@@ -10,6 +10,10 @@ enum ProgramDestination: Hashable {
     case exerciseDetail(PersistentIdentifier)
 }
 
+enum HistoryDestination: Hashable {
+    case exerciseDetail(PersistentIdentifier)
+}
+
 extension View {
     func withWorkoutDestinations() -> some View {
         navigationDestination(for: WorkoutDestination.self) { destination in
@@ -24,6 +28,15 @@ extension View {
 
     func withProgramDestinations() -> some View {
         navigationDestination(for: ProgramDestination.self) { destination in
+            switch destination {
+            case .exerciseDetail(let id):
+                ExerciseDetailView(enrolmentId: id)
+            }
+        }
+    }
+
+    func withHistoryDestinations() -> some View {
+        navigationDestination(for: HistoryDestination.self) { destination in
             switch destination {
             case .exerciseDetail(let id):
                 ExerciseDetailView(enrolmentId: id)
