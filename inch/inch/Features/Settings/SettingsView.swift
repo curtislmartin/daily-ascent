@@ -31,6 +31,7 @@ struct SettingsView: View {
                 }
             }
             .task { viewModel.load(context: modelContext) }
+            .task { await notifications.checkAuthorizationStatus() }
         }
     }
 
