@@ -10,6 +10,7 @@ struct InchApp: App {
     let healthKit = HealthKitService()
     let motionRecording = MotionRecordingService()
     let dataUpload = DataUploadService()
+    let notificationService = NotificationService()
 
     init() {
         do {
@@ -29,8 +30,10 @@ struct InchApp: App {
                 .environment(healthKit)
                 .environment(motionRecording)
                 .environment(dataUpload)
+                .environment(notificationService)
                 .task {
                     watchConnectivity.activate()
+                    await notificationService.checkAuthorizationStatus()
                     let context = ModelContext(container)
                     await watchConnectivity.handleCompletionReports(context: context)
                 }
