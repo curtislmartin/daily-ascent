@@ -1,17 +1,23 @@
-//
-//  inchApp.swift
-//  inch
-//
-//  Created by Curtis Martin on 15/3/2026.
-//
-
 import SwiftUI
+import SwiftData
+import InchShared
 
 @main
-struct inchApp: App {
+struct InchApp: App {
+    let container: ModelContainer
+
+    init() {
+        do {
+            container = try ModelContainerFactory.makeContainer()
+        } catch {
+            fatalError("Failed to create ModelContainer: \(error)")
+        }
+    }
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
+                .modelContainer(container)
         }
     }
 }
