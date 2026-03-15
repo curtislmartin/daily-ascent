@@ -12,7 +12,7 @@ final class TodayViewModel {
 
     private let detector = ConflictDetector()
 
-    func loadToday(context: ModelContext) {
+    func loadToday(context: ModelContext, showWarnings: Bool = true) {
         let today = Calendar.current.startOfDay(for: .now)
         let descriptor = FetchDescriptor<ExerciseEnrolment>(
             predicate: #Predicate { $0.isActive }
@@ -29,7 +29,11 @@ final class TodayViewModel {
             computeNextTraining(from: all, after: today)
         }
 
-        detectConflictsForToday()
+        if showWarnings {
+            detectConflictsForToday()
+        } else {
+            conflictWarnings = [:]
+        }
         resetStreakForMissedDayIfNeeded(context: context, today: today)
     }
 

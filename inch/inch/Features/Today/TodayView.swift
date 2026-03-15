@@ -12,6 +12,8 @@ struct TodayView: View {
 
     private var settings: UserSettings? { allSettings.first }
 
+    private var showConflictWarnings: Bool { allSettings.first?.showConflictWarnings ?? true }
+
     private var streak: Int { streakStates.first?.currentStreak ?? 0 }
 
     var body: some View {
@@ -30,7 +32,7 @@ struct TodayView: View {
         .navigationBarTitleDisplayMode(.large)
         .withWorkoutDestinations()
         .task {
-            viewModel.loadToday(context: modelContext)
+            viewModel.loadToday(context: modelContext, showWarnings: showConflictWarnings)
             watchConnectivity.sendTodaySchedule(
                 enrolments: viewModel.dueExercises,
                 settings: settings
