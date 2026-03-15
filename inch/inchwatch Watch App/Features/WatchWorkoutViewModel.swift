@@ -6,6 +6,7 @@ final class WatchWorkoutViewModel {
     private(set) var session: WatchSession
     private(set) var completedSets: [WatchSetResult] = []
     private(set) var currentSetIndex: Int = 0
+    private(set) var pendingRealTimeCount: Int? = nil
     private(set) var phase: WorkoutPhase = .ready
 
     enum WorkoutPhase: Equatable {
@@ -44,6 +45,15 @@ final class WatchWorkoutViewModel {
         guard case .inSet(let startedAt) = phase else { return }
         let duration = Date.now.timeIntervalSince(startedAt)
         phase = .confirming(targetReps: targetReps, duration: duration)
+    }
+
+    func endSetRealTime(count: Int) {
+        pendingRealTimeCount = count
+        endSet()
+    }
+
+    func clearPendingRealTimeCount() {
+        pendingRealTimeCount = nil
     }
 
     func confirmSet(actual: Int) {
