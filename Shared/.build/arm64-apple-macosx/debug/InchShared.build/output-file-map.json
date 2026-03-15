@@ -1,0 +1,180 @@
+{
+  "": {
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/master.swiftdeps"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Sources/InchShared/Engine/ConflictDetector.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ConflictDetector.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ConflictDetector.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ConflictDetector~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ConflictDetector.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ConflictDetector.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Sources/InchShared/Engine/ConflictResolver.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ConflictResolver.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ConflictResolver.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ConflictResolver~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ConflictResolver.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ConflictResolver.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Sources/InchShared/Engine/EnrolmentSnapshot.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/EnrolmentSnapshot.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/EnrolmentSnapshot.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/EnrolmentSnapshot~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/EnrolmentSnapshot.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/EnrolmentSnapshot.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Sources/InchShared/Engine/ExerciseDataLoader.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ExerciseDataLoader.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ExerciseDataLoader.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ExerciseDataLoader~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ExerciseDataLoader.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ExerciseDataLoader.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Sources/InchShared/Engine/ProjectedSession.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ProjectedSession.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ProjectedSession.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ProjectedSession~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ProjectedSession.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ProjectedSession.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Sources/InchShared/Engine/ScheduleConflict.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ScheduleConflict.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ScheduleConflict.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ScheduleConflict~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ScheduleConflict.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ScheduleConflict.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Sources/InchShared/Engine/SchedulingEngine.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/SchedulingEngine.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/SchedulingEngine.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/SchedulingEngine~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/SchedulingEngine.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/SchedulingEngine.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Sources/InchShared/Engine/StreakCalculator.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/StreakCalculator.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/StreakCalculator.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/StreakCalculator~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/StreakCalculator.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/StreakCalculator.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Sources/InchShared/Models/BodyweightSchema.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/BodyweightSchema.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/BodyweightSchema.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/BodyweightSchema~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/BodyweightSchema.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/BodyweightSchema.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Sources/InchShared/Models/CompletedSet.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/CompletedSet.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/CompletedSet.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/CompletedSet~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/CompletedSet.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/CompletedSet.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Sources/InchShared/Models/DayPrescription.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/DayPrescription.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/DayPrescription.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/DayPrescription~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/DayPrescription.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/DayPrescription.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Sources/InchShared/Models/Enums.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/Enums.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/Enums.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/Enums~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/Enums.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/Enums.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Sources/InchShared/Models/ExerciseDefinition.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ExerciseDefinition.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ExerciseDefinition.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ExerciseDefinition~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ExerciseDefinition.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ExerciseDefinition.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Sources/InchShared/Models/ExerciseEnrolment.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ExerciseEnrolment.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ExerciseEnrolment.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ExerciseEnrolment~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ExerciseEnrolment.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ExerciseEnrolment.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Sources/InchShared/Models/LevelDefinition.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/LevelDefinition.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/LevelDefinition.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/LevelDefinition~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/LevelDefinition.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/LevelDefinition.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Sources/InchShared/Models/SensorRecording.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/SensorRecording.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/SensorRecording.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/SensorRecording~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/SensorRecording.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/SensorRecording.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Sources/InchShared/Models/StreakState.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/StreakState.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/StreakState.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/StreakState~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/StreakState.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/StreakState.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Sources/InchShared/Models/UserEntitlement.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/UserEntitlement.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/UserEntitlement.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/UserEntitlement~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/UserEntitlement.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/UserEntitlement.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Sources/InchShared/Models/UserSettings.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/UserSettings.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/UserSettings.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/UserSettings~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/UserSettings.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/UserSettings.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Sources/InchShared/Transfer/WatchCompletionReport.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/WatchCompletionReport.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/WatchCompletionReport.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/WatchCompletionReport~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/WatchCompletionReport.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/WatchCompletionReport.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Sources/InchShared/Transfer/WatchSession.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/WatchSession.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/WatchSession.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/WatchSession~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/WatchSession.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/WatchSession.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Sources/InchShared/Transfer/WatchSetResult.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/WatchSetResult.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/WatchSetResult.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/WatchSetResult~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/WatchSetResult.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/WatchSetResult.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Sources/InchShared/Utilities/DateHelpers.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/DateHelpers.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/DateHelpers.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/DateHelpers~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/DateHelpers.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/DateHelpers.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Sources/InchShared/Utilities/ModelContainerFactory.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ModelContainerFactory.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ModelContainerFactory.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ModelContainerFactory~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ModelContainerFactory.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/ModelContainerFactory.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/DerivedSources/resource_bundle_accessor.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/resource_bundle_accessor.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/resource_bundle_accessor.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/resource_bundle_accessor~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/resource_bundle_accessor.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchShared.build/resource_bundle_accessor.dia"
+  }
+}

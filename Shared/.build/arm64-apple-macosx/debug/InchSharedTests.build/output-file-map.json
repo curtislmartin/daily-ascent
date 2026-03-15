@@ -1,0 +1,47 @@
+{
+  "": {
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/master.swiftdeps"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Tests/InchSharedTests/ConflictDetectorTests.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/ConflictDetectorTests.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/ConflictDetectorTests.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/ConflictDetectorTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/ConflictDetectorTests.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/ConflictDetectorTests.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Tests/InchSharedTests/ConflictResolverTests.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/ConflictResolverTests.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/ConflictResolverTests.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/ConflictResolverTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/ConflictResolverTests.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/ConflictResolverTests.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Tests/InchSharedTests/ExerciseDataLoaderTests.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/ExerciseDataLoaderTests.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/ExerciseDataLoaderTests.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/ExerciseDataLoaderTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/ExerciseDataLoaderTests.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/ExerciseDataLoaderTests.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Tests/InchSharedTests/SchedulingEngineTests.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/SchedulingEngineTests.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/SchedulingEngineTests.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/SchedulingEngineTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/SchedulingEngineTests.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/SchedulingEngineTests.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Tests/InchSharedTests/StreakCalculatorTests.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/StreakCalculatorTests.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/StreakCalculatorTests.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/StreakCalculatorTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/StreakCalculatorTests.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/StreakCalculatorTests.dia"
+  },
+  "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/Tests/InchSharedTests/TestTags.swift": {
+    "dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/TestTags.d",
+    "object": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/TestTags.swift.o",
+    "swiftmodule": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/TestTags~partial.swiftmodule",
+    "swift-dependencies": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/TestTags.swiftdeps",
+    "diagnostics": "/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/InchSharedTests.build/TestTags.dia"
+  }
+}

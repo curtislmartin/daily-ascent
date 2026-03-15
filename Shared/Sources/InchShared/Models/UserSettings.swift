@@ -2,32 +2,32 @@ import Foundation
 import SwiftData
 
 @Model
-final class UserSettings {
-    var createdAt: Date = Date.now
+public final class UserSettings {
+    public var createdAt: Date = Date.now
 
-    var restOverrides: [String: Int] = [:]
-    var countingModeOverrides: [String: String] = [:]
+    public var restOverrides: [String: Int] = [:]
+    public var countingModeOverrides: [String: String] = [:]
 
-    var interExerciseRestEnabled: Bool = false
-    var interExerciseRestSeconds: Int = 120
+    public var interExerciseRestEnabled: Bool = false
+    public var interExerciseRestSeconds: Int = 120
 
-    var dailyReminderEnabled: Bool = true
-    var dailyReminderHour: Int = 8
-    var dailyReminderMinute: Int = 0
-    var streakProtectionEnabled: Bool = true
-    var testDayNotificationEnabled: Bool = true
-    var levelUnlockNotificationEnabled: Bool = true
+    public var dailyReminderEnabled: Bool = true
+    public var dailyReminderHour: Int = 8
+    public var dailyReminderMinute: Int = 0
+    public var streakProtectionEnabled: Bool = true
+    public var testDayNotificationEnabled: Bool = true
+    public var levelUnlockNotificationEnabled: Bool = true
 
-    var motionDataUploadConsented: Bool = false
-    var consentDate: Date? = nil
-    var contributorId: String = ""
+    public var motionDataUploadConsented: Bool = false
+    public var consentDate: Date? = nil
+    public var contributorId: String = ""
 
-    var ageRange: String? = nil
-    var heightRange: String? = nil
-    var biologicalSex: String? = nil
-    var activityLevel: String? = nil
+    public var ageRange: String? = nil
+    public var heightRange: String? = nil
+    public var biologicalSex: String? = nil
+    public var activityLevel: String? = nil
 
-    init(
+    public init(
         createdAt: Date = Date.now,
         restOverrides: [String: Int] = [:],
         countingModeOverrides: [String: String] = [:],
