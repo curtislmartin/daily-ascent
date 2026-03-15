@@ -7,7 +7,8 @@ struct ManageEnrolmentsView: View {
     @Environment(\.dismiss) private var dismiss
 
     @Query private var definitions: [ExerciseDefinition]
-    @Query private var existingEnrolments: [ExerciseEnrolment]
+    @Query(filter: #Predicate<ExerciseEnrolment> { $0.isActive })
+    private var existingEnrolments: [ExerciseEnrolment]
 
     @State private var viewModel = EnrolmentViewModel()
 
