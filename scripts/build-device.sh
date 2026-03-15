@@ -9,8 +9,10 @@
 
 set -euo pipefail
 
-IPHONE_UDID="FA7530FD-7656-5A9B-8732-A84A93F5F87B"
-WATCH_UDID="1BF95A8D-949E-556B-9A45-D2ACB43AA04F"
+# UDIDs as reported by xcrun xctrace (used by xcodebuild).
+# Note: these differ from xcrun devicectl UDIDs — xcodebuild uses xctrace.
+IPHONE_UDID="00008110-001609380E3B801E"
+WATCH_UDID="00008006-001E2C2414C3402E"
 
 PROJECT_DIR="$(cd "$(dirname "$0")/../inch" && pwd)"
 SCHEME="inch"
