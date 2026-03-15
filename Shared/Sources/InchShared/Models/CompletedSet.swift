@@ -2,29 +2,29 @@ import Foundation
 import SwiftData
 
 @Model
-final class CompletedSet {
+public final class CompletedSet {
     #Index<CompletedSet>([\.completedAt])
 
-    var completedAt: Date = Date.now
-    var sessionDate: Date = Date.now
-    var exerciseId: String = ""
-    var level: Int = 0
-    var dayNumber: Int = 0
-    var setNumber: Int = 0
-    var targetReps: Int = 0
-    var actualReps: Int = 0
-    var isTest: Bool = false
-    var testPassed: Bool? = nil
+    public var completedAt: Date = Date.now
+    public var sessionDate: Date = Date.now
+    public var exerciseId: String = ""
+    public var level: Int = 0
+    public var dayNumber: Int = 0
+    public var setNumber: Int = 0
+    public var targetReps: Int = 0
+    public var actualReps: Int = 0
+    public var isTest: Bool = false
+    public var testPassed: Bool? = nil
 
-    var countingMode: CountingMode = CountingMode.postSetConfirmation
-    var setDurationSeconds: Double? = nil
+    public var countingMode: CountingMode = CountingMode.postSetConfirmation
+    public var setDurationSeconds: Double? = nil
 
-    var enrolment: ExerciseEnrolment?
+    public var enrolment: ExerciseEnrolment?
 
     @Relationship(deleteRule: .cascade, inverse: \SensorRecording.completedSet)
-    var sensorRecordings: [SensorRecording]? = []
+    public var sensorRecordings: [SensorRecording]? = []
 
-    init(
+    public init(
         completedAt: Date = Date.now,
         sessionDate: Date = Date.now,
         exerciseId: String = "",

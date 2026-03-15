@@ -1,19 +1,19 @@
 import SwiftData
 
 @Model
-final class LevelDefinition {
-    var level: Int = 1
-    var restDayPattern: [Int] = [2, 2, 3]
-    var testTarget: Int = 0
-    var extraRestBeforeTest: Int? = nil
-    var totalDays: Int = 0
+public final class LevelDefinition {
+    public var level: Int = 1
+    public var restDayPattern: [Int] = [2, 2, 3]
+    public var testTarget: Int = 0
+    public var extraRestBeforeTest: Int? = nil
+    public var totalDays: Int = 0
 
-    var exercise: ExerciseDefinition?
+    public var exercise: ExerciseDefinition?
 
     @Relationship(deleteRule: .cascade, inverse: \DayPrescription.level)
-    var days: [DayPrescription]? = []
+    public var days: [DayPrescription]? = []
 
-    init(level: Int = 1, restDayPattern: [Int] = [2, 2, 3], testTarget: Int = 0, extraRestBeforeTest: Int? = nil, totalDays: Int = 0) {
+    public init(level: Int = 1, restDayPattern: [Int] = [2, 2, 3], testTarget: Int = 0, extraRestBeforeTest: Int? = nil, totalDays: Int = 0) {
         self.level = level
         self.restDayPattern = restDayPattern
         self.testTarget = testTarget

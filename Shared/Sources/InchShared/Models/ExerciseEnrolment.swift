@@ -2,25 +2,25 @@ import Foundation
 import SwiftData
 
 @Model
-final class ExerciseEnrolment {
+public final class ExerciseEnrolment {
     #Index<ExerciseEnrolment>([\.nextScheduledDate])
 
-    var enrolledAt: Date = Date.now
-    var isActive: Bool = true
+    public var enrolledAt: Date = Date.now
+    public var isActive: Bool = true
 
-    var currentLevel: Int = 1
-    var currentDay: Int = 1
-    var lastCompletedDate: Date? = nil
-    var nextScheduledDate: Date? = nil
+    public var currentLevel: Int = 1
+    public var currentDay: Int = 1
+    public var lastCompletedDate: Date? = nil
+    public var nextScheduledDate: Date? = nil
 
-    var restPatternIndex: Int = 0
+    public var restPatternIndex: Int = 0
 
-    var exerciseDefinition: ExerciseDefinition?
+    public var exerciseDefinition: ExerciseDefinition?
 
     @Relationship(deleteRule: .cascade, inverse: \CompletedSet.enrolment)
-    var completedSets: [CompletedSet]? = []
+    public var completedSets: [CompletedSet]? = []
 
-    init(
+    public init(
         enrolledAt: Date = Date.now,
         isActive: Bool = true,
         currentLevel: Int = 1,

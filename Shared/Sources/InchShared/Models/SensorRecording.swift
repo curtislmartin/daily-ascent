@@ -2,25 +2,25 @@ import Foundation
 import SwiftData
 
 @Model
-final class SensorRecording {
-    var recordedAt: Date = Date.now
-    var device: SensorDevice = SensorDevice.iPhone
-    var exerciseId: String = ""
-    var level: Int = 0
-    var dayNumber: Int = 0
-    var setNumber: Int = 0
-    var confirmedReps: Int = 0
-    var sampleRateHz: Int = 100
-    var durationSeconds: Double = 0
-    var filePath: String = ""
-    var fileSizeBytes: Int = 0
+public final class SensorRecording {
+    public var recordedAt: Date = Date.now
+    public var device: SensorDevice = SensorDevice.iPhone
+    public var exerciseId: String = ""
+    public var level: Int = 0
+    public var dayNumber: Int = 0
+    public var setNumber: Int = 0
+    public var confirmedReps: Int = 0
+    public var sampleRateHz: Int = 100
+    public var durationSeconds: Double = 0
+    public var filePath: String = ""
+    public var fileSizeBytes: Int = 0
 
-    var uploadStatus: UploadStatus = UploadStatus.pending
-    var uploadedAt: Date? = nil
+    public var uploadStatus: UploadStatus = UploadStatus.pending
+    public var uploadedAt: Date? = nil
 
-    var completedSet: CompletedSet?
+    public var completedSet: CompletedSet?
 
-    init(
+    public init(
         recordedAt: Date = Date.now,
         device: SensorDevice = .iPhone,
         exerciseId: String = "",

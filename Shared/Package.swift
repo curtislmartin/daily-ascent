@@ -5,7 +5,8 @@ let package = Package(
     name: "Shared",
     platforms: [
         .iOS(.v18),
-        .watchOS(.v11)
+        .watchOS(.v11),
+        .macOS(.v15)
     ],
     products: [
         .library(name: "InchShared", targets: ["InchShared"])
@@ -14,6 +15,9 @@ let package = Package(
         .target(
             name: "InchShared",
             path: "Sources/InchShared",
+            resources: [
+                .process("Resources")
+            ],
             swiftSettings: [
                 .swiftLanguageMode(.v6)
             ]
