@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ElapsedTimerView: View {
+    @State private var startDate: Date = .now
     @State private var elapsed: Int = 0
 
     var body: some View {
@@ -9,9 +10,10 @@ struct ElapsedTimerView: View {
             .monospacedDigit()
             .foregroundStyle(.secondary)
             .task {
+                startDate = .now
                 while true {
                     try? await Task.sleep(for: .seconds(1))
-                    elapsed += 1
+                    elapsed = Int(Date.now.timeIntervalSince(startDate))
                 }
             }
     }
