@@ -5,7 +5,7 @@ import CoreMotion
 /// Uses OperationQueue callbacks per Core Motion framework guidance.
 @Observable
 final class MotionRecordingService {
-    private let motionManager = CMMotionManager()
+    nonisolated(unsafe) private let motionManager = CMMotionManager()
     private var sensorQueue: OperationQueue?
     private(set) var currentRecordingURL: URL?
     private(set) var isRecording: Bool = false
@@ -32,25 +32,13 @@ final class MotionRecordingService {
         let recordingStart = Date.now
         motionManager.accelerometerUpdateInterval = 1.0 / 100.0
 
-        // Typed as CMAccelerometerHandler to prevent @MainActor isolation inheritance.
-        // The callback must run on `queue` (not the main actor) — CMMotionManager
-        // asserts this via dispatch_assert_queue at runtime.
-        let handler: CMAccelerometerHandler = { data, _ in
-            guard let data else { return }
-            let t = Float64(Date.now.timeIntervalSince(recordingStart))
-            let x = Float32(data.acceleration.x)
-            let y = Float32(data.acceleration.y)
-            let z = Float32(data.acceleration.z)
-            var sample = Data(count: 20)
-            sample.withUnsafeMutableBytes { ptr in
-                ptr.storeBytes(of: t, toByteOffset: 0, as: Float64.self)
-                ptr.storeBytes(of: x, toByteOffset: 8, as: Float32.self)
-                ptr.storeBytes(of: y, toByteOffset: 12, as: Float32.self)
-                ptr.storeBytes(of: z, toByteOffset: 16, as: Float32.self)
-            }
-            try? fileHandle.write(contentsOf: sample)
-        }
-        motionManager.startAccelerometerUpdates(to: queue, withHandler: handler)
+        // Must call via nonisolated method so the handler closure is defined in a
+        // nonisolated context. A closure literal defined inside a @MainActor method
+        // inherits @MainActor isolation — even when typed as CMAccelerometerHandler —
+        // causing Swift to insert an actor hop. CMMotionManager asserts via
+        // dispatch_assert_queue that the callback runs on the provided OperationQueue,
+        // not the main queue, so that hop triggers a crash.
+        startAccelerometerUpdates(to: queue, fileHandle: fileHandle, recordingStart: recordingStart)
 
         currentRecordingURL = fileURL
         isRecording = true
@@ -67,6 +55,29 @@ final class MotionRecordingService {
     }
 
     // MARK: - Private
+
+    private nonisolated func startAccelerometerUpdates(
+        to queue: OperationQueue,
+        fileHandle: FileHandle,
+        recordingStart: Date
+    ) {
+        let handler: CMAccelerometerHandler = { data, _ in
+            guard let data else { return }
+            let t = Float64(Date.now.timeIntervalSince(recordingStart))
+            let x = Float32(data.acceleration.x)
+            let y = Float32(data.acceleration.y)
+            let z = Float32(data.acceleration.z)
+            var sample = Data(count: 20)
+            sample.withUnsafeMutableBytes { ptr in
+                ptr.storeBytes(of: t, toByteOffset: 0, as: Float64.self)
+                ptr.storeBytes(of: x, toByteOffset: 8, as: Float32.self)
+                ptr.storeBytes(of: y, toByteOffset: 12, as: Float32.self)
+                ptr.storeBytes(of: z, toByteOffset: 16, as: Float32.self)
+            }
+            try? fileHandle.write(contentsOf: sample)
+        }
+        motionManager.startAccelerometerUpdates(to: queue, withHandler: handler)
+    }
 
     private func writeHeader(to fileHandle: FileHandle, sensorType: UInt8) {
         var header = Data()
