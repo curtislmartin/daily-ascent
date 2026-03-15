@@ -34,7 +34,7 @@ final class WatchMotionRecordingService {
         let recordingStart = Date.now
         motionManager.accelerometerUpdateInterval = 1.0 / 50.0 // Watch may cap at 50Hz
 
-        motionManager.startAccelerometerUpdates(to: queue) { data, _ in
+        let handler: CMAccelerometerHandler = { data, _ in
             guard let data else { return }
             let t = Float64(Date.now.timeIntervalSince(recordingStart))
             let x = Float32(data.acceleration.x)
@@ -49,6 +49,7 @@ final class WatchMotionRecordingService {
             }
             try? fileHandle.write(contentsOf: sample)
         }
+        motionManager.startAccelerometerUpdates(to: queue, withHandler: handler)
 
         currentRecordingURL = fileURL
         isRecording = true

@@ -32,7 +32,10 @@ final class MotionRecordingService {
         let recordingStart = Date.now
         motionManager.accelerometerUpdateInterval = 1.0 / 100.0
 
-        motionManager.startAccelerometerUpdates(to: queue) { data, _ in
+        // Typed as CMAccelerometerHandler to prevent @MainActor isolation inheritance.
+        // The callback must run on `queue` (not the main actor) — CMMotionManager
+        // asserts this via dispatch_assert_queue at runtime.
+        let handler: CMAccelerometerHandler = { data, _ in
             guard let data else { return }
             let t = Float64(Date.now.timeIntervalSince(recordingStart))
             let x = Float32(data.acceleration.x)
@@ -47,6 +50,7 @@ final class MotionRecordingService {
             }
             try? fileHandle.write(contentsOf: sample)
         }
+        motionManager.startAccelerometerUpdates(to: queue, withHandler: handler)
 
         currentRecordingURL = fileURL
         isRecording = true
