@@ -7,11 +7,19 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var viewModel = SettingsViewModel()
+    @Environment(NotificationService.self) private var notifications
 
     var body: some View {
         NavigationStack {
             List {
                 workoutSection
+                if let settings = viewModel.settings {
+                    NotificationsSettingsSection(
+                        settings: settings,
+                        isAuthorized: notifications.isAuthorized
+                    )
+                    ScheduleSettingsSection(settings: settings)
+                }
                 privacySection
             }
             .listStyle(.insetGrouped)
