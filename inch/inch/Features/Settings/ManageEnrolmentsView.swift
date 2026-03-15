@@ -51,8 +51,23 @@ struct ManageEnrolmentsView: View {
         .padding(.vertical, 60)
     }
 
+    private var selectAllButton: some View {
+        let ids = availableDefinitions.map { $0.exerciseId }
+        let allSelected = viewModel.selectedExerciseIds.count == ids.count && !ids.isEmpty
+        return Button(allSelected ? "Deselect All" : "Select All") {
+            if allSelected {
+                viewModel.selectedExerciseIds = []
+            } else {
+                viewModel.selectAll(ids: ids)
+            }
+        }
+        .font(.subheadline)
+        .frame(maxWidth: .infinity, alignment: .trailing)
+    }
+
     @ViewBuilder
     private var exerciseSections: some View {
+        selectAllButton
         ForEach(viewModel.sections(from: availableDefinitions), id: \.label) { section in
             VStack(alignment: .leading, spacing: 12) {
                 Text(section.label)

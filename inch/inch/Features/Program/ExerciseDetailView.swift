@@ -10,6 +10,8 @@ struct ExerciseDetailView: View {
 
     @State private var enrolment: ExerciseEnrolment?
     @State private var showingUnenrolConfirm = false
+    @State private var pendingLevel: Int?
+    @State private var pendingDay: Int?
 
     var body: some View {
         Group {
@@ -21,6 +23,26 @@ struct ExerciseDetailView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .task { load() }
+        .confirmationDialog(
+            "Jump to Level \(pendingLevel ?? 0)?",
+            isPresented: Binding(get: { pendingLevel != nil }, set: { if !$0 { pendingLevel = nil } }),
+            titleVisibility: .visible
+        ) {
+            Button("Change Level") { applyLevelChange() }
+            Button("Cancel", role: .cancel) { pendingLevel = nil }
+        } message: {
+            Text("Day resets to 1 and you'll train from the start of this level.")
+        }
+        .confirmationDialog(
+            "Jump to Day \(pendingDay ?? 0)?",
+            isPresented: Binding(get: { pendingDay != nil }, set: { if !$0 { pendingDay = nil } }),
+            titleVisibility: .visible
+        ) {
+            Button("Change Day") { applyDayChange() }
+            Button("Cancel", role: .cancel) { pendingDay = nil }
+        } message: {
+            Text("Your next session will be Day \(pendingDay ?? 0).")
+        }
         .confirmationDialog(
             "Unenrol from this exercise?",
             isPresented: $showingUnenrolConfirm,
@@ -46,7 +68,11 @@ struct ExerciseDetailView: View {
                     DayRow(
                         day: day,
                         status: dayStatus(day: day, enrolment: enrolment)
-                    )
+                    ) {
+                        if day.dayNumber != enrolment.currentDay {
+                            pendingDay = day.dayNumber
+                        }
+                    }
                 }
             }
 
@@ -82,6 +108,9 @@ struct ExerciseDetailView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             }
+        } footer: {
+            Text("Tap a level to jump there.")
+                .font(.caption2)
         }
     }
 
@@ -89,16 +118,22 @@ struct ExerciseDetailView: View {
         let isCurrent = level == currentLevel
         let isPast = level < currentLevel || !isActive
 
-        return VStack(spacing: 4) {
-            Circle()
-                .fill(isPast ? Color.green : isCurrent ? Color.accentColor : Color.secondary.opacity(0.3))
-                .frame(width: 10, height: 10)
-            Text("L\(level)")
-                .font(.caption2)
-                .fontWeight(isCurrent ? .bold : .regular)
-                .foregroundStyle(isCurrent ? .primary : .secondary)
+        return Button {
+            pendingLevel = level
+        } label: {
+            VStack(spacing: 4) {
+                Circle()
+                    .fill(isPast ? Color.green : isCurrent ? Color.accentColor : Color.secondary.opacity(0.3))
+                    .frame(width: 10, height: 10)
+                Text("L\(level)")
+                    .font(.caption2)
+                    .fontWeight(isCurrent ? .bold : .regular)
+                    .foregroundStyle(isCurrent ? .primary : .secondary)
+            }
+            .frame(maxWidth: .infinity)
         }
-        .frame(maxWidth: .infinity)
+        .buttonStyle(.plain)
+        .disabled(isCurrent)
     }
 
     private func dayStatus(day: DayPrescription, enrolment: ExerciseEnrolment) -> DayStatus {
@@ -117,6 +152,24 @@ struct ExerciseDetailView: View {
         }
     }
 
+    private func applyLevelChange() {
+        guard let level = pendingLevel, let enrolment else { return }
+        enrolment.currentLevel = level
+        enrolment.currentDay = 1
+        enrolment.nextScheduledDate = .now
+        enrolment.restPatternIndex = 0
+        try? modelContext.save()
+        pendingLevel = nil
+    }
+
+    private func applyDayChange() {
+        guard let day = pendingDay, let enrolment else { return }
+        enrolment.currentDay = day
+        enrolment.nextScheduledDate = .now
+        try? modelContext.save()
+        pendingDay = nil
+    }
+
     private func unenrol() {
         enrolment?.isActive = false
         try? modelContext.save()
@@ -129,32 +182,38 @@ private enum DayStatus { case completed, current, upcoming }
 private struct DayRow: View {
     let day: DayPrescription
     let status: DayStatus
+    let onTap: () -> Void
 
     var body: some View {
-        HStack(spacing: 12) {
-            statusIcon
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 6) {
-                    Text("Day \(day.dayNumber)")
-                        .font(.body)
-                        .foregroundStyle(status == .upcoming ? .secondary : .primary)
-                    if day.isTest {
-                        Text("TEST")
-                            .font(.caption2)
-                            .fontWeight(.bold)
-                            .padding(.horizontal, 5)
-                            .padding(.vertical, 2)
-                            .background(.orange.opacity(0.15), in: Capsule())
-                            .foregroundStyle(.orange)
+        Button(action: onTap) {
+            HStack(spacing: 12) {
+                statusIcon
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 6) {
+                        Text("Day \(day.dayNumber)")
+                            .font(.body)
+                            .foregroundStyle(status == .upcoming ? .secondary : .primary)
+                        if day.isTest {
+                            Text("TEST")
+                                .font(.caption2)
+                                .fontWeight(.bold)
+                                .padding(.horizontal, 5)
+                                .padding(.vertical, 2)
+                                .background(.orange.opacity(0.15), in: Capsule())
+                                .foregroundStyle(.orange)
+                        }
+                    }
+                    if !day.sets.isEmpty, !day.isTest {
+                        Text(setSummary(day.sets))
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
                     }
                 }
-                if !day.sets.isEmpty, !day.isTest {
-                    Text(setSummary(day.sets))
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                }
+                Spacer()
             }
         }
+        .buttonStyle(.plain)
+        .disabled(status == .current)
     }
 
     private var statusIcon: some View {
@@ -175,4 +234,3 @@ private struct DayRow: View {
         "\(sets.count) sets · \(sets.map(String.init).joined(separator: "-")) reps"
     }
 }
-

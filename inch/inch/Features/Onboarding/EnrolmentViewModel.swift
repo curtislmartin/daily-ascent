@@ -21,6 +21,10 @@ final class EnrolmentViewModel {
         }
     }
 
+    func selectAll(ids: [String]) {
+        selectedExerciseIds = Set(ids)
+    }
+
     /// Groups exercise definitions into display sections matching the UX spec.
     func sections(from definitions: [ExerciseDefinition]) -> [(label: String, definitions: [ExerciseDefinition])] {
         let sorted = definitions.sorted { $0.sortOrder < $1.sortOrder }

@@ -1,6 +1,7 @@
 import Foundation
 
-public struct WatchSession: Codable, Sendable {
+public struct WatchSession: Codable, Sendable, Identifiable {
+    public var id: String { exerciseId }
     public let exerciseId: String
     public let exerciseName: String
     public let color: String

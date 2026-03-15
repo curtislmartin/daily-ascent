@@ -3,37 +3,51 @@ import InchShared
 
 struct WatchTodayView: View {
     @Environment(WatchConnectivityService.self) private var watchConnectivity
+    @Environment(WatchMotionRecordingService.self) private var motionRecording
+
+    @State private var activeSession: WatchSession?
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if watchConnectivity.sessions.isEmpty {
-                    restDayView
-                } else {
-                    sessionList
+        if watchConnectivity.sessions.isEmpty {
+            restDayView
+        } else {
+            TabView {
+                ForEach(watchConnectivity.sessions) { session in
+                    exercisePage(for: session)
                 }
             }
-            .navigationTitle("Today")
-            .navigationDestination(for: String.self) { exerciseId in
-                if let session = watchConnectivity.sessions.first(where: { $0.exerciseId == exerciseId }) {
-                    WatchWorkoutView(session: session)
-                }
+            .tabViewStyle(.page)
+            .sheet(item: $activeSession) { session in
+                WatchWorkoutView(session: session)
             }
         }
     }
 
-    private var sessionList: some View {
-        List(watchConnectivity.sessions, id: \.exerciseId) { session in
-            NavigationLink(value: session.exerciseId) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(session.exerciseName)
-                        .font(.headline)
-                    Text("L\(session.level) · Day \(session.dayNumber)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+    private func exercisePage(for session: WatchSession) -> some View {
+        VStack(spacing: 8) {
+            Spacer()
+            Text(session.exerciseName)
+                .font(.headline)
+                .multilineTextAlignment(.center)
+            Text("Level \(session.level) · Day \(session.dayNumber)")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            if session.isTest {
+                Text("TEST DAY")
+                    .font(.caption2)
+                    .fontWeight(.bold)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(.orange.opacity(0.2), in: Capsule())
+                    .foregroundStyle(.orange)
             }
+            Spacer()
+            Button("Start") {
+                activeSession = session
+            }
+            .buttonStyle(.borderedProminent)
         }
+        .padding()
     }
 
     private var restDayView: some View {
