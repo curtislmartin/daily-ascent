@@ -136,8 +136,22 @@ final class WorkoutViewModel {
         )
         let nextDate = scheduler.computeNextDate(enrolment: updated, level: levelSnap)
         scheduler.writeBack(updated, to: enrolment, nextDate: nextDate)
+        updateStreak(context: context)
         try? context.save()
         phase = .complete
+    }
+
+    private func updateStreak(context: ModelContext) {
+        let calculator = StreakCalculator()
+        let streaks = (try? context.fetch(FetchDescriptor<StreakState>())) ?? []
+        let streakState: StreakState
+        if let existing = streaks.first {
+            streakState = existing
+        } else {
+            streakState = StreakState()
+            context.insert(streakState)
+        }
+        calculator.updateStreakState(streakState, today: sessionDate, hadDueExercises: true, completedAny: true)
     }
 
     private func currentPrescription(for enrolment: ExerciseEnrolment) -> DayPrescription? {
