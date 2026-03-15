@@ -27,7 +27,6 @@ struct NotificationsSettingsSection: View {
                     )
                 }
 
-                Toggle("Test Day Alerts", isOn: $settings.testDayNotificationEnabled)
                 Toggle("Level Unlock Alerts", isOn: $settings.levelUnlockNotificationEnabled)
             }
         } else {

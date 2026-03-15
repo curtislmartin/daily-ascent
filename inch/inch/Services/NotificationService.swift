@@ -31,7 +31,11 @@ final class NotificationService {
         guard isAuthorized else { return }
 
         let center = UNUserNotificationCenter.current()
-        center.removeAllPendingNotificationRequests()
+        let pending = await center.pendingNotificationRequests()
+        let idsToRemove = pending
+            .map(\.identifier)
+            .filter { $0.hasPrefix("daily-reminder-") || $0.hasPrefix("streak-protection-") }
+        center.removePendingNotificationRequests(withIdentifiers: idsToRemove)
 
         let enrolments = fetchActiveEnrolments(context: context)
         let streak = fetchStreakState(context: context)?.currentStreak ?? 0
