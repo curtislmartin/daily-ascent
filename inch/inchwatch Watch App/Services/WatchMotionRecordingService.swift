@@ -75,6 +75,8 @@ final class WatchMotionRecordingService {
         fileHandle: FileHandle,
         recordingStart: Date
     ) {
+        // Buffer 25 samples (~0.5s at 50Hz) before flushing to reduce syscall overhead.
+        var buffer = Data(capacity: 25 * 20)
         let handler: CMAccelerometerHandler = { data, _ in
             guard let data else { return }
             let t = Float64(Date.now.timeIntervalSince(recordingStart))
@@ -88,7 +90,11 @@ final class WatchMotionRecordingService {
                 ptr.storeBytes(of: y, toByteOffset: 12, as: Float32.self)
                 ptr.storeBytes(of: z, toByteOffset: 16, as: Float32.self)
             }
-            try? fileHandle.write(contentsOf: sample)
+            buffer.append(sample)
+            if buffer.count >= 25 * 20 {
+                try? fileHandle.write(contentsOf: buffer)
+                buffer.removeAll(keepingCapacity: true)
+            }
         }
         motionManager.startAccelerometerUpdates(to: queue, withHandler: handler)
     }
