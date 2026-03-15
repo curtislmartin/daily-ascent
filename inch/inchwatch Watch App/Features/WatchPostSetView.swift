@@ -6,10 +6,10 @@ struct WatchPostSetView: View {
 
     @State private var actualReps: Int
 
-    init(targetReps: Int, onConfirm: @escaping (Int) -> Void) {
+    init(targetReps: Int, initialReps: Int? = nil, onConfirm: @escaping (Int) -> Void) {
         self.targetReps = targetReps
         self.onConfirm = onConfirm
-        _actualReps = State(initialValue: targetReps)
+        _actualReps = State(initialValue: initialReps ?? targetReps)
     }
 
     var body: some View {
