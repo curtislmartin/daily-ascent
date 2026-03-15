@@ -28,10 +28,21 @@ struct EnrolmentView: View {
     }
 
     private var headerSection: some View {
-        Text("Select the exercises you want to train. You can add more later.")
+        HStack {
+            Text("Select the exercises you want to train. You can add more later.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Button(viewModel.selectedExerciseIds.count == definitions.count ? "Deselect All" : "Select All") {
+                if viewModel.selectedExerciseIds.count == definitions.count {
+                    viewModel.selectedExerciseIds = []
+                } else {
+                    viewModel.selectAll(ids: definitions.map { $0.exerciseId })
+                }
+            }
             .font(.subheadline)
-            .foregroundStyle(.secondary)
-            .padding(.top, 8)
+        }
+        .padding(.top, 8)
     }
 
     @ViewBuilder

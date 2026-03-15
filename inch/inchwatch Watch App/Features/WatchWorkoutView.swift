@@ -8,6 +8,7 @@ struct WatchWorkoutView: View {
     @Environment(WatchMotionRecordingService.self) private var motionRecording
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel: WatchWorkoutViewModel
+    @State private var setStartDate: Date = .now
     @State private var elapsed: Int = 0
 
     init(session: WatchSession) {
@@ -67,6 +68,7 @@ struct WatchWorkoutView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Button("Start Set") {
+                setStartDate = .now
                 elapsed = 0
                 viewModel.startSet()
             }
@@ -90,7 +92,7 @@ struct WatchWorkoutView: View {
         .task {
             while true {
                 try? await Task.sleep(for: .seconds(1))
-                elapsed += 1
+                elapsed = Int(Date.now.timeIntervalSince(setStartDate))
             }
         }
     }
