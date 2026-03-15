@@ -9,9 +9,11 @@ struct WorkoutSessionView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(HealthKitService.self) private var healthKit
     @Environment(MotionRecordingService.self) private var motionRecording
+    @Environment(NotificationService.self) private var notifications
 
     @Query private var allSettings: [UserSettings]
     private var sensorConsented: Bool { allSettings.first?.motionDataUploadConsented ?? false }
+    private var settings: UserSettings? { allSettings.first }
 
     @State private var viewModel: WorkoutViewModel
     @State private var pendingRecordingURL: URL?
@@ -77,6 +79,24 @@ struct WorkoutSessionView: View {
                         totalEnergyBurned: nil,
                         metadata: ["exerciseId": exerciseId]
                     )
+                }
+                if let settings {
+                    Task {
+                        // Request permission (UNUserNotificationCenter is idempotent — shows prompt only once)
+                        await notifications.requestPermission()
+                        // Cancel today's streak-protection notification (just completed a workout)
+                        notifications.cancelTodayStreakProtection()
+                        // Refresh upcoming notification schedule
+                        await notifications.refresh(context: modelContext, settings: settings)
+                        // Post level-unlock notification if the test was just passed
+                        if viewModel.didAdvanceLevel, settings.levelUnlockNotificationEnabled {
+                            notifications.postLevelUnlock(
+                                exerciseName: viewModel.exerciseName,
+                                newLevel: viewModel.newLevel,
+                                startsIn: SchedulingEngine.interLevelGapDays
+                            )
+                        }
+                    }
                 }
             default:
                 break
