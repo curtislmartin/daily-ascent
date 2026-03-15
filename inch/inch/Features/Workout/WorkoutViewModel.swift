@@ -20,7 +20,7 @@ final class WorkoutViewModel {
     var enrolment: ExerciseEnrolment?
     var prescription: DayPrescription?
 
-    private var sessionDate: Date = .now
+    private(set) var sessionDate: Date = .now
     var sessionTotalReps: Int = 0
     private let scheduler = SchedulingEngine()
 

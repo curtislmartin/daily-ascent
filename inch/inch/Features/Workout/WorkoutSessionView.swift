@@ -7,6 +7,7 @@ struct WorkoutSessionView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(HealthKitService.self) private var healthKit
 
     @State private var viewModel: WorkoutViewModel
 
@@ -43,7 +44,24 @@ struct WorkoutSessionView: View {
         }
         .navigationTitle(viewModel.exerciseName)
         .navigationBarTitleDisplayMode(.inline)
-        .task { viewModel.load(context: modelContext) }
+        .task {
+            viewModel.load(context: modelContext)
+            await healthKit.requestAuthorization()
+        }
+        .onChange(of: viewModel.phase) { _, newPhase in
+            if case .complete = newPhase {
+                let start = viewModel.sessionDate
+                let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
+                Task {
+                    await healthKit.saveWorkout(
+                        startDate: start,
+                        endDate: .now,
+                        totalEnergyBurned: nil,
+                        metadata: ["exerciseId": exerciseId]
+                    )
+                }
+            }
+        }
     }
 
     private var readyView: some View {
