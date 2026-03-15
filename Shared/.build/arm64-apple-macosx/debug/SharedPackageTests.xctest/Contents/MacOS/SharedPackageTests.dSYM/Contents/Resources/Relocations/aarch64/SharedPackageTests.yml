@@ -1,5 +1,0 @@
----
-triple:          'arm64-apple-darwin'
-binary-path:     '/Users/curtismartin/Work/inch-project/.worktrees/phase-2-data-loader/Shared/.build/arm64-apple-macosx/debug/SharedPackageTests.xctest/Contents/MacOS/SharedPackageTests'
-relocations:     []
-...
