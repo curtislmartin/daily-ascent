@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 public struct SchedulingEngine: Sendable {
-    static let interLevelGapDays = 2
+    public static let interLevelGapDays = 2
 
     public init() {}
 
