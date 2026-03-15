@@ -32,6 +32,7 @@ struct TestDayView: View {
         }
         .navigationTitle("Test Day")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .tabBar)
         .task { load() }
     }
 

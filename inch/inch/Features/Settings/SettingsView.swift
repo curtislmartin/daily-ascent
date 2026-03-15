@@ -31,6 +31,9 @@ struct SettingsView: View {
             NavigationLink("Rest Timers") {
                 RestTimerSettingsView(viewModel: viewModel)
             }
+            NavigationLink("Manage Programs") {
+                ManageEnrolmentsView()
+            }
             ForEach(viewModel.enrolments, id: \.persistentModelID) { enrolment in
                 countingModeRow(for: enrolment)
             }

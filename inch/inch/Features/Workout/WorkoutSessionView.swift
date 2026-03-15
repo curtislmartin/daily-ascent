@@ -51,6 +51,7 @@ struct WorkoutSessionView: View {
         }
         .navigationTitle(viewModel.exerciseName)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .tabBar)
         .task {
             viewModel.load(context: modelContext)
             await healthKit.requestAuthorization()
