@@ -4,9 +4,13 @@ import InchShared
 
 struct TodayView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(WatchConnectivityService.self) private var watchConnectivity
     @Query private var streakStates: [StreakState]
+    @Query private var allSettings: [UserSettings]
 
     @State private var viewModel = TodayViewModel()
+
+    private var settings: UserSettings? { allSettings.first }
 
     private var streak: Int { streakStates.first?.currentStreak ?? 0 }
 
@@ -25,7 +29,13 @@ struct TodayView: View {
         .navigationTitle("Today")
         .navigationBarTitleDisplayMode(.large)
         .withWorkoutDestinations()
-        .task { viewModel.loadToday(context: modelContext) }
+        .task {
+            viewModel.loadToday(context: modelContext)
+            watchConnectivity.sendTodaySchedule(
+                enrolments: viewModel.dueExercises,
+                settings: settings
+            )
+        }
     }
 
     private var exerciseList: some View {
