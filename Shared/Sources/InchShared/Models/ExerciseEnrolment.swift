@@ -3,8 +3,6 @@ import SwiftData
 
 @Model
 public final class ExerciseEnrolment {
-    #Index<ExerciseEnrolment>([\.nextScheduledDate])
-
     public var enrolledAt: Date = Date.now
     public var isActive: Bool = true
 

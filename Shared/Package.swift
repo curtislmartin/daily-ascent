@@ -4,9 +4,9 @@ import PackageDescription
 let package = Package(
     name: "Shared",
     platforms: [
-        .iOS(.v18),
-        .watchOS(.v11),
-        .macOS(.v15)
+        .iOS(.v17),
+        .watchOS(.v10),
+        .macOS(.v14)
     ],
     products: [
         .library(name: "InchShared", targets: ["InchShared"])
