@@ -5,6 +5,7 @@ struct WatchWorkoutView: View {
     let session: WatchSession
 
     @Environment(WatchConnectivityService.self) private var watchConnectivity
+    @Environment(WatchMotionRecordingService.self) private var motionRecording
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel: WatchWorkoutViewModel
     @State private var elapsed: Int = 0
@@ -41,6 +42,18 @@ struct WatchWorkoutView: View {
         }
         .navigationTitle(session.exerciseName)
         .navigationBarTitleDisplayMode(.inline)
+        .onChange(of: viewModel.phase) { _, newPhase in
+            switch newPhase {
+            case .inSet:
+                motionRecording.startRecording(exerciseId: session.exerciseId, setNumber: viewModel.currentSet)
+            case .confirming:
+                if motionRecording.isRecording {
+                    _ = motionRecording.stopAndTransfer(exerciseId: session.exerciseId, setNumber: viewModel.currentSet)
+                }
+            default:
+                break
+            }
+        }
     }
 
     private var readyView: some View {
