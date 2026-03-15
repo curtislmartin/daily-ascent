@@ -56,8 +56,8 @@ final class WorkoutViewModel {
         phase = .confirming(targetReps: currentTargetReps, duration: duration)
     }
 
-    func confirmSet(actual: Int, context: ModelContext) {
-        saveSet(actualReps: actual, context: context)
+    func confirmSet(actual: Int, context: ModelContext, recordingURL: URL? = nil) {
+        saveSet(actualReps: actual, context: context, recordingURL: recordingURL)
         advanceAfterSet(context: context)
     }
 
@@ -82,7 +82,7 @@ final class WorkoutViewModel {
         }
     }
 
-    private func saveSet(actualReps: Int, context: ModelContext) {
+    private func saveSet(actualReps: Int, context: ModelContext, recordingURL: URL? = nil) {
         guard let enrolment, let prescription, let def = enrolment.exerciseDefinition else { return }
         let completedSet = CompletedSet(
             sessionDate: sessionDate,
@@ -97,6 +97,25 @@ final class WorkoutViewModel {
         )
         completedSet.enrolment = enrolment
         context.insert(completedSet)
+
+        if let recordingURL {
+            let attrs = try? FileManager.default.attributesOfItem(atPath: recordingURL.path)
+            let fileSize = (attrs?[.size] as? Int) ?? 0
+            let recording = SensorRecording(
+                device: .iPhone,
+                exerciseId: def.exerciseId,
+                level: enrolment.currentLevel,
+                dayNumber: enrolment.currentDay,
+                setNumber: currentSetIndex + 1,
+                confirmedReps: actualReps,
+                sampleRateHz: 100,
+                filePath: recordingURL.path,
+                fileSizeBytes: fileSize
+            )
+            recording.completedSet = completedSet
+            context.insert(recording)
+        }
+
         sessionTotalReps += actualReps
         try? context.save()
     }

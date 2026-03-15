@@ -8,7 +8,7 @@ final class WatchWorkoutViewModel {
     private(set) var currentSetIndex: Int = 0
     private(set) var phase: WorkoutPhase = .ready
 
-    enum WorkoutPhase {
+    enum WorkoutPhase: Equatable {
         case ready
         case inSet(startedAt: Date)
         case confirming(targetReps: Int, duration: Double)

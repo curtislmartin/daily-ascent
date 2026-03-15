@@ -8,8 +8,13 @@ struct WorkoutSessionView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Environment(HealthKitService.self) private var healthKit
+    @Environment(MotionRecordingService.self) private var motionRecording
+
+    @Query private var allSettings: [UserSettings]
+    private var sensorConsented: Bool { allSettings.first?.motionDataUploadConsented ?? false }
 
     @State private var viewModel: WorkoutViewModel
+    @State private var pendingRecordingURL: URL?
 
     init(enrolmentId: PersistentIdentifier) {
         self.enrolmentId = enrolmentId
@@ -27,7 +32,9 @@ struct WorkoutSessionView: View {
                 inSetView
             case .confirming(let targetReps, let duration):
                 PostSetConfirmationView(targetReps: targetReps, duration: duration) { actual in
-                    viewModel.confirmSet(actual: actual, context: modelContext)
+                    let url = pendingRecordingURL
+                    pendingRecordingURL = nil
+                    viewModel.confirmSet(actual: actual, context: modelContext, recordingURL: url)
                 }
             case .resting(let seconds):
                 RestTimerView(totalSeconds: seconds) {
@@ -49,7 +56,17 @@ struct WorkoutSessionView: View {
             await healthKit.requestAuthorization()
         }
         .onChange(of: viewModel.phase) { _, newPhase in
-            if case .complete = newPhase {
+            switch newPhase {
+            case .inSet:
+                if sensorConsented {
+                    let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
+                    motionRecording.startRecording(exerciseId: exerciseId, setNumber: viewModel.currentSetIndex + 1)
+                }
+            case .confirming:
+                if motionRecording.isRecording {
+                    pendingRecordingURL = motionRecording.stopRecording()
+                }
+            case .complete:
                 let start = viewModel.sessionDate
                 let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
                 Task {
@@ -60,6 +77,8 @@ struct WorkoutSessionView: View {
                         metadata: ["exerciseId": exerciseId]
                     )
                 }
+            default:
+                break
             }
         }
     }
