@@ -6,8 +6,18 @@ import InchShared
 final class EnrolmentViewModel {
     var selectedExerciseIds: Set<String> = []
     var startDate: Date = .now
+    var levelChoices: [String: Int] = [:]
 
     var canProceed: Bool { !selectedExerciseIds.isEmpty }
+
+    /// Returns recommended level (1, 2, or 3) given a max-rep score.
+    /// testTargets must contain at least 2 entries: [L1target, L2target, ...].
+    static func recommendLevel(score: Int, testTargets: [Int]) -> Int {
+        guard testTargets.count >= 2 else { return 1 }
+        if score < testTargets[0] { return 1 }
+        if score < testTargets[1] { return 2 }
+        return 3
+    }
 
     func isSelected(_ exerciseId: String) -> Bool {
         selectedExerciseIds.contains(exerciseId)
@@ -46,7 +56,8 @@ final class EnrolmentViewModel {
     func saveEnrolments(from definitions: [ExerciseDefinition], context: ModelContext) throws {
         let selected = definitions.filter { selectedExerciseIds.contains($0.exerciseId) }
         for definition in selected {
-            let enrolment = ExerciseEnrolment(enrolledAt: startDate)
+            let chosenLevel = levelChoices[definition.exerciseId] ?? 1
+            let enrolment = ExerciseEnrolment(enrolledAt: startDate, currentLevel: chosenLevel)
             enrolment.exerciseDefinition = definition
             enrolment.nextScheduledDate = startDate
             context.insert(enrolment)
