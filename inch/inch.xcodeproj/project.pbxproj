@@ -367,6 +367,7 @@
 				DEVELOPMENT_TEAM = X93D6JZKR6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_BGTaskSchedulerPermittedIdentifiers = "com.inch.bodyweight.sensor-upload";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Inch logs workouts to Apple Health to show your training history.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Inch logs workouts to Apple Health to show your training history.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "Inch records motion sensor data during sets to help improve automatic rep counting.";
@@ -405,6 +406,7 @@
 				DEVELOPMENT_TEAM = X93D6JZKR6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_BGTaskSchedulerPermittedIdentifiers = "com.inch.bodyweight.sensor-upload";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Inch logs workouts to Apple Health to show your training history.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Inch logs workouts to Apple Health to show your training history.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "Inch records motion sensor data during sets to help improve automatic rep counting.";
