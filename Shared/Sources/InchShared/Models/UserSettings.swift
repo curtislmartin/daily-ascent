@@ -17,6 +17,9 @@ public final class UserSettings {
     public var streakProtectionEnabled: Bool = true
     public var testDayNotificationEnabled: Bool = true
     public var levelUnlockNotificationEnabled: Bool = true
+    public var streakProtectionHour: Int = 19
+    public var streakProtectionMinute: Int = 0
+    public var showConflictWarnings: Bool = true
 
     public var motionDataUploadConsented: Bool = false
     public var consentDate: Date? = nil
@@ -39,6 +42,9 @@ public final class UserSettings {
         streakProtectionEnabled: Bool = true,
         testDayNotificationEnabled: Bool = true,
         levelUnlockNotificationEnabled: Bool = true,
+        streakProtectionHour: Int = 19,
+        streakProtectionMinute: Int = 0,
+        showConflictWarnings: Bool = true,
         motionDataUploadConsented: Bool = false,
         consentDate: Date? = nil,
         contributorId: String = "",
@@ -58,6 +64,9 @@ public final class UserSettings {
         self.streakProtectionEnabled = streakProtectionEnabled
         self.testDayNotificationEnabled = testDayNotificationEnabled
         self.levelUnlockNotificationEnabled = levelUnlockNotificationEnabled
+        self.streakProtectionHour = streakProtectionHour
+        self.streakProtectionMinute = streakProtectionMinute
+        self.showConflictWarnings = showConflictWarnings
         self.motionDataUploadConsented = motionDataUploadConsented
         self.consentDate = consentDate
         self.contributorId = contributorId
