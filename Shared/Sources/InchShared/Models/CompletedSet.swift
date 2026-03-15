@@ -3,8 +3,6 @@ import SwiftData
 
 @Model
 public final class CompletedSet {
-    #Index<CompletedSet>([\.completedAt])
-
     public var completedAt: Date = Date.now
     public var sessionDate: Date = Date.now
     public var exerciseId: String = ""
