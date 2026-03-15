@@ -30,6 +30,7 @@ final class TodayViewModel {
         }
 
         detectConflictsForToday()
+        resetStreakForMissedDayIfNeeded(context: context, today: today)
     }
 
     private func computeNextTraining(from all: [ExerciseEnrolment], after today: Date) {
@@ -67,6 +68,20 @@ final class TodayViewModel {
             case .testWithSameGroupTraining(_, _, let trainingId):
                 conflictWarnings[trainingId] = "Same muscle group as today's test"
             }
+        }
+    }
+
+    private func resetStreakForMissedDayIfNeeded(context: ModelContext, today: Date) {
+        guard !isRestDay else { return }
+        let streaks = (try? context.fetch(FetchDescriptor<StreakState>())) ?? []
+        guard let streakState = streaks.first, streakState.currentStreak > 0 else { return }
+        guard let lastActive = streakState.lastActiveDate else { return }
+
+        let lastDay = Calendar.current.startOfDay(for: lastActive)
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today) ?? today
+        if lastDay < Calendar.current.startOfDay(for: yesterday) {
+            streakState.currentStreak = 0
+            try? context.save()
         }
     }
 

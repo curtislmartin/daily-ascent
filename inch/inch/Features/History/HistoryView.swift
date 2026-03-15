@@ -5,11 +5,13 @@ import InchShared
 struct HistoryView: View {
     @Query(sort: \CompletedSet.completedAt, order: .reverse)
     private var allSets: [CompletedSet]
+    @Query private var streakStates: [StreakState]
 
     @State private var viewModel = HistoryViewModel()
     @State private var showingSettings = false
 
     private var sessions: [SessionGroup] { viewModel.grouped(sets: allSets) }
+    private var streakState: StreakState? { streakStates.first }
 
     var body: some View {
         Group {
@@ -17,6 +19,15 @@ struct HistoryView: View {
                 emptyState
             } else {
                 List {
+                    if let streak = streakState {
+                        Section {
+                            HStack(spacing: 0) {
+                                streakStat(value: streak.currentStreak, label: "Current streak", icon: "flame.fill", color: .orange)
+                                Divider()
+                                streakStat(value: streak.longestStreak, label: "Best streak", icon: "trophy.fill", color: .yellow)
+                            }
+                        }
+                    }
                     ForEach(sessions) { session in
                         Section(header: Text(session.id.formatted(date: .complete, time: .omitted))) {
                             ForEach(session.exercises) { summary in
@@ -53,6 +64,20 @@ struct HistoryView: View {
         .sheet(isPresented: $showingSettings) {
             SettingsView()
         }
+    }
+
+    private func streakStat(value: Int, label: String, icon: String, color: Color) -> some View {
+        VStack(spacing: 4) {
+            Label("\(value)", systemImage: icon)
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundStyle(value > 0 ? color : .secondary)
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
     }
 
     private var emptyState: some View {
