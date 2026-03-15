@@ -11,6 +11,7 @@ struct OnboardingCoordinatorView: View {
 
     private enum Step {
         case enrolment
+        case placement
         case consent
     }
 
@@ -19,6 +20,11 @@ struct OnboardingCoordinatorView: View {
             switch step {
             case .enrolment:
                 EnrolmentView(viewModel: viewModel) {
+                    step = .placement
+                }
+            case .placement:
+                PlacementTestView(viewModel: viewModel) {
+                    try? viewModel.saveEnrolments(from: definitions, context: modelContext)
                     step = .consent
                 }
             case .consent:
