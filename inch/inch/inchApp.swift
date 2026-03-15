@@ -6,6 +6,7 @@ import InchShared
 struct InchApp: App {
     let container: ModelContainer
     let watchConnectivity = WatchConnectivityService()
+    let healthKit = HealthKitService()
 
     init() {
         do {
@@ -20,6 +21,7 @@ struct InchApp: App {
             RootView()
                 .modelContainer(container)
                 .environment(watchConnectivity)
+                .environment(healthKit)
                 .task {
                     watchConnectivity.activate()
                     let context = ModelContext(container)
