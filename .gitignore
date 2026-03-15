@@ -1,2 +1,12 @@
 .DS_Store
 .worktrees/
+
+# Swift Package Manager build artifacts
+Shared/.build/
+*.o
+*.d
+
+# Xcode build artifacts
+DerivedData/
+*.xcuserstate
+xcuserdata/
