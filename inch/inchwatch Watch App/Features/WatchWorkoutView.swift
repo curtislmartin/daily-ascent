@@ -22,9 +22,23 @@ struct WatchWorkoutView: View {
             case .ready:
                 readyView
             case .inSet:
-                inSetView
+                if session.countingMode == "real_time" {
+                    WatchRealTimeCountingView(
+                        targetReps: viewModel.targetReps,
+                        setNumber: viewModel.currentSet,
+                        totalSets: viewModel.totalSets
+                    ) { count in
+                        viewModel.endSetRealTime(count: count)
+                    }
+                } else {
+                    inSetView
+                }
             case .confirming(let targetReps, _):
-                WatchPostSetView(targetReps: targetReps) { actual in
+                WatchPostSetView(
+                    targetReps: targetReps,
+                    initialReps: viewModel.pendingRealTimeCount
+                ) { actual in
+                    viewModel.clearPendingRealTimeCount()
                     viewModel.confirmSet(actual: actual)
                 }
             case .resting(let seconds):
