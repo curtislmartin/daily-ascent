@@ -1,17 +1,18 @@
-//
-//  inchwatchApp.swift
-//  inchwatch Watch App
-//
-//  Created by Curtis Martin on 15/3/2026.
-//
-
 import SwiftUI
+import InchShared
 
 @main
 struct inchwatch_Watch_AppApp: App {
+    let watchConnectivity = WatchConnectivityService()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            WatchTodayView()
+                .environment(watchConnectivity)
+                .task {
+                    watchConnectivity.activate()
+                    await watchConnectivity.processSessions()
+                }
         }
     }
 }
