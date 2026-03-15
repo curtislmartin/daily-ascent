@@ -3,7 +3,6 @@ import SwiftData
 import InchShared
 
 struct EnrolmentView: View {
-    @Environment(\.modelContext) private var modelContext
     @Query private var definitions: [ExerciseDefinition]
 
     @Bindable var viewModel: EnrolmentViewModel
@@ -111,11 +110,6 @@ struct EnrolmentView: View {
     }
 
     private func saveAndContinue() {
-        do {
-            try viewModel.saveEnrolments(from: definitions, context: modelContext)
-            onEnrolmentSaved()
-        } catch {
-            // Enrolment failure is non-recoverable in onboarding context
-        }
+        onEnrolmentSaved()
     }
 }
