@@ -4,10 +4,6 @@
 
 Inch is an iOS + watchOS bodyweight training app with 6 exercises (Push-Ups, Squats, Sit-Ups, Pull-Ups, Glute Bridges, Dead Bugs), each with 3 progressive levels. Users enrol in exercises, follow prescribed set/rep schemes, and progress through levels by passing max-rep tests. The app features injury-aware scheduling, two rep counting modes, and collects anonymous sensor data for future ML-based auto rep counting.
 
-## Worktrees
-
-Use `.worktrees/` (project-local, hidden) for all git worktrees. This directory is gitignored.
-
 ## Specification Documents
 
 Read these before writing any code. They are the source of truth for all features and architecture decisions.
@@ -21,6 +17,7 @@ Read these before writing any code. They are the source of truth for all feature
 | `Specs/architecture.md` | Project structure, target config, state management, navigation, services | Always — structural decisions |
 | `Specs/framework-guidance.md` | WatchConnectivity, Core Motion, HealthKit, BGProcessingTask patterns | Building framework integration |
 | `Specs/backend-api.md` | Supabase schema, upload endpoints, client integration | Building the upload service |
+| `Specs/v1-1-features.md` | v1.1 features: history, stats, notifications, complications, exercise detail, conflict warnings | Building any v1.1 feature |
 
 ## Build & Run
 
