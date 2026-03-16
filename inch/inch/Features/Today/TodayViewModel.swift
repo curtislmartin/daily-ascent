@@ -31,13 +31,25 @@ final class TodayViewModel {
             predicate: #Predicate { $0.sessionDate >= today && $0.sessionDate < tomorrow }
         )
         let todaySets = (try? context.fetch(setsDescriptor)) ?? []
-        let completedIds = Set(todaySets.map(\.exerciseId))
-        completedTodayIds = completedIds
+
+        // Group today's sets by exercise ID
+        let setsByExercise = Dictionary(grouping: todaySets, by: \.exerciseId)
+
+        // An exercise is fully complete when all prescribed sets are done
+        let fullyCompletedIds = Set(all.compactMap { enrolment -> String? in
+            guard let id = enrolment.exerciseDefinition?.exerciseId else { return nil }
+            let completedCount = setsByExercise[id]?.count ?? 0
+            let prescribedCount = currentPrescription(for: enrolment)?.sets.count ?? 0
+            guard prescribedCount > 0, completedCount >= prescribedCount else { return nil }
+            return id
+        })
+
+        completedTodayIds = fullyCompletedIds
 
         // Include completed-today exercises that are no longer in the due list
         let completedEnrolments = all.filter { enrolment in
             guard let id = enrolment.exerciseDefinition?.exerciseId else { return false }
-            return completedIds.contains(id) && !dueToday.contains(where: { $0.persistentModelID == enrolment.persistentModelID })
+            return fullyCompletedIds.contains(id) && !dueToday.contains(where: { $0.persistentModelID == enrolment.persistentModelID })
         }
 
         dueExercises = dueToday + completedEnrolments
