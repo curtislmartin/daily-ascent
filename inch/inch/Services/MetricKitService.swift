@@ -25,7 +25,7 @@ final class MetricKitService: NSObject, MXMetricManagerSubscriber {
         }
     }
 
-    private func writeToDisk(_ data: Data, prefix: String) {
+    private nonisolated func writeToDisk(_ data: Data, prefix: String) {
         guard let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withFullDate, .withTime, .withColonSeparatorInTime]
