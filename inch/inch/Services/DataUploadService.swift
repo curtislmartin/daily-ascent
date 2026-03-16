@@ -45,7 +45,6 @@ final class DataUploadService {
               let anonKey = dict["SupabaseAnonKey"] as? String
         else { throw UploadError.configurationMissing }
 
-        let newId = UUID().uuidString.lowercased()
         guard let url = URL(string: "\(supabaseURL)/rest/v1/sensor_recordings?contributor_id=eq.\(contributorId)") else {
             throw UploadError.configurationMissing
         }
@@ -53,8 +52,9 @@ final class DataUploadService {
         request.httpMethod = "PATCH"
         request.setValue(anonKey, forHTTPHeaderField: "apikey")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue(contributorId, forHTTPHeaderField: "x-contributor-id")
-        request.httpBody = try JSONEncoder().encode(["contributor_id": newId])
+        // Reassign server rows to a random ID — intentionally different from the new local ID
+        // so neither side can be used to re-link the data after unlinking.
+        request.httpBody = try JSONEncoder().encode(["contributor_id": UUID().uuidString.lowercased()])
 
         let (_, response) = try await URLSession.shared.data(for: request)
         guard (response as? HTTPURLResponse)?.statusCode == 204 else {
