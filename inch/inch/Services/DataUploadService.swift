@@ -8,6 +8,7 @@ enum UploadError: Error {
     case fileNotFound
     case fileUploadFailed(Int)
     case metadataInsertFailed(Int)
+    case unlinkFailed
 }
 
 /// Uploads pending SensorRecordings to Supabase in the background via BGProcessingTask.
@@ -35,6 +36,30 @@ final class DataUploadService {
         await uploadTask?.value
         task.setTaskCompleted(success: true)
         scheduleBGUpload()
+    }
+
+    func unlinkContributorData(contributorId: String) async throws {
+        guard let plistURL = Bundle.main.url(forResource: "Secrets", withExtension: "plist"),
+              let dict = NSDictionary(contentsOf: plistURL) as? [String: Any],
+              let supabaseURL = dict["SupabaseURL"] as? String,
+              let anonKey = dict["SupabaseAnonKey"] as? String
+        else { throw UploadError.configurationMissing }
+
+        let newId = UUID().uuidString.lowercased()
+        guard let url = URL(string: "\(supabaseURL)/rest/v1/sensor_recordings?contributor_id=eq.\(contributorId)") else {
+            throw UploadError.configurationMissing
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.setValue(anonKey, forHTTPHeaderField: "apikey")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(contributorId, forHTTPHeaderField: "x-contributor-id")
+        request.httpBody = try JSONEncoder().encode(["contributor_id": newId])
+
+        let (_, response) = try await URLSession.shared.data(for: request)
+        guard (response as? HTTPURLResponse)?.statusCode == 204 else {
+            throw UploadError.unlinkFailed
+        }
     }
 
     // MARK: - Private
