@@ -10,8 +10,6 @@ final class TodayViewModel {
     var conflictWarnings: [String: String] = [:]
     var nextTrainingDate: Date? = nil
     var nextTrainingCount: Int = 0
-    var showDemographicsNudge: Bool = false
-
     private let detector = ConflictDetector()
 
     func loadToday(context: ModelContext, showWarnings: Bool = true) {
@@ -55,10 +53,6 @@ final class TodayViewModel {
             conflictWarnings = [:]
         }
         resetStreakForMissedDayIfNeeded(context: context, today: today)
-        let allSettings = (try? context.fetch(FetchDescriptor<UserSettings>())) ?? []
-        if let s = allSettings.first {
-            showDemographicsNudge = s.motionDataUploadConsented && !s.hasDemographics
-        }
     }
 
     private func computeNextTraining(from all: [ExerciseEnrolment], after today: Date) {
