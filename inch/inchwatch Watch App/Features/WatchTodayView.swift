@@ -3,7 +3,8 @@ import InchShared
 
 struct WatchTodayView: View {
     @Environment(WatchConnectivityService.self) private var watchConnectivity
-    @Environment(WatchMotionRecordingService.self) private var motionRecording
+    // Note: settings is NOT read here — WatchWorkoutView.init gains settings: in Task 8.
+    // At Task 6 time, WatchWorkoutView still uses init(session:) — updated in Task 8.
 
     @State private var activeSession: WatchSession?
 
@@ -11,43 +12,29 @@ struct WatchTodayView: View {
         if watchConnectivity.sessions.isEmpty {
             restDayView
         } else {
-            TabView {
-                ForEach(watchConnectivity.sessions) { session in
-                    exercisePage(for: session)
+            List(watchConnectivity.sessions) { session in
+                Button {
+                    activeSession = session
+                } label: {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(session.exerciseName)
+                            .font(.headline)
+                        Text("Level \(session.level) · Day \(session.dayNumber)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        if session.isTest {
+                            Text("TEST DAY")
+                                .font(.caption2)
+                                .fontWeight(.bold)
+                                .foregroundStyle(.orange)
+                        }
+                    }
                 }
             }
-            .tabViewStyle(.page)
             .sheet(item: $activeSession) { session in
-                WatchWorkoutView(session: session)
+                WatchWorkoutView(session: session)  // updated to session:settings: in Task 8
             }
         }
-    }
-
-    private func exercisePage(for session: WatchSession) -> some View {
-        VStack(spacing: 8) {
-            Spacer()
-            Text(session.exerciseName)
-                .font(.headline)
-                .multilineTextAlignment(.center)
-            Text("Level \(session.level) · Day \(session.dayNumber)")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            if session.isTest {
-                Text("TEST DAY")
-                    .font(.caption2)
-                    .fontWeight(.bold)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(.orange.opacity(0.2), in: Capsule())
-                    .foregroundStyle(.orange)
-            }
-            Spacer()
-            Button("Start") {
-                activeSession = session
-            }
-            .buttonStyle(.borderedProminent)
-        }
-        .padding()
     }
 
     private var restDayView: some View {
