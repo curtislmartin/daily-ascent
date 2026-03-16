@@ -40,7 +40,27 @@ final class DataUploadService {
     // MARK: - Private
 
     private func uploadPending(context: ModelContext) async {
-        guard let config = loadConfig() else { return }
+        guard let settings = (try? context.fetch(FetchDescriptor<UserSettings>()))?.first,
+              settings.motionDataUploadConsented,
+              !settings.contributorId.isEmpty
+        else { return }
+
+        guard let plistURL = Bundle.main.url(forResource: "Secrets", withExtension: "plist"),
+              let dict = NSDictionary(contentsOf: plistURL) as? [String: Any],
+              let supabaseURL = dict["SupabaseURL"] as? String,
+              let anonKey = dict["SupabaseAnonKey"] as? String
+        else { return }
+
+        let config = SupabaseConfig(
+            supabaseURL: supabaseURL,
+            anonKey: anonKey,
+            contributorId: settings.contributorId,
+            ageRange: settings.ageRange,
+            heightRange: settings.heightRange,
+            biologicalSex: settings.biologicalSex,
+            activityLevel: settings.activityLevel
+        )
+
         let pendingStatus = UploadStatus.pending
         let descriptor = FetchDescriptor<SensorRecording>(
             predicate: #Predicate { $0.uploadStatus == pendingStatus }
@@ -65,17 +85,19 @@ final class DataUploadService {
         }
 
         let rawData = try Data(contentsOf: fileURL)
+        let compressedData = (try? (rawData as NSData).compressed(using: .zlib) as Data) ?? rawData
         let timestamp = Int(recording.recordedAt.timeIntervalSince1970)
-        let fileName = "\(config.contributorId)_\(timestamp).bin"
+        let fileName = "\(config.contributorId)_\(timestamp).bin.zlib"
         let storagePath = "\(recording.exerciseId)/\(fileName)"
 
-        // Step 1: Upload binary file to Supabase Storage
+        // Step 1: Upload binary file to Supabase Storage (zlib-compressed)
         let storageURL = URL(string: "\(config.supabaseURL)/storage/v1/object/sensor-data/\(storagePath)")!
         var uploadRequest = URLRequest(url: storageURL)
         uploadRequest.httpMethod = "POST"
         uploadRequest.setValue(config.anonKey, forHTTPHeaderField: "apikey")
         uploadRequest.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
-        uploadRequest.httpBody = rawData
+        uploadRequest.setValue("deflate", forHTTPHeaderField: "Content-Encoding")
+        uploadRequest.httpBody = compressedData
 
         let (_, uploadResponse) = try await URLSession.shared.data(for: uploadRequest)
         guard let uploadHTTP = uploadResponse as? HTTPURLResponse, uploadHTTP.statusCode == 200 else {
@@ -90,12 +112,12 @@ final class DataUploadService {
             dayNumber: recording.dayNumber,
             setNumber: recording.setNumber,
             confirmedReps: recording.confirmedReps,
-            countingMode: "post_set_confirmation",
+            countingMode: recording.countingMode,
             device: recording.device.rawValue,
             sampleRateHz: recording.sampleRateHz,
             durationSeconds: recording.durationSeconds,
             filePath: storagePath,
-            fileSizeBytes: rawData.count,
+            fileSizeBytes: compressedData.count,
             recordedAt: recording.recordedAt,
             ageRange: config.ageRange,
             heightRange: config.heightRange,
@@ -121,24 +143,6 @@ final class DataUploadService {
         try? context.save()
     }
 
-    private func loadConfig() -> SupabaseConfig? {
-        guard let url = Bundle.main.url(forResource: "Secrets", withExtension: "plist"),
-              let dict = NSDictionary(contentsOf: url) as? [String: Any],
-              let supabaseURL = dict["SupabaseURL"] as? String,
-              let anonKey = dict["SupabaseAnonKey"] as? String,
-              let contributorId = dict["ContributorId"] as? String
-        else { return nil }
-
-        return SupabaseConfig(
-            supabaseURL: supabaseURL,
-            anonKey: anonKey,
-            contributorId: contributorId,
-            ageRange: dict["AgeRange"] as? String,
-            heightRange: dict["HeightRange"] as? String,
-            biologicalSex: dict["BiologicalSex"] as? String,
-            activityLevel: dict["ActivityLevel"] as? String
-        )
-    }
 }
 
 private struct SupabaseConfig {
