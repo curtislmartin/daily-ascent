@@ -10,6 +10,7 @@ struct HistoryView: View {
 
     @State private var viewModel = HistoryViewModel()
     @State private var selectedSegment: Segment = .log
+    @State private var showingSettings = false
 
     enum Segment: String, CaseIterable {
         case log = "Log"
@@ -42,5 +43,19 @@ struct HistoryView: View {
         .navigationTitle("History")
         .navigationBarTitleDisplayMode(.large)
         .withHistoryDestinations()
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showingSettings = true
+                } label: {
+                    Label("Settings", systemImage: "gearshape")
+                }
+            }
+        }
+        .sheet(isPresented: $showingSettings) {
+            NavigationStack {
+                SettingsView()
+            }
+        }
     }
 }
