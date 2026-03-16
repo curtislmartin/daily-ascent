@@ -20,6 +20,7 @@ struct PrivacySettingsView: View {
         .listStyle(.insetGrouped)
         .navigationTitle("Data & Privacy")
         .navigationBarTitleDisplayMode(.inline)
+        .task { viewModel.load(context: modelContext) }
         .confirmationDialog(
             "Delete all workout history?",
             isPresented: $showingDeleteHistoryConfirm,
