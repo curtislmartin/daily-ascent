@@ -12,6 +12,9 @@ import InchShared
     }
 
     func record(_ report: WatchCompletionReport, exerciseName: String) {
+        guard !entries.contains(where: {
+            $0.completedAt == report.completedAt && $0.exerciseName == exerciseName
+        }) else { return }
         let totalReps = report.completedSets.reduce(0) { $0 + $1.actualReps }
         let entry = WatchHistoryEntry(
             exerciseName: exerciseName,
