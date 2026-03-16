@@ -21,7 +21,7 @@ struct PrivacySettingsView: View {
             if settings?.motionDataUploadConsented == true {
                 demographicsSection
             }
-dataSection
+            dataSection
         }
         .listStyle(.insetGrouped)
         .navigationTitle("Data & Privacy")
