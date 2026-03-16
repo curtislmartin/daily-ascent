@@ -52,16 +52,16 @@ final class SettingsViewModel {
     }
 
     func deleteHistory(context: ModelContext) {
-        try? context.delete(model: CompletedSet.self)
         resetStreak(context: context)
+        try? context.delete(model: CompletedSet.self)
         try? context.save()
     }
 
     func resetToOnboarding(context: ModelContext) {
+        resetStreak(context: context)
         try? context.delete(model: CompletedSet.self)
         try? context.delete(model: ExerciseEnrolment.self)
         try? context.delete(model: UserSettings.self)
-        resetStreak(context: context)
         try? context.save()
     }
 
