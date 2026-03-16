@@ -49,7 +49,11 @@ struct WatchRestTimerView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task {
             while remaining > 0 {
-                try? await Task.sleep(for: .seconds(1))
+                do {
+                    try await Task.sleep(for: .seconds(1))
+                } catch {
+                    return  // Cancelled (user tapped Skip) — exit without calling onSkip again
+                }
                 remaining -= 1
                 if remaining == 10 && !tenSecondHapticFired {
                     tenSecondHapticFired = true
@@ -61,9 +65,9 @@ struct WatchRestTimerView: View {
             }
             // Triple haptic at rest end
             WKInterfaceDevice.current().play(.success)
-            try? await Task.sleep(for: .milliseconds(200))
+            do { try await Task.sleep(for: .milliseconds(200)) } catch { return }
             WKInterfaceDevice.current().play(.success)
-            try? await Task.sleep(for: .milliseconds(200))
+            do { try await Task.sleep(for: .milliseconds(200)) } catch { return }
             WKInterfaceDevice.current().play(.success)
             onSkip()
         }
