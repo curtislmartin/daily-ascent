@@ -90,11 +90,19 @@ final class HistoryViewModel {
             )
         }.sorted { $0.totalReps > $1.totalReps }
 
+        let today = calendar.startOfDay(for: .now)
+        let sevenDaysAgo = calendar.date(byAdding: .day, value: -6, to: today) ?? today
+        let daysTrainedThisWeek = Set(
+            sets.filter { $0.sessionDate >= sevenDaysAgo }
+                .map { calendar.startOfDay(for: $0.sessionDate) }
+        ).count
+
         return HistoryStats(
             totalReps: totalReps,
             sessionCount: sessionCount,
             exerciseStats: exerciseStats,
-            weeklyData: weeklyData(from: sets)
+            weeklyData: weeklyData(from: sets),
+            daysTrainedThisWeek: daysTrainedThisWeek
         )
     }
 
@@ -159,6 +167,7 @@ final class HistoryViewModel {
         let sessionCount: Int
         let exerciseStats: [ExerciseStat]
         let weeklyData: [WeeklyData]
+        let daysTrainedThisWeek: Int
     }
 
     struct ExerciseStat: Identifiable {
