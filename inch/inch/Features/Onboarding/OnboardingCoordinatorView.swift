@@ -68,16 +68,16 @@ struct OnboardingCoordinatorView: View {
         let settings = UserSettings(
             motionDataUploadConsented: consented,
             consentDate: consented ? .now : nil,
-            contributorId: consented ? UUID().uuidString : "",
+            contributorId: consented ? UUID().uuidString.lowercased() : "",
             ageRange: ageRange,
             heightRange: heightRange,
             biologicalSex: biologicalSex,
-            activityLevel: activityLevel
+            activityLevel: activityLevel,
+            onboardingComplete: true
         )
         let streakState = StreakState()
         modelContext.insert(settings)
         modelContext.insert(streakState)
         try? modelContext.save()
-        // RootView's @Query on UserSettings detects the new record and auto-transitions to AppTabView
     }
 }
