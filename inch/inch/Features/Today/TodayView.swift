@@ -9,8 +9,14 @@ struct TodayView: View {
     @Query private var allSettings: [UserSettings]
 
     @State private var viewModel = TodayViewModel()
+    @State private var nudgeDismissed = false
 
     private var settings: UserSettings? { allSettings.first }
+
+    private var showDemographicsNudge: Bool {
+        guard let s = allSettings.first else { return false }
+        return !nudgeDismissed && s.motionDataUploadConsented && !s.hasDemographics
+    }
 
     private var showConflictWarnings: Bool { allSettings.first?.showConflictWarnings ?? true }
 
@@ -59,9 +65,9 @@ struct TodayView: View {
                         isCompleted: viewModel.completedTodayIds.contains(exerciseId)
                     )
                 }
-                if viewModel.showDemographicsNudge {
+                if showDemographicsNudge {
                     TodayDemographicsNudge {
-                        viewModel.showDemographicsNudge = false
+                        nudgeDismissed = true
                     }
                 }
             }
