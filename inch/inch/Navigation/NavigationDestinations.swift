@@ -14,6 +14,10 @@ enum HistoryDestination: Hashable {
     case exerciseDetail(PersistentIdentifier)
 }
 
+enum TodayDestination: Hashable {
+    case privacySettings
+}
+
 extension View {
     func withWorkoutDestinations() -> some View {
         navigationDestination(for: WorkoutDestination.self) { destination in
@@ -40,6 +44,15 @@ extension View {
             switch destination {
             case .exerciseDetail(let id):
                 ExerciseDetailView(enrolmentId: id)
+            }
+        }
+    }
+
+    func withTodayDestinations() -> some View {
+        navigationDestination(for: TodayDestination.self) { destination in
+            switch destination {
+            case .privacySettings:
+                PrivacySettingsView(viewModel: SettingsViewModel())
             }
         }
     }
