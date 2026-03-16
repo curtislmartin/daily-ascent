@@ -21,7 +21,9 @@ struct PrivacySettingsView: View {
             if settings?.motionDataUploadConsented == true {
                 demographicsSection
             }
-            contributorSection
+            if let id = settings?.contributorId, !id.isEmpty {
+                contributorSection(id: id)
+            }
             dataSection
         }
         .listStyle(.insetGrouped)
@@ -193,15 +195,13 @@ struct PrivacySettingsView: View {
         }
     }
 
-    private var contributorSection: some View {
+    private func contributorSection(id: String) -> some View {
         Section("Contributor") {
-            if let id = settings?.contributorId, !id.isEmpty {
-                LabeledContent("Contributor ID") {
-                    Text(id.prefix(8) + "…")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .monospaced()
-                }
+            LabeledContent("Contributor ID") {
+                Text(id.prefix(8) + "…")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .monospaced()
             }
         }
     }
