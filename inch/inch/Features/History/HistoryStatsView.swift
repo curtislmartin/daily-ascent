@@ -1,4 +1,5 @@
 import SwiftUI
+import Charts
 import InchShared
 
 struct HistoryStatsView: View {
@@ -7,81 +8,113 @@ struct HistoryStatsView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                summaryCards
+            VStack(spacing: 16) {
+                streakCard
+                    .padding()
+                    .background(.secondarySystemGroupedBackground, in: RoundedRectangle(cornerRadius: 12))
+                    .padding(.horizontal)
+
+                completionRingCard
+                    .padding()
+                    .background(.secondarySystemGroupedBackground, in: RoundedRectangle(cornerRadius: 12))
                     .padding(.horizontal)
 
                 if !stats.weeklyData.isEmpty {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Weekly Volume")
-                            .font(.headline)
-                            .padding(.horizontal)
-                        WeeklyVolumeChart(weeklyData: stats.weeklyData)
-                            .padding(.horizontal)
-                    }
+                    volumeChartCard
+                        .padding()
+                        .background(.secondarySystemGroupedBackground, in: RoundedRectangle(cornerRadius: 12))
+                        .padding(.horizontal)
                 }
 
                 if !stats.exerciseStats.isEmpty {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("By Exercise")
-                            .font(.headline)
-                            .padding(.horizontal)
-                        exerciseList
-                    }
+                    exerciseStatsCard
+                        .padding()
+                        .background(.secondarySystemGroupedBackground, in: RoundedRectangle(cornerRadius: 12))
+                        .padding(.horizontal)
                 }
             }
             .padding(.vertical)
         }
     }
 
-    private var summaryCards: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-            StatCard(label: "Total Reps", value: stats.totalReps.formatted(), subtitle: "All time")
-            StatCard(label: "Sessions", value: "\(stats.sessionCount)", subtitle: "Training days")
-            if let streak = streakState {
-                StatCard(label: "Streak", value: "\(streak.currentStreak)", subtitle: "Current")
-                StatCard(label: "Best Streak", value: "\(streak.longestStreak)", subtitle: "Personal best")
+    private var streakCard: some View {
+        HStack(spacing: 0) {
+            VStack(alignment: .center, spacing: 4) {
+                Text("Current Streak")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text("\(streakState?.currentStreak ?? 0)")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                Image(systemName: "flame.fill")
+                    .foregroundStyle(.orange)
+                    .font(.title3)
+            }
+            .frame(maxWidth: .infinity)
+
+            VStack(alignment: .center, spacing: 4) {
+                Text("Best Streak")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text("\(streakState?.longestStreak ?? 0)")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                Image(systemName: "flame.fill")
+                    .foregroundStyle(.orange)
+                    .font(.title3)
+            }
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    private var completionRingCard: some View {
+        VStack(spacing: 8) {
+            Text("This Week")
+                .font(.headline)
+            Chart {
+                SectorMark(
+                    angle: .value("Trained", stats.daysTrainedThisWeek),
+                    innerRadius: .ratio(0.6)
+                )
+                .foregroundStyle(Color.accentColor)
+
+                SectorMark(
+                    angle: .value("Rest", max(0, 7 - stats.daysTrainedThisWeek)),
+                    innerRadius: .ratio(0.6)
+                )
+                .foregroundStyle(Color.secondary.opacity(0.2))
+            }
+            .frame(height: 140)
+            .overlay {
+                Text("\(stats.daysTrainedThisWeek)/7")
+                    .font(.title2)
+                    .fontWeight(.semibold)
             }
         }
     }
 
-    private var exerciseList: some View {
-        VStack(spacing: 0) {
-            ForEach(stats.exerciseStats) { exercise in
-                ExerciseStatRow(stat: exercise)
-                if exercise.id != stats.exerciseStats.last?.id {
-                    Divider()
-                        .padding(.leading, 44)
+    private var volumeChartCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Weekly Volume")
+                .font(.headline)
+            WeeklyVolumeChart(weeklyData: stats.weeklyData)
+        }
+    }
+
+    private var exerciseStatsCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("By Exercise")
+                .font(.headline)
+            VStack(spacing: 0) {
+                ForEach(stats.exerciseStats) { exercise in
+                    ExerciseStatRow(stat: exercise)
+                    if exercise.id != stats.exerciseStats.last?.id {
+                        Divider()
+                            .padding(.leading, 44)
+                    }
                 }
             }
         }
-        .background(.background.secondary)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .padding(.horizontal)
-    }
-}
-
-private struct StatCard: View {
-    let label: String
-    let value: String
-    let subtitle: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(value)
-                .font(.title2)
-                .fontWeight(.bold)
-            Text(label)
-                .font(.subheadline)
-                .foregroundStyle(.primary)
-            Text(subtitle)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
-        .background(.background.secondary)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
 
