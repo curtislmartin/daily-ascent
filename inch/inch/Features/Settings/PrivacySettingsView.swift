@@ -14,6 +14,9 @@ struct PrivacySettingsView: View {
     var body: some View {
         List {
             consentSection
+            if settings?.motionDataUploadConsented == true {
+                demographicsSection
+            }
             contributorSection
             dataSection
         }
@@ -45,6 +48,77 @@ struct PrivacySettingsView: View {
         } message: {
             Text("All progress, history, and settings will be permanently deleted. You'll go through onboarding again.")
         }
+    }
+
+    private var demographicsSection: some View {
+        Section {
+            demographicRow(
+                title: "Age range",
+                options: ["Under 18", "18–29", "30–39", "40–49", "50–59", "60+"],
+                selection: Binding(
+                    get: { settings?.ageRange },
+                    set: { settings?.ageRange = $0; try? modelContext.save() }
+                )
+            )
+            demographicRow(
+                title: "Height",
+                options: ["Under 160cm", "160–170cm", "171–180cm", "181–190cm", "Over 190cm"],
+                selection: Binding(
+                    get: { settings?.heightRange },
+                    set: { settings?.heightRange = $0; try? modelContext.save() }
+                )
+            )
+            demographicRow(
+                title: "Biological sex",
+                options: ["Male", "Female", "Prefer not to say"],
+                selection: Binding(
+                    get: { settings?.biologicalSex },
+                    set: { settings?.biologicalSex = $0; try? modelContext.save() }
+                )
+            )
+            demographicRow(
+                title: "Activity level",
+                options: ["Beginner", "Intermediate", "Advanced"],
+                selection: Binding(
+                    get: { settings?.activityLevel },
+                    set: { settings?.activityLevel = $0; try? modelContext.save() }
+                )
+            )
+        } header: {
+            Text("Profile")
+        } footer: {
+            Text("Optional. Used only to improve rep-counting accuracy for different body types.")
+        }
+    }
+
+    private func demographicRow(title: String, options: [String], selection: Binding<String?>) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(.subheadline)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(options, id: \.self) { option in
+                        Button {
+                            selection.wrappedValue = selection.wrappedValue == option ? nil : option
+                        } label: {
+                            Text(option)
+                                .font(.caption)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(
+                                    selection.wrappedValue == option
+                                        ? Color.accentColor
+                                        : Color.secondary.opacity(0.15),
+                                    in: Capsule()
+                                )
+                                .foregroundStyle(selection.wrappedValue == option ? .white : .primary)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+        .padding(.vertical, 4)
     }
 
     private var consentSection: some View {
