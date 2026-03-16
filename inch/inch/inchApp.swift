@@ -34,9 +34,16 @@ struct InchApp: App {
                 .task {
                     watchConnectivity.activate()
                     await notificationService.checkAuthorizationStatus()
-                    let context = ModelContext(container)
-                    Task { await watchConnectivity.handleReceivedFiles(context: context) }
-                    await watchConnectivity.handleCompletionReports(context: context)
+                    await withTaskGroup(of: Void.self) { group in
+                        group.addTask {
+                            let context = ModelContext(self.container)
+                            await self.watchConnectivity.handleCompletionReports(context: context)
+                        }
+                        group.addTask {
+                            let context = ModelContext(self.container)
+                            await self.watchConnectivity.handleReceivedFiles(context: context)
+                        }
+                    }
                 }
         }
     }
