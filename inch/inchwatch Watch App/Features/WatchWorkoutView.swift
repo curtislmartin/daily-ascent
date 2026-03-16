@@ -6,6 +6,8 @@ import InchShared
 struct WatchWorkoutView: View {
     let session: WatchSession
 
+    var onStartNext: ((WatchSession) -> Void)?
+
     @Environment(WatchConnectivityService.self) private var watchConnectivity
     @Environment(WatchMotionRecordingService.self) private var motionRecording
     @Environment(WatchHealthService.self) private var healthService
@@ -17,9 +19,14 @@ struct WatchWorkoutView: View {
     @State private var elapsed: Int = 0
     @State private var hasAlerted: Bool = false
 
-    init(session: WatchSession, settings: WatchSettings) {
+    init(session: WatchSession, settings: WatchSettings, onStartNext: ((WatchSession) -> Void)? = nil) {
         self.session = session
+        self.onStartNext = onStartNext
         _viewModel = State(initialValue: WatchWorkoutViewModel(session: session, settings: settings))
+    }
+
+    private var remainingSessions: [WatchSession] {
+        watchConnectivity.sessions.filter { $0.exerciseId != session.exerciseId }
     }
 
     var body: some View {
@@ -67,14 +74,18 @@ struct WatchWorkoutView: View {
             case .complete:
                 WatchExerciseCompleteView(
                     exerciseName: session.exerciseName,
-                    totalReps: viewModel.totalReps
-                ) {
+                    totalReps: viewModel.totalReps,
+                    remainingSessions: remainingSessions
+                ) { nextSession in
                     // Capture once — completionReport is computed and includes .now timestamp
                     let report = viewModel.completionReport
                     Task {
                         historyStore.record(report, exerciseName: session.exerciseName)
                         watchConnectivity.sendCompletionReport(report)
                         await healthService.endWorkout()
+                        if let nextSession {
+                            onStartNext?(nextSession)
+                        }
                         dismiss()
                     }
                 }

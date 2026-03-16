@@ -9,6 +9,7 @@ struct WorkoutSessionView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(HealthKitService.self) private var healthKit
     @Environment(MotionRecordingService.self) private var motionRecording
+    @Environment(DataUploadService.self) private var dataUpload
     @Environment(NotificationService.self) private var notifications
 
     @Query private var allSettings: [UserSettings]
@@ -17,10 +18,20 @@ struct WorkoutSessionView: View {
 
     @State private var viewModel: WorkoutViewModel
     @State private var pendingRecordingURL: URL?
+    @State private var realTimeSetStartDate: Date?
+    @State private var showingQuitConfirm = false
 
     init(enrolmentId: PersistentIdentifier) {
         self.enrolmentId = enrolmentId
         _viewModel = State(initialValue: WorkoutViewModel(enrolmentId: enrolmentId))
+    }
+
+    private var shouldWarnOnBack: Bool {
+        switch viewModel.phase {
+        case .loading, .complete: false
+        case .inSet: true
+        default: viewModel.currentSetIndex > 0
+        }
     }
 
     var body: some View {
@@ -36,16 +47,20 @@ struct WorkoutSessionView: View {
                 PostSetConfirmationView(targetReps: targetReps, duration: duration) { actual in
                     let url = pendingRecordingURL
                     pendingRecordingURL = nil
-                    viewModel.confirmSet(actual: actual, context: modelContext, recordingURL: url)
+                    viewModel.confirmSet(actual: actual, context: modelContext, recordingURL: url, duration: duration)
                 }
             case .resting(let seconds):
-                RestTimerView(totalSeconds: seconds) {
+                RestTimerView(
+                    totalSeconds: seconds,
+                    nextSetReps: viewModel.prescription?.sets[safe: viewModel.currentSetIndex]
+                ) {
                     viewModel.finishRest()
                 }
             case .complete:
                 ExerciseCompleteView(
                     exerciseName: viewModel.exerciseName,
                     totalReps: viewModel.sessionTotalReps,
+                    previousSessionReps: viewModel.previousSessionReps,
                     nextDate: viewModel.enrolment?.nextScheduledDate,
                     onDone: { dismiss() }
                 )
@@ -54,6 +69,31 @@ struct WorkoutSessionView: View {
         .navigationTitle(viewModel.exerciseName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .tabBar)
+        .navigationBarBackButtonHidden(shouldWarnOnBack)
+        .toolbar {
+            if shouldWarnOnBack {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        showingQuitConfirm = true
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "chevron.left")
+                            Text("Back")
+                        }
+                    }
+                }
+            }
+        }
+        .confirmationDialog(
+            "Quit workout?",
+            isPresented: $showingQuitConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Quit Workout", role: .destructive) { dismiss() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Your progress so far won't be saved.")
+        }
         .task {
             viewModel.load(context: modelContext)
             await healthKit.requestAuthorization()
@@ -70,6 +110,7 @@ struct WorkoutSessionView: View {
                     pendingRecordingURL = motionRecording.stopRecording()
                 }
             case .complete:
+                dataUpload.scheduleBGUpload()
                 let start = viewModel.sessionDate
                 let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
                 Task {
@@ -124,7 +165,18 @@ struct WorkoutSessionView: View {
                 RealTimeCountingView(
                     targetReps: viewModel.currentTargetReps
                 ) { actual in
-                    viewModel.completeRealTimeSet(actual: actual, context: modelContext)
+                    let url = sensorConsented ? motionRecording.stopRecording() : nil
+                    let duration = realTimeSetStartDate.map { Date.now.timeIntervalSince($0) } ?? 0
+                    realTimeSetStartDate = nil
+                    viewModel.completeRealTimeSet(actual: actual, context: modelContext, recordingURL: url, duration: duration)
+                }
+                .id(viewModel.currentSetIndex)
+                .onAppear {
+                    if sensorConsented {
+                        realTimeSetStartDate = .now
+                        let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
+                        motionRecording.startRecording(exerciseId: exerciseId, setNumber: viewModel.currentSetIndex + 1)
+                    }
                 }
             } else {
                 Button("Start Set \(viewModel.currentSetIndex + 1)") {

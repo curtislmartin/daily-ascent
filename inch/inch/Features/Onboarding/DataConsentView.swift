@@ -3,25 +3,23 @@ import SwiftData
 import InchShared
 
 struct DataConsentView: View {
-    @Environment(\.modelContext) private var modelContext
+    let onComplete: (Bool) -> Void
 
-    @State private var consented = false
+    @State private var consented = true
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    explanationSection
-                    localRecordingNote
-                    consentToggle
-                    continueButton
-                }
-                .padding(.horizontal)
-                .padding(.bottom, 32)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                explanationSection
+                localRecordingNote
+                consentToggle
+                continueButton
             }
-            .navigationTitle("Sensor Data")
-            .navigationBarTitleDisplayMode(.large)
+            .padding(.horizontal)
+            .padding(.bottom, 32)
         }
+        .navigationTitle("Sensor Data")
+        .navigationBarTitleDisplayMode(.large)
     }
 
     private var explanationSection: some View {
@@ -68,7 +66,7 @@ struct DataConsentView: View {
 
     private var continueButton: some View {
         Button {
-            saveAndFinish()
+            onComplete(consented)
         } label: {
             Text("Continue")
                 .font(.headline)
@@ -76,18 +74,5 @@ struct DataConsentView: View {
                 .padding(.vertical, 14)
         }
         .buttonStyle(.borderedProminent)
-    }
-
-    private func saveAndFinish() {
-        let settings = UserSettings(
-            motionDataUploadConsented: consented,
-            consentDate: consented ? .now : nil,
-            contributorId: consented ? UUID().uuidString : ""
-        )
-        let streakState = StreakState()
-        modelContext.insert(settings)
-        modelContext.insert(streakState)
-        try? modelContext.save()
-        // RootView's @Query on UserSettings detects the new record and auto-transitions to AppTabView
     }
 }
