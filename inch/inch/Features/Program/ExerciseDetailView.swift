@@ -9,6 +9,7 @@ struct ExerciseDetailView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var enrolment: ExerciseEnrolment?
+    @State private var detailViewModel = ExerciseDetailViewModel()
     @State private var showingUnenrolConfirm = false
     @State private var pendingLevel: Int?
     @State private var pendingDay: Int?
@@ -22,31 +23,31 @@ struct ExerciseDetailView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
-        .task { load() }
-        .confirmationDialog(
+        .task {
+            load()
+            detailViewModel.load(enrolmentId: enrolmentId, context: modelContext)
+        }
+        .alert(
             "Jump to Level \(pendingLevel ?? 0)?",
-            isPresented: Binding(get: { pendingLevel != nil }, set: { if !$0 { pendingLevel = nil } }),
-            titleVisibility: .visible
+            isPresented: Binding(get: { pendingLevel != nil }, set: { if !$0 { pendingLevel = nil } })
         ) {
             Button("Change Level") { applyLevelChange() }
             Button("Cancel", role: .cancel) { pendingLevel = nil }
         } message: {
             Text("Day resets to 1 and you'll train from the start of this level.")
         }
-        .confirmationDialog(
+        .alert(
             "Jump to Day \(pendingDay ?? 0)?",
-            isPresented: Binding(get: { pendingDay != nil }, set: { if !$0 { pendingDay = nil } }),
-            titleVisibility: .visible
+            isPresented: Binding(get: { pendingDay != nil }, set: { if !$0 { pendingDay = nil } })
         ) {
             Button("Change Day") { applyDayChange() }
             Button("Cancel", role: .cancel) { pendingDay = nil }
         } message: {
             Text("Your next session will be Day \(pendingDay ?? 0).")
         }
-        .confirmationDialog(
+        .alert(
             "Unenrol from this exercise?",
-            isPresented: $showingUnenrolConfirm,
-            titleVisibility: .visible
+            isPresented: $showingUnenrolConfirm
         ) {
             Button("Unenrol", role: .destructive) { unenrol() }
             Button("Cancel", role: .cancel) {}
@@ -60,14 +61,29 @@ struct ExerciseDetailView: View {
         let levelDef = def?.levels?.first(where: { $0.level == enrolment.currentLevel })
         let days = levelDef?.days?.sorted(by: { $0.dayNumber < $1.dayNumber }) ?? []
 
+        let accentColor = Color(hex: def?.color ?? "") ?? .accentColor
+
         return List {
             levelProgressSection(enrolment: enrolment)
 
+            if !detailViewModel.sessionHistory.isEmpty {
+                Section("History") {
+                    SessionHistoryChart(
+                        history: detailViewModel.sessionHistory,
+                        testTarget: detailViewModel.testTarget,
+                        accentColor: accentColor
+                    )
+                    .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
+                }
+            }
+
             Section("Level \(enrolment.currentLevel) — \(days.count) days") {
                 ForEach(days, id: \.dayNumber) { day in
+                    let scheduled = detailViewModel.upcomingSchedule.first(where: { $0.dayNumber == day.dayNumber })?.scheduledDate
                     DayRow(
                         day: day,
-                        status: dayStatus(day: day, enrolment: enrolment)
+                        status: dayStatus(day: day, enrolment: enrolment),
+                        scheduledDate: scheduled
                     ) {
                         if day.dayNumber != enrolment.currentDay {
                             pendingDay = day.dayNumber
@@ -182,6 +198,7 @@ private enum DayStatus { case completed, current, upcoming }
 private struct DayRow: View {
     let day: DayPrescription
     let status: DayStatus
+    var scheduledDate: Date? = nil
     let onTap: () -> Void
 
     var body: some View {
@@ -210,6 +227,11 @@ private struct DayRow: View {
                     }
                 }
                 Spacer()
+                if let date = scheduledDate {
+                    Text(date, format: .dateTime.weekday(.abbreviated).month(.abbreviated).day())
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
         .buttonStyle(.plain)
