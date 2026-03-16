@@ -3,8 +3,7 @@ import InchShared
 
 struct WatchTodayView: View {
     @Environment(WatchConnectivityService.self) private var watchConnectivity
-    // Note: settings is NOT read here — WatchWorkoutView.init gains settings: in Task 8.
-    // At Task 6 time, WatchWorkoutView still uses init(session:) — updated in Task 8.
+    @Environment(WatchSettings.self) private var settings
 
     @State private var activeSession: WatchSession?
 
@@ -32,7 +31,7 @@ struct WatchTodayView: View {
                 }
             }
             .sheet(item: $activeSession) { session in
-                WatchWorkoutView(session: session)  // updated to session:settings: in Task 8
+                WatchWorkoutView(session: session, settings: settings)
             }
         }
     }
