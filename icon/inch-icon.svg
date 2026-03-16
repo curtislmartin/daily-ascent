@@ -1,0 +1,13 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1024" height="1024" fill="#1A1040"/>
+
+  <!-- Arc: sweeps from bottom-left to top-right, clockwise, bowing upward -->
+  <path
+    d="M 220 750 A 390 390 0 0 1 780 280"
+    fill="none"
+    stroke="#F0EEF8"
+    stroke-width="88"
+    stroke-linecap="round"
+  />
+</svg>
