@@ -53,3 +53,19 @@ All sizes are generated from the SVG source:
 2. Export all PNG sizes using `rsvg-convert` or `sips`
 3. Replace files in `inch/inch/Assets.xcassets/AppIcon.appiconset/`
 4. Verify in Xcode that all slots are filled
+
+---
+
+## Rejected / Parked Alternatives
+
+These were proposed during brainstorming but not pursued. Revisit if the arc design doesn't work out.
+
+### Option 2 — Stacked Bars on Forest Green
+Three progressively taller vertical bars — minimal, abstract, reads as both progress and strength.
+- Background: deep forest `#0D3B2E`
+- Bars: near-white, equal spacing, heights roughly 50% / 70% / 90% of canvas
+
+### Option 3 — Diamond on Rich Black
+A solid geometric diamond (rotated square) with a fine inner cut. Premium feel, zero fitness cliché.
+- Background: `#0A0A0F`
+- Shape: electric blue `#4F7CFF` or warm gold `#E8B84B`
