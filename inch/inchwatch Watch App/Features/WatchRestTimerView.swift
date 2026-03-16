@@ -6,6 +6,7 @@ struct WatchRestTimerView: View {
     let onSkip: () -> Void
 
     @Environment(WatchSettings.self) private var settings
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var remaining: Int
     @State private var tenSecondHapticFired = false
@@ -25,12 +26,12 @@ struct WatchRestTimerView: View {
         VStack(spacing: 8) {
             ZStack {
                 Circle()
-                    .stroke(Color.secondary.opacity(0.3), lineWidth: 4)
+                    .stroke(.quaternary, lineWidth: 4)
                 Circle()
                     .trim(from: 0, to: progress)
                     .stroke(Color.accentColor, style: StrokeStyle(lineWidth: 4, lineCap: .round))
                     .rotationEffect(.degrees(-90))
-                    .animation(.linear(duration: 1), value: progress)
+                    .animation(reduceMotion ? .none : .linear(duration: 1), value: progress)
 
                 Text("\(remaining)")
                     .font(.system(size: 36, weight: .semibold, design: .monospaced))

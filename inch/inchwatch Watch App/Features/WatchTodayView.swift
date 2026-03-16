@@ -9,7 +9,7 @@ struct WatchTodayView: View {
 
     var body: some View {
         if watchConnectivity.sessions.isEmpty {
-            restDayView
+            WatchRestDayView(lastSyncDate: watchConnectivity.lastSyncDate)
         } else {
             List(watchConnectivity.sessions) { session in
                 Button {
@@ -24,7 +24,7 @@ struct WatchTodayView: View {
                         if session.isTest {
                             Text("TEST DAY")
                                 .font(.caption2)
-                                .fontWeight(.bold)
+                                .bold()
                                 .foregroundStyle(.orange)
                         }
                     }
@@ -32,21 +32,6 @@ struct WatchTodayView: View {
             }
             .sheet(item: $activeSession) { session in
                 WatchWorkoutView(session: session, settings: settings)
-            }
-        }
-    }
-
-    private var restDayView: some View {
-        VStack(spacing: 8) {
-            Image(systemName: "moon.fill")
-                .font(.largeTitle)
-                .foregroundStyle(.secondary)
-            Text("Rest Day")
-                .font(.headline)
-            if let syncDate = watchConnectivity.lastSyncDate {
-                Text("Synced \(syncDate.formatted(.relative(presentation: .named)))")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
             }
         }
     }

@@ -16,12 +16,12 @@ struct WatchHistoryDetailView: View {
                 HStack {
                     Text("Total reps").font(.caption).foregroundStyle(.secondary)
                     Spacer()
-                    Text("\(entry.totalReps)").font(.caption).fontWeight(.bold)
+                    Text("\(entry.totalReps)").font(.caption).bold()
                 }
                 HStack {
                     Text("Sets").font(.caption).foregroundStyle(.secondary)
                     Spacer()
-                    Text("\(entry.setCount)").font(.caption).fontWeight(.semibold)
+                    Text("\(entry.setCount)").font(.caption)
                 }
                 Divider()
                 Text(entry.completedAt.formatted(.dateTime.month().day().hour().minute()))

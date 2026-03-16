@@ -7,7 +7,11 @@ struct WatchHistoryView: View {
 
     var body: some View {
         if historyStore.entries.isEmpty {
-            emptyState
+            ContentUnavailableView(
+                "No workouts yet",
+                systemImage: "clock.arrow.circlepath",
+                description: Text("Complete one from the Today tab.")
+            )
         } else {
             List {
                 ForEach(groupedEntries, id: \.0) { sectionTitle, entries in
@@ -16,44 +20,14 @@ struct WatchHistoryView: View {
                             Button {
                                 selectedEntry = entry
                             } label: {
-                                historyRow(entry)
+                                WatchHistoryRow(entry: entry)
                             }
                         }
                     }
                 }
             }
             .navigationTitle("History")
-            .sheet(item: $selectedEntry) { entry in
-                WatchHistoryDetailView(entry: entry)
-            }
-        }
-    }
-
-    private var emptyState: some View {
-        VStack(spacing: 8) {
-            Image(systemName: "clock.arrow.circlepath")
-                .font(.largeTitle)
-                .foregroundStyle(.secondary)
-            Text("No workouts yet")
-                .font(.headline)
-            Text("Complete one from the Today tab.")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .padding()
-    }
-
-    private func historyRow(_ entry: WatchHistoryEntry) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(entry.exerciseName)
-                .font(.headline)
-            Text("\(entry.totalReps) reps · \(entry.setCount) sets")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            Text(entry.completedAt.formatted(.relative(presentation: .named)))
-                .font(.caption2)
-                .foregroundStyle(.tertiary)
+            .sheet(item: $selectedEntry, content: WatchHistoryDetailView.init)
         }
     }
 
