@@ -46,6 +46,7 @@ struct WatchRestTimerView: View {
                 .buttonStyle(.bordered)
                 .font(.caption)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .navigationTitle("Rest")
         .navigationBarTitleDisplayMode(.inline)
         .task {
