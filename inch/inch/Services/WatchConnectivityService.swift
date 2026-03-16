@@ -178,7 +178,7 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
               let exerciseId = raw["exerciseId"] as? String, !exerciseId.isEmpty
         else { return }
 
-        let attrs = try? FileManager.default.attributesOfItem(atPath: dest.path)
+        let attrs = try? FileManager.default.attributesOfItem(atPath: dest.path(percentEncoded: false))
         let size = (attrs?[.size] as? Int) ?? 0
         let meta = WatchSensorMetadata(
             exerciseId: exerciseId,
