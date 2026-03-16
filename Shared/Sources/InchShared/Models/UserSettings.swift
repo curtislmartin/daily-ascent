@@ -21,6 +21,8 @@ public final class UserSettings {
     public var streakProtectionMinute: Int = 0
     public var showConflictWarnings: Bool = true
 
+    public var appearanceMode: String = "system"
+
     public var motionDataUploadConsented: Bool = false
     public var consentDate: Date? = nil
     public var contributorId: String = ""
@@ -29,6 +31,12 @@ public final class UserSettings {
     public var heightRange: String? = nil
     public var biologicalSex: String? = nil
     public var activityLevel: String? = nil
+    public var onboardingComplete: Bool = false
+
+    public var hasDemographics: Bool {
+        ageRange != nil && heightRange != nil &&
+        biologicalSex != nil && activityLevel != nil
+    }
 
     public init(
         createdAt: Date = Date.now,
@@ -51,7 +59,8 @@ public final class UserSettings {
         ageRange: String? = nil,
         heightRange: String? = nil,
         biologicalSex: String? = nil,
-        activityLevel: String? = nil
+        activityLevel: String? = nil,
+        onboardingComplete: Bool = false
     ) {
         self.createdAt = createdAt
         self.restOverrides = restOverrides
@@ -74,5 +83,6 @@ public final class UserSettings {
         self.heightRange = heightRange
         self.biologicalSex = biologicalSex
         self.activityLevel = activityLevel
+        self.onboardingComplete = onboardingComplete
     }
 }
