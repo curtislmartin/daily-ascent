@@ -16,21 +16,26 @@ struct WatchTodayView: View {
                 Button {
                     activeSession = session
                 } label: {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(session.exerciseName)
-                            .font(.headline)
-                        Text("Level \(session.level) · Day \(session.dayNumber)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        if session.isTest {
-                            Text("TEST DAY")
-                                .font(.caption2)
-                                .bold()
-                                .foregroundStyle(.orange)
+                    HStack(alignment: .center, spacing: 8) {
+                        Image(systemName: exerciseIcon(for: session.exerciseId))
+                            .font(.title3)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(session.exerciseName)
+                                .font(.headline)
+                            Text("Level \(session.level) · Day \(session.dayNumber)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            if session.isTest {
+                                Text("TEST DAY")
+                                    .font(.caption2)
+                                    .bold()
+                                    .foregroundStyle(.orange)
+                            }
                         }
                     }
                 }
             }
+            .navigationTitle("Today")
             .sheet(item: $activeSession) { session in
                 WatchWorkoutView(session: session, settings: settings) { next in
                     pendingNextSession = next
@@ -42,6 +47,18 @@ struct WatchTodayView: View {
                 pendingNextSession = nil
                 activeSession = next
             }
+        }
+    }
+
+    private func exerciseIcon(for exerciseId: String) -> String {
+        switch exerciseId {
+        case "push_ups": return "figure.strengthtraining.traditional"
+        case "squats": return "figure.gymnastics"
+        case "sit_ups": return "figure.core.training"
+        case "pull_ups": return "figure.highintensity.intervaltraining"
+        case "glute_bridges": return "figure.flexibility"
+        case "dead_bugs": return "figure.cooldown"
+        default: return "figure.strengthtraining.functional"
         }
     }
 }
