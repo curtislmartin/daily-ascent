@@ -6,6 +6,7 @@ struct PrivacySettingsView: View {
     @Environment(\.modelContext) private var modelContext
     var viewModel: SettingsViewModel
 
+    @State private var showingDeleteHistoryConfirm = false
     @State private var showingResetConfirm = false
 
     private var settings: UserSettings? { viewModel.settings }
@@ -14,10 +15,35 @@ struct PrivacySettingsView: View {
         List {
             consentSection
             contributorSection
+            dataSection
         }
         .listStyle(.insetGrouped)
         .navigationTitle("Data & Privacy")
         .navigationBarTitleDisplayMode(.inline)
+        .confirmationDialog(
+            "Delete all workout history?",
+            isPresented: $showingDeleteHistoryConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Delete History", role: .destructive) {
+                viewModel.deleteHistory(context: modelContext)
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("All completed sets and session records will be permanently deleted. Your programme progress is kept.")
+        }
+        .confirmationDialog(
+            "Reset app to onboarding?",
+            isPresented: $showingResetConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Reset Everything", role: .destructive) {
+                viewModel.resetToOnboarding(context: modelContext)
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("All progress, history, and settings will be permanently deleted. You'll go through onboarding again.")
+        }
     }
 
     private var consentSection: some View {
@@ -45,6 +71,17 @@ struct PrivacySettingsView: View {
         }
     }
 
+    private var dataSection: some View {
+        Section("Data") {
+            Button("Delete Workout History", role: .destructive) {
+                showingDeleteHistoryConfirm = true
+            }
+            Button("Reset App", role: .destructive) {
+                showingResetConfirm = true
+            }
+        }
+    }
+
     private var contributorSection: some View {
         Section("Contributor") {
             if let id = settings?.contributorId, !id.isEmpty {
@@ -54,23 +91,6 @@ struct PrivacySettingsView: View {
                         .foregroundStyle(.secondary)
                         .monospaced()
                 }
-            }
-
-            Button("Reset Contributor ID", role: .destructive) {
-                showingResetConfirm = true
-            }
-            .confirmationDialog(
-                "Reset Contributor ID?",
-                isPresented: $showingResetConfirm,
-                titleVisibility: .visible
-            ) {
-                Button("Reset", role: .destructive) {
-                    settings?.contributorId = UUID().uuidString
-                    try? modelContext.save()
-                }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("A new anonymous ID will be generated. Previously contributed data remains anonymous and cannot be linked to the new ID.")
             }
         }
     }
