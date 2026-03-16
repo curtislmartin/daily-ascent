@@ -13,10 +13,7 @@ struct SettingsView: View {
             if let s = viewModel.settings { AppearanceSectionView(settings: s) }
             workoutSection
             if let settings = viewModel.settings {
-                NotificationsSettingsSection(
-                    settings: settings,
-                    isAuthorized: notifications.isAuthorized
-                )
+                NotificationsSettingsSection(settings: settings)
                 ScheduleSettingsSection(settings: settings)
             }
             privacySection

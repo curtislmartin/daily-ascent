@@ -6,6 +6,7 @@ import InchShared
 @Observable
 final class NotificationService {
     var isAuthorized: Bool = false
+    var authorizationStatus: UNAuthorizationStatus = .notDetermined
 
     // MARK: - Permission
 
@@ -13,13 +14,15 @@ final class NotificationService {
     /// UNUserNotificationCenter shows the system prompt only once.
     func requestPermission() async {
         let center = UNUserNotificationCenter.current()
-        let granted = (try? await center.requestAuthorization(options: [.alert, .sound, .badge])) ?? false
-        isAuthorized = granted
+        _ = try? await center.requestAuthorization(options: [.alert, .sound, .badge])
+        // Read back the real status rather than inferring from the Bool return value.
+        await checkAuthorizationStatus()
     }
 
     func checkAuthorizationStatus() async {
         let settings = await UNUserNotificationCenter.current().notificationSettings()
         isAuthorized = settings.authorizationStatus == .authorized
+        authorizationStatus = settings.authorizationStatus
     }
 
     // MARK: - Schedule Refresh
@@ -41,11 +44,11 @@ final class NotificationService {
         let streak = fetchStreakState(context: context)?.currentStreak ?? 0
         let schedule = buildSchedule(from: enrolments)
 
-        for (date, exerciseNames) in schedule {
+        for (date, scheduledDay) in schedule {
             if settings.dailyReminderEnabled {
                 scheduleDailyReminder(
                     for: date,
-                    exercises: exerciseNames,
+                    scheduledDay: scheduledDay,
                     hour: settings.dailyReminderHour,
                     minute: settings.dailyReminderMinute
                 )
@@ -53,7 +56,7 @@ final class NotificationService {
             if settings.streakProtectionEnabled {
                 scheduleStreakProtection(
                     for: date,
-                    exerciseCount: exerciseNames.count,
+                    exerciseCount: scheduledDay.exerciseNames.count,
                     streak: streak,
                     hour: settings.streakProtectionHour,
                     minute: settings.streakProtectionMinute
@@ -103,26 +106,46 @@ final class NotificationService {
 
     // MARK: - Private
 
-    private func buildSchedule(from enrolments: [ExerciseEnrolment]) -> [Date: [String]] {
+    private struct ScheduledDay {
+        var exerciseNames: [String] = []
+        var hasTestDay: Bool = false
+    }
+
+    private func buildSchedule(from enrolments: [ExerciseEnrolment]) -> [Date: ScheduledDay] {
         let today = Calendar.current.startOfDay(for: .now)
         guard let weekOut = Calendar.current.date(byAdding: .day, value: 7, to: today) else { return [:] }
-        var schedule: [Date: [String]] = [:]
+        var schedule: [Date: ScheduledDay] = [:]
         for enrolment in enrolments {
             guard let scheduled = enrolment.nextScheduledDate else { continue }
             let day = Calendar.current.startOfDay(for: scheduled)
             guard day >= today, day <= weekOut else { continue }
             let name = enrolment.exerciseDefinition?.name ?? "Exercise"
-            schedule[day, default: []].append(name)
+            let isTest = enrolment.exerciseDefinition?
+                .levels?
+                .first(where: { $0.level == enrolment.currentLevel })?
+                .days?
+                .first(where: { $0.dayNumber == enrolment.currentDay })?
+                .isTest ?? false
+            schedule[day, default: ScheduledDay()].exerciseNames.append(name)
+            if isTest { schedule[day]?.hasTestDay = true }
         }
         return schedule
     }
 
-    private func scheduleDailyReminder(for date: Date, exercises: [String], hour: Int, minute: Int) {
+    private func scheduleDailyReminder(for date: Date, scheduledDay: ScheduledDay, hour: Int, minute: Int) {
+        let exercises = scheduledDay.exerciseNames
         let content = UNMutableNotificationContent()
-        content.title = "Time to train"
-        content.body = exercises.count == 1
-            ? exercises[0]
-            : "\(exercises.count) exercises today — \(exercises.joined(separator: ", "))"
+        if scheduledDay.hasTestDay {
+            content.title = "Test day"
+            content.body = exercises.count == 1
+                ? "\(exercises[0]) — max reps today"
+                : "Max rep tests: \(exercises.joined(separator: ", "))"
+        } else {
+            content.title = "Time to train"
+            content.body = exercises.count == 1
+                ? exercises[0]
+                : "\(exercises.count) exercises today — \(exercises.joined(separator: ", "))"
+        }
         content.sound = .default
         var components = Calendar.current.dateComponents([.year, .month, .day], from: date)
         components.hour = hour

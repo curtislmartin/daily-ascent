@@ -1,71 +1,81 @@
 import SwiftUI
+import UserNotifications
 import InchShared
 
 struct NotificationsSettingsSection: View {
     @Bindable var settings: UserSettings
     @Environment(\.openURL) private var openURL
-    let isAuthorized: Bool
+    @Environment(NotificationService.self) private var notifications
 
     var body: some View {
-        if isAuthorized {
-            Section("Notifications") {
-                Toggle("Daily Reminder", isOn: $settings.dailyReminderEnabled)
-                if settings.dailyReminderEnabled {
-                    DatePicker(
-                        "Reminder time",
-                        selection: dailyReminderBinding,
-                        displayedComponents: .hourAndMinute
-                    )
-                }
-
-                Toggle("Streak Protection", isOn: $settings.streakProtectionEnabled)
-                if settings.streakProtectionEnabled {
-                    DatePicker(
-                        "Protection time",
-                        selection: streakProtectionBinding,
-                        displayedComponents: .hourAndMinute
-                    )
-                }
-
-                Toggle("Level Unlock Alerts", isOn: $settings.levelUnlockNotificationEnabled)
-            }
-        } else {
-            Section("Notifications") {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Notifications are disabled")
-                        .font(.subheadline)
-                    Text("Enable in Settings → Notifications → Inch")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Button("Open Settings") {
-                        // "App-Prefs:NOTIFICATIONS" is the iOS 16+ deep-link to the app's
-                        // notification settings. UIApplication.openNotificationSettingsURLString
-                        // is UIKit (banned) so we use the string literal directly.
-                        if let url = URL(string: "App-Prefs:NOTIFICATIONS") {
-                            openURL(url)
-                        }
+        Group {
+            if notifications.isAuthorized {
+                Section("Notifications") {
+                    Toggle("Daily Reminder", isOn: $settings.dailyReminderEnabled)
+                    if settings.dailyReminderEnabled {
+                        DatePicker(
+                            "Reminder time",
+                            selection: dailyReminderBinding,
+                            displayedComponents: .hourAndMinute
+                        )
                     }
-                    .font(.caption)
+
+                    Toggle("Streak Protection", isOn: $settings.streakProtectionEnabled)
+                    if settings.streakProtectionEnabled {
+                        DatePicker(
+                            "Reminder time",
+                            selection: streakProtectionBinding,
+                            displayedComponents: .hourAndMinute
+                        )
+                    }
+
+                    Toggle("Level Unlock Alerts", isOn: $settings.levelUnlockNotificationEnabled)
                 }
-                .padding(.vertical, 4)
+            } else if notifications.authorizationStatus == .notDetermined {
+                Section("Notifications") {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Allow notifications to get workout reminders and streak alerts.")
+                            .font(.subheadline)
+                        Button("Enable Notifications") {
+                            Task { await notifications.requestPermission() }
+                        }
+                        .font(.subheadline)
+                    }
+                    .padding(.vertical, 4)
+                }
+            } else {
+                Section("Notifications") {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Notifications are disabled")
+                            .font(.subheadline)
+                        Text("Enable in Settings → Notifications → Inch")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Button("Open Settings") {
+                            // "App-Prefs:NOTIFICATIONS" is the iOS 16+ deep-link to the app's
+                            // notification settings. UIApplication.openNotificationSettingsURLString
+                            // is UIKit (banned) so we use the string literal directly.
+                            if let url = URL(string: "App-Prefs:NOTIFICATIONS") {
+                                openURL(url)
+                            }
+                        }
+                        .font(.caption)
+                    }
+                    .padding(.vertical, 4)
+                }
             }
         }
+        .task { await notifications.checkAuthorizationStatus() }
     }
 
     // MARK: - Private
 
     private var dailyReminderBinding: Binding<Date> {
-        timeBinding(
-            hour: $settings.dailyReminderHour,
-            minute: $settings.dailyReminderMinute
-        )
+        timeBinding(hour: $settings.dailyReminderHour, minute: $settings.dailyReminderMinute)
     }
 
     private var streakProtectionBinding: Binding<Date> {
-        timeBinding(
-            hour: $settings.streakProtectionHour,
-            minute: $settings.streakProtectionMinute
-        )
+        timeBinding(hour: $settings.streakProtectionHour, minute: $settings.streakProtectionMinute)
     }
 
     private func timeBinding(hour: Binding<Int>, minute: Binding<Int>) -> Binding<Date> {
