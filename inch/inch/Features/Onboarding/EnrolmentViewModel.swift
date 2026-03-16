@@ -54,7 +54,14 @@ final class EnrolmentViewModel {
     /// Creates ExerciseEnrolment records and saves. Does NOT create UserSettings.
     /// UserSettings is created after data consent to trigger the RootView transition.
     func saveEnrolments(from definitions: [ExerciseDefinition], context: ModelContext) throws {
-        let selected = definitions.filter { selectedExerciseIds.contains($0.exerciseId) }
+        let existing = (try? context.fetch(FetchDescriptor<ExerciseEnrolment>(
+            predicate: #Predicate { $0.isActive }
+        ))) ?? []
+        let existingIds = Set(existing.compactMap { $0.exerciseDefinition?.exerciseId })
+
+        let selected = definitions.filter {
+            selectedExerciseIds.contains($0.exerciseId) && !existingIds.contains($0.exerciseId)
+        }
         for definition in selected {
             let chosenLevel = levelChoices[definition.exerciseId] ?? 1
             let enrolment = ExerciseEnrolment(enrolledAt: startDate, currentLevel: chosenLevel)
