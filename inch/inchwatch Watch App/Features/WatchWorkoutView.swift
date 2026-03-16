@@ -1,4 +1,6 @@
+// inch/inchwatch Watch App/Features/WatchWorkoutView.swift
 import SwiftUI
+import WatchKit
 import InchShared
 
 struct WatchWorkoutView: View {
@@ -6,16 +8,18 @@ struct WatchWorkoutView: View {
 
     @Environment(WatchConnectivityService.self) private var watchConnectivity
     @Environment(WatchMotionRecordingService.self) private var motionRecording
-    @Environment(WatchSettings.self) private var settings
+    @Environment(WatchHealthService.self) private var healthService
+    @Environment(WatchHistoryStore.self) private var historyStore
     @Environment(\.dismiss) private var dismiss
+
     @State private var viewModel: WatchWorkoutViewModel
     @State private var setStartDate: Date = .now
     @State private var elapsed: Int = 0
+    @State private var hasAlerted: Bool = false
 
-    init(session: WatchSession) {
+    init(session: WatchSession, settings: WatchSettings) {
         self.session = session
-        let defaultSettings = WatchSettings()
-        _viewModel = State(initialValue: WatchWorkoutViewModel(session: session, settings: defaultSettings))
+        _viewModel = State(initialValue: WatchWorkoutViewModel(session: session, settings: settings))
     }
 
     var body: some View {
@@ -32,6 +36,7 @@ struct WatchWorkoutView: View {
                     ) { count in
                         viewModel.endSetRealTime(count: count)
                     }
+                    .overlay(alignment: .topTrailing) { hrBadge }
                 } else {
                     inSetView
                 }
@@ -52,8 +57,12 @@ struct WatchWorkoutView: View {
                     exerciseName: session.exerciseName,
                     totalReps: viewModel.totalReps
                 ) {
-                    watchConnectivity.sendCompletionReport(viewModel.completionReport)
-                    dismiss()
+                    Task {
+                        historyStore.record(viewModel.completionReport, exerciseName: session.exerciseName)
+                        watchConnectivity.sendCompletionReport(viewModel.completionReport)
+                        await healthService.endWorkout()
+                        dismiss()
+                    }
                 }
             }
         }
@@ -62,6 +71,9 @@ struct WatchWorkoutView: View {
         .onChange(of: viewModel.phase) { _, newPhase in
             switch newPhase {
             case .inSet:
+                // Reset elapsed timer — covers both manual Start and auto-advance after rest
+                setStartDate = .now
+                elapsed = 0
                 motionRecording.startRecording(exerciseId: session.exerciseId, setNumber: viewModel.currentSet)
             case .confirming:
                 if motionRecording.isRecording {
@@ -70,6 +82,28 @@ struct WatchWorkoutView: View {
             default:
                 break
             }
+        }
+        .onChange(of: healthService.currentBPM) { _, bpm in
+            guard let bpm else {
+                hasAlerted = false
+                return
+            }
+            let threshold = viewModel.heartRateAlertBPM
+            if threshold > 0 && bpm >= threshold && !hasAlerted {
+                WKInterfaceDevice.current().play(.notification)
+                hasAlerted = true
+            } else if threshold > 0 && bpm < threshold {
+                hasAlerted = false
+            }
+        }
+    }
+
+    @ViewBuilder private var hrBadge: some View {
+        if viewModel.showHeartRate, let bpm = healthService.currentBPM {
+            Text("♥ \(bpm)")
+                .font(.caption2)
+                .foregroundStyle(.red)
+                .padding(4)
         }
     }
 
@@ -91,6 +125,10 @@ struct WatchWorkoutView: View {
                 .foregroundStyle(.secondary)
             Spacer(minLength: 4)
             Button("Start") {
+                // Only call startWorkout() on the first set — guard against duplicate HKWorkoutSession starts
+                if viewModel.completedSets.isEmpty {
+                    Task { await healthService.startWorkout() }
+                }
                 setStartDate = .now
                 elapsed = 0
                 viewModel.startSet()
@@ -125,6 +163,7 @@ struct WatchWorkoutView: View {
         }
         .padding(.horizontal)
         .padding(.top, 8)
+        .overlay(alignment: .topTrailing) { hrBadge }
         .task {
             while true {
                 try? await Task.sleep(for: .seconds(1))
