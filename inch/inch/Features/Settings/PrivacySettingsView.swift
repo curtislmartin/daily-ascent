@@ -21,19 +21,15 @@ struct PrivacySettingsView: View {
             if settings?.motionDataUploadConsented == true {
                 demographicsSection
             }
-            if let id = settings?.contributorId, !id.isEmpty {
-                contributorSection(id: id)
-            }
-            dataSection
+dataSection
         }
         .listStyle(.insetGrouped)
         .navigationTitle("Data & Privacy")
         .navigationBarTitleDisplayMode(.inline)
         .task { viewModel.load(context: modelContext) }
-        .confirmationDialog(
+        .alert(
             "Delete all workout history?",
-            isPresented: $showingDeleteHistoryConfirm,
-            titleVisibility: .visible
+            isPresented: $showingDeleteHistoryConfirm
         ) {
             Button("Delete History", role: .destructive) {
                 viewModel.deleteHistory(context: modelContext)
@@ -42,10 +38,9 @@ struct PrivacySettingsView: View {
         } message: {
             Text("All completed sets and session records will be permanently deleted. Your programme progress is kept.")
         }
-        .confirmationDialog(
+        .alert(
             "Reset app to onboarding?",
-            isPresented: $showingResetConfirm,
-            titleVisibility: .visible
+            isPresented: $showingResetConfirm
         ) {
             Button("Reset Everything", role: .destructive) {
                 viewModel.resetToOnboarding(context: modelContext)
@@ -54,10 +49,9 @@ struct PrivacySettingsView: View {
         } message: {
             Text("All progress, history, and settings will be permanently deleted. You'll go through onboarding again.")
         }
-        .confirmationDialog(
+        .alert(
             "Unlink sensor data?",
-            isPresented: $showingUnlinkConfirm,
-            titleVisibility: .visible
+            isPresented: $showingUnlinkConfirm
         ) {
             Button("Unlink My Data", role: .destructive) {
                 guard let id = settings?.contributorId, !id.isEmpty else { return }
@@ -195,14 +189,4 @@ struct PrivacySettingsView: View {
         }
     }
 
-    private func contributorSection(id: String) -> some View {
-        Section("Contributor") {
-            LabeledContent("Contributor ID") {
-                Text(id.prefix(8) + "…")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .monospaced()
-            }
-        }
-    }
 }
