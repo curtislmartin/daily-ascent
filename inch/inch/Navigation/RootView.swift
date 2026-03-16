@@ -23,5 +23,8 @@ struct RootView: View {
             }
         }
         .preferredColorScheme(preferredColorScheme)
+        .onChange(of: settings) {
+            if settings.isEmpty { onboardingComplete = false }
+        }
     }
 }
