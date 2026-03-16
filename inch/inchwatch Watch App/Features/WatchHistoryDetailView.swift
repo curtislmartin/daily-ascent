@@ -10,13 +10,13 @@ struct WatchHistoryDetailView: View {
                 Text(entry.exerciseName)
                     .font(.headline)
                 Text("Level \(entry.level) · Day \(entry.dayNumber)")
-                    .font(.caption)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
                 Divider()
                 HStack {
                     Text("Total reps").font(.caption).foregroundStyle(.secondary)
                     Spacer()
-                    Text("\(entry.totalReps)").font(.caption).fontWeight(.semibold)
+                    Text("\(entry.totalReps)").font(.caption).fontWeight(.bold)
                 }
                 HStack {
                     Text("Sets").font(.caption).foregroundStyle(.secondary)
