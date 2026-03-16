@@ -44,6 +44,7 @@ struct WatchExerciseCompleteView: View {
                     .buttonStyle(.borderedProminent)
                     .padding(.top, 4)
             }
+            .frame(maxWidth: .infinity, minHeight: 160)
             .padding(.vertical)
         }
         .navigationBarBackButtonHidden()

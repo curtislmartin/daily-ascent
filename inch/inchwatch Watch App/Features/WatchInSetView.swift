@@ -13,6 +13,7 @@ struct WatchInSetView: View {
 
     var body: some View {
         VStack(spacing: 6) {
+            WatchHRBadge(showHeartRate: showHeartRate, currentBPM: currentBPM)
             Text(session.exerciseName)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
@@ -34,9 +35,6 @@ struct WatchInSetView: View {
         }
         .padding(.horizontal)
         .padding(.top, 8)
-        .overlay(alignment: .topTrailing) {
-            WatchHRBadge(showHeartRate: showHeartRate, currentBPM: currentBPM)
-        }
         .task {
             while true {
                 do {
