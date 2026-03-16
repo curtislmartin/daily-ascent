@@ -83,6 +83,7 @@ struct WatchWorkoutView: View {
                         historyStore.record(report, exerciseName: session.exerciseName)
                         watchConnectivity.sendCompletionReport(report)
                         await healthService.endWorkout()
+                        watchConnectivity.removeSession(exerciseId: session.exerciseId)
                         if let nextSession {
                             onStartNext?(nextSession)
                         }

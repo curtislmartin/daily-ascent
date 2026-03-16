@@ -37,6 +37,11 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
         }
     }
 
+    func removeSession(exerciseId: String) {
+        sessions.removeAll { $0.exerciseId == exerciseId }
+        store(sessions)
+    }
+
     func sendCompletionReport(_ report: WatchCompletionReport) {
         guard let wcSession, wcSession.activationState == .activated else { return }
         guard let data = try? JSONEncoder().encode(report) else { return }
@@ -46,6 +51,14 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
     // MARK: - Private
 
     private func loadStoredSessions() {
+        // Prefer the latest application context from the phone
+        if let context = wcSession?.receivedApplicationContext,
+           let data = context["data"] as? Data,
+           let received = try? JSONDecoder().decode([WatchSession].self, from: data) {
+            sessions = received
+            return
+        }
+        // Fall back to locally cached sessions
         guard let data = UserDefaults.standard.data(forKey: sessionsKey),
               let stored = try? JSONDecoder().decode([WatchSession].self, from: data)
         else { return }
@@ -58,6 +71,18 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
     }
 
     // MARK: - WCSessionDelegate
+
+    nonisolated func session(
+        _ session: WCSession,
+        didReceiveApplicationContext applicationContext: [String: Any]
+    ) {
+        guard let type = applicationContext["type"] as? String,
+              type == "schedule",
+              let data = applicationContext["data"] as? Data,
+              let received = try? JSONDecoder().decode([WatchSession].self, from: data)
+        else { return }
+        sessionContinuation.yield(received)
+    }
 
     nonisolated func session(
         _ session: WCSession,
