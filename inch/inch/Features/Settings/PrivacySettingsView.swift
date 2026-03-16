@@ -4,14 +4,10 @@ import InchShared
 
 struct PrivacySettingsView: View {
     @Environment(\.modelContext) private var modelContext
-    @Environment(DataUploadService.self) private var dataUpload
     var viewModel: SettingsViewModel
 
     @State private var showingDeleteHistoryConfirm = false
     @State private var showingResetConfirm = false
-    @State private var showingUnlinkConfirm = false
-    @State private var showingUnlinkError = false
-    @State private var isUnlinking = false
 
     private enum DemographicField: Identifiable {
         case age, height, sex, activity
@@ -96,33 +92,6 @@ struct PrivacySettingsView: View {
         } message: {
             Text("All progress, history, and settings will be permanently deleted. You'll go through onboarding again.")
         }
-        .alert(
-            "Unlink sensor data?",
-            isPresented: $showingUnlinkConfirm
-        ) {
-            Button("Unlink My Data", role: .destructive) {
-                guard let id = settings?.contributorId, !id.isEmpty else { return }
-                isUnlinking = true
-                Task {
-                    do {
-                        try await dataUpload.unlinkContributorData(contributorId: id)
-                        settings?.contributorId = UUID().uuidString.lowercased()
-                        try? modelContext.save()
-                    } catch {
-                        showingUnlinkError = true
-                    }
-                    isUnlinking = false
-                }
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("Your sensor recordings will remain on the server but can no longer be linked to this device. Future uploads will use a new anonymous ID.")
-        }
-        .alert("Couldn't Unlink Data", isPresented: $showingUnlinkError) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("Check your connection and try again.")
-        }
     }
 
     private var demographicsSection: some View {
@@ -184,10 +153,6 @@ struct PrivacySettingsView: View {
             Button("Reset App", role: .destructive) {
                 showingResetConfirm = true
             }
-            Button("Unlink My Sensor Data from Server", role: .destructive) {
-                showingUnlinkConfirm = true
-            }
-            .disabled(isUnlinking || !(settings?.motionDataUploadConsented == true))
         }
     }
 
