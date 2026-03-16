@@ -13,6 +13,13 @@ struct PrivacySettingsView: View {
     @State private var showingUnlinkError = false
     @State private var isUnlinking = false
 
+    private enum DemographicField: Identifiable {
+        case age, height, sex, activity
+        var id: Self { self }
+    }
+
+    @State private var activeDemographicField: DemographicField?
+
     private var settings: UserSettings? { viewModel.settings }
 
     var body: some View {
@@ -20,6 +27,9 @@ struct PrivacySettingsView: View {
             consentSection
             if settings?.motionDataUploadConsented == true {
                 demographicsSection
+                if let id = settings?.contributorId, !id.isEmpty {
+                    contributorSection(id: id)
+                }
             }
             dataSection
         }
@@ -27,6 +37,46 @@ struct PrivacySettingsView: View {
         .navigationTitle("Data & Privacy")
         .navigationBarTitleDisplayMode(.inline)
         .task { viewModel.load(context: modelContext) }
+        .sheet(item: $activeDemographicField) { field in
+            switch field {
+            case .age:
+                DemographicPickerSheet(
+                    title: "Age Range",
+                    options: ["Under 18", "18–29", "30–39", "40–49", "50–59", "60+"],
+                    selection: Binding(
+                        get: { settings?.ageRange },
+                        set: { settings?.ageRange = $0; try? modelContext.save() }
+                    )
+                )
+            case .height:
+                DemographicPickerSheet(
+                    title: "Height",
+                    options: ["Under 160cm", "160–170cm", "171–180cm", "181–190cm", "Over 190cm"],
+                    selection: Binding(
+                        get: { settings?.heightRange },
+                        set: { settings?.heightRange = $0; try? modelContext.save() }
+                    )
+                )
+            case .sex:
+                DemographicPickerSheet(
+                    title: "Biological Sex",
+                    options: ["Male", "Female", "Prefer not to say"],
+                    selection: Binding(
+                        get: { settings?.biologicalSex },
+                        set: { settings?.biologicalSex = $0; try? modelContext.save() }
+                    )
+                )
+            case .activity:
+                DemographicPickerSheet(
+                    title: "Activity Level",
+                    options: ["Beginner", "Intermediate", "Advanced"],
+                    selection: Binding(
+                        get: { settings?.activityLevel },
+                        set: { settings?.activityLevel = $0; try? modelContext.save() }
+                    )
+                )
+            }
+        }
         .alert(
             "Delete all workout history?",
             isPresented: $showingDeleteHistoryConfirm
@@ -80,38 +130,10 @@ struct PrivacySettingsView: View {
 
     private var demographicsSection: some View {
         Section {
-            demographicRow(
-                title: "Age range",
-                options: ["Under 18", "18–29", "30–39", "40–49", "50–59", "60+"],
-                selection: Binding(
-                    get: { settings?.ageRange },
-                    set: { settings?.ageRange = $0; try? modelContext.save() }
-                )
-            )
-            demographicRow(
-                title: "Height",
-                options: ["Under 160cm", "160–170cm", "171–180cm", "181–190cm", "Over 190cm"],
-                selection: Binding(
-                    get: { settings?.heightRange },
-                    set: { settings?.heightRange = $0; try? modelContext.save() }
-                )
-            )
-            demographicRow(
-                title: "Biological sex",
-                options: ["Male", "Female", "Prefer not to say"],
-                selection: Binding(
-                    get: { settings?.biologicalSex },
-                    set: { settings?.biologicalSex = $0; try? modelContext.save() }
-                )
-            )
-            demographicRow(
-                title: "Activity level",
-                options: ["Beginner", "Intermediate", "Advanced"],
-                selection: Binding(
-                    get: { settings?.activityLevel },
-                    set: { settings?.activityLevel = $0; try? modelContext.save() }
-                )
-            )
+            demographicRow(title: "Age range",      value: settings?.ageRange,      field: .age)
+            demographicRow(title: "Height",          value: settings?.heightRange,   field: .height)
+            demographicRow(title: "Biological sex",  value: settings?.biologicalSex, field: .sex)
+            demographicRow(title: "Activity level",  value: settings?.activityLevel, field: .activity)
         } header: {
             Text("Profile")
         } footer: {
@@ -119,34 +141,28 @@ struct PrivacySettingsView: View {
         }
     }
 
-    private func demographicRow(title: String, options: [String], selection: Binding<String?>) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title)
-                .font(.subheadline)
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(options, id: \.self) { option in
-                        Button {
-                            selection.wrappedValue = selection.wrappedValue == option ? nil : option
-                        } label: {
-                            Text(option)
-                                .font(.caption)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(
-                                    selection.wrappedValue == option
-                                        ? Color.accentColor
-                                        : Color.secondary.opacity(0.15),
-                                    in: Capsule()
-                                )
-                                .foregroundStyle(selection.wrappedValue == option ? .white : .primary)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
+    private func demographicRow(title: String, value: String?, field: DemographicField) -> some View {
+        Button {
+            activeDemographicField = field
+        } label: {
+            LabeledContent(title) {
+                Text(value ?? "Not set")
+                    .foregroundStyle(value == nil ? .secondary : .primary)
             }
         }
-        .padding(.vertical, 4)
+        .buttonStyle(.plain)
+        .foregroundStyle(.primary)
+    }
+
+    private func contributorSection(id: String) -> some View {
+        Section("Contributor") {
+            LabeledContent("Contributor ID") {
+                Text(id.prefix(8) + "…")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .monospaced()
+            }
+        }
     }
 
     private var consentSection: some View {
