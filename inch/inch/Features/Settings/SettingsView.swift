@@ -4,34 +4,43 @@ import InchShared
 
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
-    @Environment(\.dismiss) private var dismiss
 
     @State private var viewModel = SettingsViewModel()
     @Environment(NotificationService.self) private var notifications
 
     var body: some View {
-        NavigationStack {
-            List {
-                workoutSection
-                if let settings = viewModel.settings {
-                    NotificationsSettingsSection(
-                        settings: settings,
-                        isAuthorized: notifications.isAuthorized
-                    )
-                    ScheduleSettingsSection(settings: settings)
-                }
-                privacySection
+        List {
+            appearanceSection
+            workoutSection
+            if let settings = viewModel.settings {
+                NotificationsSettingsSection(
+                    settings: settings,
+                    isAuthorized: notifications.isAuthorized
+                )
+                ScheduleSettingsSection(settings: settings)
             }
-            .listStyle(.insetGrouped)
-            .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { dismiss() }
+            privacySection
+        }
+        .listStyle(.insetGrouped)
+        .navigationTitle("Settings")
+        .navigationBarTitleDisplayMode(.inline)
+        .task { viewModel.load(context: modelContext) }
+        .task { await notifications.checkAuthorizationStatus() }
+    }
+
+    private var appearanceSection: some View {
+        Section("Appearance") {
+            if let settings = viewModel.settings {
+                Picker("Theme", selection: Binding(
+                    get: { settings.appearanceMode },
+                    set: { settings.appearanceMode = $0; try? modelContext.save() }
+                )) {
+                    Text("System").tag("system")
+                    Text("Light").tag("light")
+                    Text("Dark").tag("dark")
                 }
+                .pickerStyle(.segmented)
             }
-            .task { viewModel.load(context: modelContext) }
-            .task { await notifications.checkAuthorizationStatus() }
         }
     }
 
@@ -40,27 +49,13 @@ struct SettingsView: View {
             NavigationLink("Rest Timers") {
                 RestTimerSettingsView(viewModel: viewModel)
             }
+            NavigationLink("Tracking Method") {
+                TrackingMethodView(viewModel: viewModel)
+            }
             NavigationLink("Manage Programs") {
                 ManageEnrolmentsView()
             }
-            ForEach(viewModel.enrolments, id: \.persistentModelID) { enrolment in
-                countingModeRow(for: enrolment)
-            }
         }
-    }
-
-    private func countingModeRow(for enrolment: ExerciseEnrolment) -> some View {
-        let mode = viewModel.countingMode(for: enrolment)
-        let name = enrolment.exerciseDefinition?.name ?? "Exercise"
-
-        return Picker(name, selection: Binding(
-            get: { mode },
-            set: { viewModel.setCountingMode($0, for: enrolment, context: modelContext) }
-        )) {
-            Text("Post-set").tag(CountingMode.postSetConfirmation)
-            Text("Real-time").tag(CountingMode.realTime)
-        }
-        .pickerStyle(.menu)
     }
 
     private var privacySection: some View {
