@@ -11,10 +11,16 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
     private let _completionReports: AsyncStream<WatchCompletionReport>.Continuation
     let completionReports: AsyncStream<WatchCompletionReport>
 
+    private let _receivedFiles: AsyncStream<ReceivedSensorFile>.Continuation
+    let receivedFiles: AsyncStream<ReceivedSensorFile>
+
     override init() {
         let (stream, continuation) = AsyncStream<WatchCompletionReport>.makeStream()
         completionReports = stream
         _completionReports = continuation
+        let (filesStream, filesContinuation) = AsyncStream<ReceivedSensorFile>.makeStream()
+        receivedFiles = filesStream
+        _receivedFiles = filesContinuation
         super.init()
     }
 
@@ -30,7 +36,7 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
     func sendSchedule(_ sessions: [WatchSession]) {
         guard let wcSession, wcSession.activationState == .activated else { return }
         guard let data = try? JSONEncoder().encode(sessions) else { return }
-        wcSession.transferUserInfo(["type": "schedule", "data": data])
+        try? wcSession.updateApplicationContext(["type": "schedule", "data": data])
     }
 
     func sendTodaySchedule(enrolments: [ExerciseEnrolment], settings: UserSettings?) {
@@ -72,6 +78,28 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
     func handleCompletionReports(context: ModelContext) async {
         for await report in completionReports {
             applyReport(report, context: context)
+        }
+    }
+
+    func handleReceivedFiles(context: ModelContext) async {
+        for await received in receivedFiles {
+            let meta = received.metadata
+            let recording = SensorRecording(
+                recordedAt: Date(timeIntervalSince1970: meta.recordedAt),
+                device: .appleWatch,
+                exerciseId: meta.exerciseId,
+                level: meta.level,
+                dayNumber: meta.dayNumber,
+                setNumber: meta.setNumber,
+                confirmedReps: meta.confirmedReps,
+                sampleRateHz: meta.sampleRateHz,
+                durationSeconds: meta.durationSeconds,
+                countingMode: meta.countingMode,
+                filePath: received.fileURL.path,
+                fileSizeBytes: received.fileSizeBytes
+            )
+            context.insert(recording)
+            try? context.save()
         }
     }
 
@@ -145,13 +173,39 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
         try? FileManager.default.createDirectory(at: destDir, withIntermediateDirectories: true)
         let dest = destDir.appending(path: file.fileURL.lastPathComponent)
         try? FileManager.default.moveItem(at: file.fileURL, to: dest)
+
+        guard let raw = file.metadata,
+              let exerciseId = raw["exerciseId"] as? String, !exerciseId.isEmpty
+        else { return }
+
+        let attrs = try? FileManager.default.attributesOfItem(atPath: dest.path)
+        let size = (attrs?[.size] as? Int) ?? 0
+        let meta = WatchSensorMetadata(
+            exerciseId: exerciseId,
+            setNumber: raw["setNumber"] as? Int ?? 0,
+            device: raw["device"] as? String ?? SensorDevice.appleWatch.rawValue,
+            level: raw["level"] as? Int ?? 0,
+            dayNumber: raw["dayNumber"] as? Int ?? 0,
+            confirmedReps: raw["confirmedReps"] as? Int ?? 0,
+            durationSeconds: raw["durationSeconds"] as? Double ?? 0,
+            countingMode: raw["countingMode"] as? String ?? "",
+            sampleRateHz: raw["sampleRateHz"] as? Int ?? 50,
+            recordedAt: raw["recordedAt"] as? Double ?? Date.now.timeIntervalSince1970
+        )
+        _receivedFiles.yield(ReceivedSensorFile(fileURL: dest, metadata: meta, fileSizeBytes: size))
     }
 
     nonisolated func session(
         _ session: WCSession,
         activationDidCompleteWith activationState: WCSessionActivationState,
         error: Error?
-    ) {}
+    ) {
+        // Re-push the last known schedule so the watch gets it on activation
+        if activationState == .activated,
+           let existing = session.applicationContext["data"] {
+            try? session.updateApplicationContext(["type": "schedule", "data": existing])
+        }
+    }
 
     nonisolated func sessionDidBecomeInactive(_ session: WCSession) {}
 

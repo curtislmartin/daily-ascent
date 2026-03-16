@@ -101,8 +101,17 @@ struct WatchWorkoutView: View {
                 elapsed = 0
                 motionRecording.startRecording(exerciseId: session.exerciseId, setNumber: viewModel.currentSet)
             case .confirming:
-                if motionRecording.isRecording {
-                    _ = motionRecording.stopAndTransfer(exerciseId: session.exerciseId, setNumber: viewModel.currentSet)
+                if motionRecording.isRecording,
+                   case .confirming(let targetReps, let duration) = newPhase {
+                    _ = motionRecording.stopAndTransfer(
+                        exerciseId: session.exerciseId,
+                        setNumber: viewModel.currentSet,
+                        level: session.level,
+                        dayNumber: session.dayNumber,
+                        confirmedReps: viewModel.pendingRealTimeCount ?? targetReps,
+                        durationSeconds: duration,
+                        countingMode: session.countingMode
+                    )
                 }
             default:
                 break
