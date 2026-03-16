@@ -3,7 +3,7 @@ import SwiftData
 import InchShared
 
 enum AppTab: String, CaseIterable {
-    case today, program, history, settings
+    case today, program, history
 }
 
 struct AppTabView: View {
@@ -31,11 +31,6 @@ struct AppTabView: View {
             Tab("History", systemImage: "clock", value: AppTab.history) {
                 NavigationStack {
                     HistoryView()
-                }
-            }
-            Tab("Settings", systemImage: "gearshape", value: AppTab.settings) {
-                NavigationStack {
-                    SettingsView()
                 }
             }
             .badge(showSettingsBadge ? 1 : 0)
