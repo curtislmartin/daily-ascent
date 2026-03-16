@@ -5,24 +5,44 @@ import InchShared
 @Observable
 final class TodayViewModel {
     var dueExercises: [ExerciseEnrolment] = []
+    var completedTodayIds: Set<String> = []
     var isRestDay: Bool = false
     var conflictWarnings: [String: String] = [:]
     var nextTrainingDate: Date? = nil
     var nextTrainingCount: Int = 0
+    var showDemographicsNudge: Bool = false
 
     private let detector = ConflictDetector()
 
     func loadToday(context: ModelContext, showWarnings: Bool = true) {
         let today = Calendar.current.startOfDay(for: .now)
+        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today) ?? today
         let descriptor = FetchDescriptor<ExerciseEnrolment>(
             predicate: #Predicate { $0.isActive }
         )
         let all = (try? context.fetch(descriptor)) ?? []
 
-        dueExercises = all.filter { enrolment in
+        // Exercises due today (scheduled today or overdue)
+        let dueToday = all.filter { enrolment in
             guard let scheduled = enrolment.nextScheduledDate else { return false }
             return Calendar.current.startOfDay(for: scheduled) <= today
         }
+
+        // Exercises completed today (may have advanced nextScheduledDate)
+        let setsDescriptor = FetchDescriptor<CompletedSet>(
+            predicate: #Predicate { $0.sessionDate >= today && $0.sessionDate < tomorrow }
+        )
+        let todaySets = (try? context.fetch(setsDescriptor)) ?? []
+        let completedIds = Set(todaySets.map(\.exerciseId))
+        completedTodayIds = completedIds
+
+        // Include completed-today exercises that are no longer in the due list
+        let completedEnrolments = all.filter { enrolment in
+            guard let id = enrolment.exerciseDefinition?.exerciseId else { return false }
+            return completedIds.contains(id) && !dueToday.contains(where: { $0.persistentModelID == enrolment.persistentModelID })
+        }
+
+        dueExercises = dueToday + completedEnrolments
         isRestDay = dueExercises.isEmpty
 
         if isRestDay {
@@ -35,6 +55,10 @@ final class TodayViewModel {
             conflictWarnings = [:]
         }
         resetStreakForMissedDayIfNeeded(context: context, today: today)
+        let allSettings = (try? context.fetch(FetchDescriptor<UserSettings>())) ?? []
+        if let s = allSettings.first {
+            showDemographicsNudge = s.motionDataUploadConsented && !s.hasDemographics
+        }
     }
 
     private func computeNextTraining(from all: [ExerciseEnrolment], after today: Date) {

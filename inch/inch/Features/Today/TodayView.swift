@@ -31,12 +31,16 @@ struct TodayView: View {
         .navigationTitle("Today")
         .navigationBarTitleDisplayMode(.large)
         .withWorkoutDestinations()
+        .withTodayDestinations()
         .task {
             viewModel.loadToday(context: modelContext, showWarnings: showConflictWarnings)
             watchConnectivity.sendTodaySchedule(
                 enrolments: viewModel.dueExercises,
                 settings: settings
             )
+        }
+        .onAppear {
+            viewModel.loadToday(context: modelContext, showWarnings: showConflictWarnings)
         }
     }
 
@@ -47,11 +51,18 @@ struct TodayView: View {
                     streakBanner
                 }
                 ForEach(viewModel.dueExercises, id: \.persistentModelID) { enrolment in
+                    let exerciseId = enrolment.exerciseDefinition?.exerciseId ?? ""
                     ExerciseCard(
                         enrolment: enrolment,
                         prescription: viewModel.currentPrescription(for: enrolment),
-                        conflictWarning: viewModel.conflictWarnings[enrolment.exerciseDefinition?.exerciseId ?? ""]
+                        conflictWarning: viewModel.conflictWarnings[exerciseId],
+                        isCompleted: viewModel.completedTodayIds.contains(exerciseId)
                     )
+                }
+                if viewModel.showDemographicsNudge {
+                    TodayDemographicsNudge {
+                        viewModel.showDemographicsNudge = false
+                    }
                 }
             }
             .padding(.horizontal)
