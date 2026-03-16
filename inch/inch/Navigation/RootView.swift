@@ -4,6 +4,7 @@ import InchShared
 
 struct RootView: View {
     @Query private var settings: [UserSettings]
+    @State private var onboardingComplete = false
 
     private var preferredColorScheme: ColorScheme? {
         switch settings.first?.appearanceMode {
@@ -15,8 +16,8 @@ struct RootView: View {
 
     var body: some View {
         Group {
-            if settings.first?.onboardingComplete != true {
-                OnboardingCoordinatorView()
+            if !onboardingComplete && settings.first?.onboardingComplete != true {
+                OnboardingCoordinatorView { onboardingComplete = true }
             } else {
                 AppTabView()
             }
