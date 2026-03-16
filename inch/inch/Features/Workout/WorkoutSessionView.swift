@@ -76,19 +76,12 @@ struct WorkoutSessionView: View {
                     Button {
                         showingQuitConfirm = true
                     } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.left")
-                            Text("Back")
-                        }
+                        Text("Quit Workout")
                     }
                 }
             }
         }
-        .confirmationDialog(
-            "Quit workout?",
-            isPresented: $showingQuitConfirm,
-            titleVisibility: .visible
-        ) {
+        .alert("Quit workout?", isPresented: $showingQuitConfirm) {
             Button("Quit Workout", role: .destructive) { dismiss() }
             Button("Cancel", role: .cancel) {}
         } message: {
