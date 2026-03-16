@@ -1,9 +1,10 @@
 import Foundation
 import InchShared
 
-@Observable
+@Observable @MainActor
 final class WatchWorkoutViewModel {
     private(set) var session: WatchSession
+    private let settings: WatchSettings
     private(set) var completedSets: [WatchSetResult] = []
     private(set) var currentSetIndex: Int = 0
     private(set) var pendingRealTimeCount: Int? = nil
@@ -17,8 +18,9 @@ final class WatchWorkoutViewModel {
         case complete
     }
 
-    init(session: WatchSession) {
+    init(session: WatchSession, settings: WatchSettings) {
         self.session = session
+        self.settings = settings
     }
 
     var currentSet: Int { currentSetIndex + 1 }
@@ -26,6 +28,10 @@ final class WatchWorkoutViewModel {
     var targetReps: Int { session.sets[safe: currentSetIndex] ?? 0 }
     var isLastSet: Bool { currentSetIndex >= session.sets.count - 1 }
     var totalReps: Int { completedSets.reduce(0) { $0 + $1.actualReps } }
+
+    // Accessors for settings — used by the view without exposing full settings object
+    var heartRateAlertBPM: Int { settings.heartRateAlertBPM }
+    var showHeartRate: Bool { settings.showHeartRate }
 
     var completionReport: WatchCompletionReport {
         WatchCompletionReport(
@@ -75,7 +81,11 @@ final class WatchWorkoutViewModel {
     }
 
     func finishRest() {
-        phase = .ready
+        if settings.autoAdvanceAfterRest {
+            phase = .inSet(startedAt: .now)
+        } else {
+            phase = .ready
+        }
     }
 }
 
