@@ -45,4 +45,31 @@ final class SettingsViewModel {
         settings?.countingModeOverrides[exerciseId] = mode.rawValue
         try? context.save()
     }
+
+    func resetRestTimers(context: ModelContext) {
+        settings?.restOverrides = [:]
+        try? context.save()
+    }
+
+    func deleteHistory(context: ModelContext) {
+        try? context.delete(model: CompletedSet.self)
+        resetStreak(context: context)
+        try? context.save()
+    }
+
+    func resetToOnboarding(context: ModelContext) {
+        try? context.delete(model: CompletedSet.self)
+        try? context.delete(model: ExerciseEnrolment.self)
+        try? context.delete(model: UserSettings.self)
+        resetStreak(context: context)
+        try? context.save()
+    }
+
+    private func resetStreak(context: ModelContext) {
+        let descriptor = FetchDescriptor<StreakState>()
+        guard let state = (try? context.fetch(descriptor))?.first else { return }
+        state.currentStreak = 0
+        state.longestStreak = 0
+        state.lastActiveDate = nil
+    }
 }
