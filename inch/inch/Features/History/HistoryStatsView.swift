@@ -11,25 +11,25 @@ struct HistoryStatsView: View {
             VStack(spacing: 16) {
                 streakCard
                     .padding()
-                    .background(.secondarySystemGroupedBackground, in: RoundedRectangle(cornerRadius: 12))
+                    .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
                     .padding(.horizontal)
 
                 completionRingCard
                     .padding()
-                    .background(.secondarySystemGroupedBackground, in: RoundedRectangle(cornerRadius: 12))
+                    .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
                     .padding(.horizontal)
 
                 if !stats.weeklyData.isEmpty {
                     volumeChartCard
                         .padding()
-                        .background(.secondarySystemGroupedBackground, in: RoundedRectangle(cornerRadius: 12))
+                        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
                         .padding(.horizontal)
                 }
 
                 if !stats.exerciseStats.isEmpty {
                     exerciseStatsCard
                         .padding()
-                        .background(.secondarySystemGroupedBackground, in: RoundedRectangle(cornerRadius: 12))
+                        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
                         .padding(.horizontal)
                 }
             }
