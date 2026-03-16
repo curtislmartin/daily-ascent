@@ -10,7 +10,7 @@ struct SettingsView: View {
 
     var body: some View {
         List {
-            appearanceSection
+            if let s = viewModel.settings { AppearanceSectionView(settings: s) }
             workoutSection
             if let settings = viewModel.settings {
                 NotificationsSettingsSection(
@@ -26,22 +26,6 @@ struct SettingsView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task { viewModel.load(context: modelContext) }
         .task { await notifications.checkAuthorizationStatus() }
-    }
-
-    private var appearanceSection: some View {
-        Section("Appearance") {
-            if let settings = viewModel.settings {
-                Picker("Theme", selection: Binding(
-                    get: { settings.appearanceMode },
-                    set: { settings.appearanceMode = $0; try? modelContext.save() }
-                )) {
-                    Text("System").tag("system")
-                    Text("Light").tag("light")
-                    Text("Dark").tag("dark")
-                }
-                .pickerStyle(.segmented)
-            }
-        }
     }
 
     private var workoutSection: some View {
@@ -62,6 +46,25 @@ struct SettingsView: View {
         Section("Privacy") {
             NavigationLink("Data & Privacy") {
                 PrivacySettingsView(viewModel: viewModel)
+            }
+        }
+    }
+}
+
+private struct AppearanceSectionView: View {
+    @Bindable var settings: UserSettings
+    @Environment(\.modelContext) private var modelContext
+
+    var body: some View {
+        Section("Appearance") {
+            Picker("Theme", selection: $settings.appearanceMode) {
+                Text("System").tag("system")
+                Text("Light").tag("light")
+                Text("Dark").tag("dark")
+            }
+            .pickerStyle(.segmented)
+            .onChange(of: settings.appearanceMode) {
+                try? modelContext.save()
             }
         }
     }
