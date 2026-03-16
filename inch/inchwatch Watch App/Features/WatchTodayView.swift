@@ -6,6 +6,7 @@ struct WatchTodayView: View {
     @Environment(WatchSettings.self) private var settings
 
     @State private var activeSession: WatchSession?
+    @State private var pendingNextSession: WatchSession?
 
     var body: some View {
         if watchConnectivity.sessions.isEmpty {
@@ -31,7 +32,15 @@ struct WatchTodayView: View {
                 }
             }
             .sheet(item: $activeSession) { session in
-                WatchWorkoutView(session: session, settings: settings)
+                WatchWorkoutView(session: session, settings: settings) { next in
+                    pendingNextSession = next
+                    activeSession = nil
+                }
+            }
+            .onChange(of: activeSession) { _, newValue in
+                guard newValue == nil, let next = pendingNextSession else { return }
+                pendingNextSession = nil
+                activeSession = next
             }
         }
     }

@@ -3,6 +3,7 @@ import SwiftUI
 struct ExerciseCompleteView: View {
     let exerciseName: String
     let totalReps: Int
+    let previousSessionReps: Int?
     let nextDate: Date?
     let onDone: () -> Void
 
@@ -28,6 +29,12 @@ struct ExerciseCompleteView: View {
                 if totalReps > 0 {
                     Text("\(totalReps) total reps")
                         .font(.headline)
+                }
+                if let prev = previousSessionReps, prev > 0 {
+                    let delta = totalReps - prev
+                    Text("\(delta >= 0 ? "+" : "")\(delta) vs last session")
+                        .font(.subheadline)
+                        .foregroundStyle(delta >= 0 ? .green : .secondary)
                 }
                 if let next = nextDate {
                     Text("Next session \(next.formatted(.relative(presentation: .named)))")
