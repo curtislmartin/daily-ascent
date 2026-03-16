@@ -3,6 +3,8 @@ import SwiftData
 import InchShared
 
 struct OnboardingCoordinatorView: View {
+    let onComplete: () -> Void
+
     @Environment(\.modelContext) private var modelContext
     @Query private var definitions: [ExerciseDefinition]
 
@@ -79,5 +81,6 @@ struct OnboardingCoordinatorView: View {
         modelContext.insert(settings)
         modelContext.insert(streakState)
         try? modelContext.save()
+        onComplete()
     }
 }
