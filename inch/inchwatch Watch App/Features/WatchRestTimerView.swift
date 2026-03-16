@@ -1,10 +1,14 @@
 import SwiftUI
+import WatchKit
 
 struct WatchRestTimerView: View {
     let restSeconds: Int
     let onSkip: () -> Void
 
+    @Environment(WatchSettings.self) private var settings
+
     @State private var remaining: Int
+    @State private var tenSecondHapticFired = false
 
     init(restSeconds: Int, onSkip: @escaping () -> Void) {
         self.restSeconds = restSeconds
@@ -47,7 +51,20 @@ struct WatchRestTimerView: View {
             while remaining > 0 {
                 try? await Task.sleep(for: .seconds(1))
                 remaining -= 1
+                if remaining == 10 && !tenSecondHapticFired {
+                    tenSecondHapticFired = true
+                    WKInterfaceDevice.current().play(.notification)
+                }
+                if settings.hapticFinalCountdown && (remaining == 3 || remaining == 2 || remaining == 1) {
+                    WKInterfaceDevice.current().play(.click)
+                }
             }
+            // Triple haptic at rest end
+            WKInterfaceDevice.current().play(.success)
+            try? await Task.sleep(for: .milliseconds(200))
+            WKInterfaceDevice.current().play(.success)
+            try? await Task.sleep(for: .milliseconds(200))
+            WKInterfaceDevice.current().play(.success)
             onSkip()
         }
     }
