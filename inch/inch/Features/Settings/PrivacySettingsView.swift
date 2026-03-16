@@ -27,9 +27,6 @@ struct PrivacySettingsView: View {
             consentSection
             if settings?.motionDataUploadConsented == true {
                 demographicsSection
-                if let id = settings?.contributorId, !id.isEmpty {
-                    contributorSection(id: id)
-                }
             }
             dataSection
         }
@@ -152,17 +149,6 @@ struct PrivacySettingsView: View {
         }
         .buttonStyle(.plain)
         .foregroundStyle(.primary)
-    }
-
-    private func contributorSection(id: String) -> some View {
-        Section("Contributor") {
-            LabeledContent("Contributor ID") {
-                Text(id.prefix(8) + "…")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .monospaced()
-            }
-        }
     }
 
     private var consentSection: some View {
