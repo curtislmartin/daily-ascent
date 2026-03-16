@@ -35,7 +35,8 @@ import HealthKit
     func startWorkout() async {
         guard session == nil else { return }
         if !isAuthorized { await requestAuthorization() }
-        guard isAuthorized, let healthStore else { return }
+        // Re-check session after the authorization await — @MainActor reentrancy guard
+        guard session == nil, isAuthorized, let healthStore else { return }
 
         let config = HKWorkoutConfiguration()
         config.activityType = .functionalStrengthTraining

@@ -11,6 +11,7 @@ struct inchwatch_Watch_AppApp: App {
 
     var body: some Scene {
         WindowGroup {
+            // TODO: Replace .tabItem with Tab {} API when minimum deployment target is raised to watchOS 11+
             TabView {
                 WatchTodayView()
                     .tabItem { Label("Today", systemImage: "figure.strengthtraining.traditional") }
