@@ -11,6 +11,7 @@ struct InchApp: App {
     let motionRecording = MotionRecordingService()
     let dataUpload = DataUploadService()
     let notificationService = NotificationService()
+    let metricKit = MetricKitService()
 
     init() {
         do {
