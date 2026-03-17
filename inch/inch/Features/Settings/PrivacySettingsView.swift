@@ -8,6 +8,7 @@ struct PrivacySettingsView: View {
 
     @State private var showingDeleteHistoryConfirm = false
     @State private var showingResetConfirm = false
+    @State private var showingDeleteContributedDataConfirm = false
 
     private enum DemographicField: Identifiable {
         case age, height, sex, activity
@@ -92,6 +93,17 @@ struct PrivacySettingsView: View {
         } message: {
             Text("All progress, history, and settings will be permanently deleted. You'll go through onboarding again.")
         }
+        .alert(
+            "Delete contributed data?",
+            isPresented: $showingDeleteContributedDataConfirm
+        ) {
+            Button("Delete My Contributed Data", role: .destructive) {
+                viewModel.deleteContributedData(context: modelContext)
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This permanently deletes all motion sensor data you've contributed from our servers. Your local workout history is kept.")
+        }
     }
 
     private var demographicsSection: some View {
@@ -147,6 +159,11 @@ struct PrivacySettingsView: View {
 
     private var dataSection: some View {
         Section("Data") {
+            if settings?.motionDataUploadConsented == true {
+                Button("Delete My Contributed Data", role: .destructive) {
+                    showingDeleteContributedDataConfirm = true
+                }
+            }
             Button("Delete Workout History", role: .destructive) {
                 showingDeleteHistoryConfirm = true
             }
