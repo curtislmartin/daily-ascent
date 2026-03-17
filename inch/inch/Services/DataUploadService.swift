@@ -53,12 +53,8 @@ final class DataUploadService {
             throw UploadError.configurationMissing
         }
         var request = URLRequest(url: url)
-        request.httpMethod = "PATCH"
+        request.httpMethod = "DELETE"
         request.setValue(anonKey, forHTTPHeaderField: "apikey")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        // Reassign server rows to a random ID — intentionally different from the new local ID
-        // so neither side can be used to re-link the data after unlinking.
-        request.httpBody = try JSONEncoder().encode(["contributor_id": UUID().uuidString.lowercased()])
 
         let (_, response) = try await URLSession.shared.data(for: request)
         guard (response as? HTTPURLResponse)?.statusCode == 204 else {
