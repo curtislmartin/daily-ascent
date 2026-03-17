@@ -181,6 +181,12 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
 
         let destDir = URL.documentsDirectory.appending(path: "sensor_data", directoryHint: .isDirectory)
         try? FileManager.default.createDirectory(at: destDir, withIntermediateDirectories: true)
+
+        var dirForBackup = destDir
+        var resourceValues = URLResourceValues()
+        resourceValues.isExcludedFromBackup = true
+        try? dirForBackup.setResourceValues(resourceValues)
+
         let dest = destDir.appending(path: file.fileURL.lastPathComponent)
         try? FileManager.default.moveItem(at: file.fileURL, to: dest)
 
