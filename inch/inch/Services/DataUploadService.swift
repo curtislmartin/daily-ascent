@@ -16,6 +16,10 @@ enum UploadError: Error {
 final class DataUploadService {
     static let taskIdentifier = "com.inch.bodyweight.sensor-upload"
 
+    private static let validExerciseIds: Set<String> = [
+        "push_ups", "squats", "sit_ups", "pull_ups", "glute_bridges", "dead_bugs"
+    ]
+
     func scheduleBGUpload() {
         let request = BGProcessingTaskRequest(identifier: Self.taskIdentifier)
         request.requiresNetworkConnectivity = true
@@ -24,17 +28,17 @@ final class DataUploadService {
     }
 
     func handleBGUpload(task: BGProcessingTask, context: ModelContext) async {
+        var cancelled = false
         var uploadTask: Task<Void, Never>?
         task.expirationHandler = {
+            cancelled = true
             uploadTask?.cancel()
         }
-
         uploadTask = Task {
             await uploadPending(context: context)
         }
-
         await uploadTask?.value
-        task.setTaskCompleted(success: true)
+        task.setTaskCompleted(success: !cancelled)
         scheduleBGUpload()
     }
 
@@ -49,12 +53,8 @@ final class DataUploadService {
             throw UploadError.configurationMissing
         }
         var request = URLRequest(url: url)
-        request.httpMethod = "PATCH"
+        request.httpMethod = "DELETE"
         request.setValue(anonKey, forHTTPHeaderField: "apikey")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        // Reassign server rows to a random ID — intentionally different from the new local ID
-        // so neither side can be used to re-link the data after unlinking.
-        request.httpBody = try JSONEncoder().encode(["contributor_id": UUID().uuidString.lowercased()])
 
         let (_, response) = try await URLSession.shared.data(for: request)
         guard (response as? HTTPURLResponse)?.statusCode == 204 else {
@@ -109,6 +109,12 @@ final class DataUploadService {
             return
         }
 
+        guard Self.validExerciseIds.contains(recording.exerciseId) else {
+            recording.uploadStatus = .localOnly
+            try? context.save()
+            return
+        }
+
         let rawData = try Data(contentsOf: fileURL)
         let compressedData = (try? (rawData as NSData).compressed(using: .zlib) as Data) ?? rawData
         let timestamp = Int(recording.recordedAt.timeIntervalSince1970)
@@ -116,7 +122,9 @@ final class DataUploadService {
         let storagePath = "\(recording.exerciseId)/\(fileName)"
 
         // Step 1: Upload binary file to Supabase Storage (zlib-compressed)
-        let storageURL = URL(string: "\(config.supabaseURL)/storage/v1/object/sensor-data/\(storagePath)")!
+        guard let storageURL = URL(string: "\(config.supabaseURL)/storage/v1/object/sensor-data/\(storagePath)") else {
+            throw UploadError.configurationMissing
+        }
         var uploadRequest = URLRequest(url: storageURL)
         uploadRequest.httpMethod = "POST"
         uploadRequest.setValue(config.anonKey, forHTTPHeaderField: "apikey")
@@ -150,7 +158,9 @@ final class DataUploadService {
             activityLevel: config.activityLevel
         )
 
-        let metadataURL = URL(string: "\(config.supabaseURL)/rest/v1/sensor_recordings")!
+        guard let metadataURL = URL(string: "\(config.supabaseURL)/rest/v1/sensor_recordings") else {
+            throw UploadError.configurationMissing
+        }
         var metadataRequest = URLRequest(url: metadataURL)
         metadataRequest.httpMethod = "POST"
         metadataRequest.setValue(config.anonKey, forHTTPHeaderField: "apikey")

@@ -5,7 +5,7 @@ import InchShared
 struct DataConsentView: View {
     let onComplete: (Bool) -> Void
 
-    @State private var consented = true
+    @State private var consented = false
 
     var body: some View {
         ScrollView {

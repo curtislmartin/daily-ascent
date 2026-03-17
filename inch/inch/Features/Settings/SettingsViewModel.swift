@@ -65,6 +65,26 @@ final class SettingsViewModel {
         try? context.save()
     }
 
+    func deleteContributedData(context: ModelContext) {
+        guard let settings,
+              !settings.contributorId.isEmpty,
+              settings.motionDataUploadConsented
+        else { return }
+
+        let contributorId = settings.contributorId
+        Task {
+            do {
+                try await DataUploadService().unlinkContributorData(contributorId: contributorId)
+                settings.contributorId = UUID().uuidString.lowercased()
+                settings.motionDataUploadConsented = false
+                settings.consentDate = nil
+                try? context.save()
+            } catch {
+                // Silent failure — user can try again
+            }
+        }
+    }
+
     private func resetStreak(context: ModelContext) {
         let descriptor = FetchDescriptor<StreakState>()
         guard let state = (try? context.fetch(descriptor))?.first else { return }
