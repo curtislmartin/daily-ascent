@@ -1,5 +1,5 @@
 ---
-status: pending
+status: complete
 priority: p3
 issue_id: "013"
 tags: [security, watchconnectivity, memory, reliability]

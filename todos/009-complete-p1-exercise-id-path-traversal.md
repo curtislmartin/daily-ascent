@@ -1,5 +1,5 @@
 ---
-status: pending
+status: complete
 priority: p1
 issue_id: "009"
 tags: [security, path-traversal, upload, watchconnectivity]
