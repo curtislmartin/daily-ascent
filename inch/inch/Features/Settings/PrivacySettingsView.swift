@@ -26,6 +26,9 @@ struct PrivacySettingsView: View {
                 demographicsSection
             }
             dataSection
+            Section("Legal") {
+                Link("Privacy Policy", destination: URL(string: "https://clmartin.dev/inch/privacy")!)
+            }
         }
         .listStyle(.insetGrouped)
         .navigationTitle("Data & Privacy")
