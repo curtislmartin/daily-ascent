@@ -16,6 +16,10 @@ enum UploadError: Error {
 final class DataUploadService {
     static let taskIdentifier = "com.inch.bodyweight.sensor-upload"
 
+    private static let validExerciseIds: Set<String> = [
+        "push_ups", "squats", "sit_ups", "pull_ups", "glute_bridges", "dead_bugs"
+    ]
+
     func scheduleBGUpload() {
         let request = BGProcessingTaskRequest(identifier: Self.taskIdentifier)
         request.requiresNetworkConnectivity = true
@@ -104,6 +108,12 @@ final class DataUploadService {
     private func uploadRecording(_ recording: SensorRecording, config: SupabaseConfig, context: ModelContext) async throws {
         let fileURL = URL(filePath: recording.filePath)
         guard FileManager.default.fileExists(atPath: fileURL.path) else {
+            recording.uploadStatus = .localOnly
+            try? context.save()
+            return
+        }
+
+        guard Self.validExerciseIds.contains(recording.exerciseId) else {
             recording.uploadStatus = .localOnly
             try? context.save()
             return
