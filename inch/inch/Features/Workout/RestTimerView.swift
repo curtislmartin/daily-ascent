@@ -2,12 +2,14 @@ import SwiftUI
 
 struct RestTimerView: View {
     let totalSeconds: Int
+    let nextSetReps: Int?
     let onComplete: () -> Void
 
     @State private var remaining: Int
 
-    init(totalSeconds: Int, onComplete: @escaping () -> Void) {
+    init(totalSeconds: Int, nextSetReps: Int? = nil, onComplete: @escaping () -> Void) {
         self.totalSeconds = totalSeconds
+        self.nextSetReps = nextSetReps
         self.onComplete = onComplete
         _remaining = State(initialValue: totalSeconds)
     }
@@ -38,6 +40,12 @@ struct RestTimerView: View {
                     .monospacedDigit()
             }
             .frame(width: 200, height: 200)
+
+            if let nextSetReps {
+                Text("Next: \(nextSetReps) reps")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
 
             Spacer()
 

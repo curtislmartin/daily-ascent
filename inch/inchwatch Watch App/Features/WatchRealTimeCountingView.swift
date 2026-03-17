@@ -10,17 +10,17 @@ struct WatchRealTimeCountingView: View {
     @State private var crownValue: Double = 0
 
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 4) {
             Text("Set \(setNumber) of \(totalSets)")
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
             progressDots
 
-            Spacer()
+            Spacer(minLength: 2)
 
             Text("\(count)")
-                .font(.system(size: 52, weight: .bold, design: .rounded))
+                .font(.system(size: 44, weight: .bold, design: .rounded))
                 .monospacedDigit()
                 .contentTransition(.numericText())
 
@@ -28,7 +28,7 @@ struct WatchRealTimeCountingView: View {
                 .font(.caption2)
                 .foregroundStyle(.secondary)
 
-            Spacer()
+            Spacer(minLength: 2)
 
             Button {
                 tapRep()
@@ -40,13 +40,15 @@ struct WatchRealTimeCountingView: View {
             .buttonStyle(.borderedProminent)
 
             if count > 0 {
-                Button("Done — \(count) reps") {
+                Button("Done (\(count))") {
                     onComplete(count)
                 }
                 .buttonStyle(.bordered)
                 .font(.caption)
+                .frame(maxWidth: .infinity)
             }
         }
+        .padding(.horizontal)
         .padding(.vertical, 4)
         .sensoryFeedback(.impact(flexibility: .rigid), trigger: count)
         .focusable()

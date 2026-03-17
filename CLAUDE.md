@@ -10,19 +10,19 @@ Read these before writing any code. They are the source of truth for all feature
 
 | Document | Purpose | Read When |
 |---|---|---|
-| `Specs/bodyweight-ux-design-v2.md` | Full UX spec: screens, flows, scheduling rules, privacy, monetisation | Always — product requirements |
-| `Specs/exercise-data.json` | All exercise progressions: 6 exercises, 18 levels, ~300 days | Building data loader or any UI showing sets/reps |
-| `Specs/data-model.md` | SwiftData schema: all entities, relationships, enums, indexes, transfer DTOs | Building any data layer code |
-| `Specs/scheduling-engine.md` | Scheduling algorithms with pseudocode and 12 test cases | Building the scheduling engine |
-| `Specs/architecture.md` | Project structure, target config, state management, navigation, services | Always — structural decisions |
-| `Specs/framework-guidance.md` | WatchConnectivity, Core Motion, HealthKit, BGProcessingTask patterns | Building framework integration |
-| `Specs/backend-api.md` | Supabase schema, upload endpoints, client integration | Building the upload service |
-| `Specs/v1-1-features.md` | v1.1 features: history, stats, notifications, complications, exercise detail, conflict warnings | Building any v1.1 feature |
+| `files/bodyweight-ux-design-v2.md` | Full UX spec: screens, flows, scheduling rules, privacy, monetisation | Always — product requirements |
+| `files/exercise-data.json` | All exercise progressions: 6 exercises, 18 levels, ~300 days | Building data loader or any UI showing sets/reps |
+| `files/data-model.md` | SwiftData schema: all entities, relationships, enums, indexes, transfer DTOs | Building any data layer code |
+| `files/scheduling-engine.md` | Scheduling algorithms with pseudocode and 12 test cases | Building the scheduling engine |
+| `files/architecture.md` | Project structure, target config, state management, navigation, services | Always — structural decisions |
+| `files/framework-guidance.md` | WatchConnectivity, Core Motion, HealthKit, BGProcessingTask patterns | Building framework integration |
+| `files/backend-api.md` | Supabase schema, upload endpoints, client integration | Building the upload service |
+| `files/v1-1-features.md` | v1.1 features: history, stats, notifications, complications, exercise detail, conflict warnings | Building any v1.1 feature |
 
 ## Build & Run
 
 - **Xcode version:** 16.0+
-- **Deployment targets:** iOS 18.0, watchOS 11.0
+- **Deployment targets:** iOS 18.0, watchOS 10.6
 - **Swift version:** 6.2
 - **Signing:** Automatic, development team configured in Xcode
 - **Simulator:** Use iPhone 16 Pro and Apple Watch Series 10 for testing
@@ -65,7 +65,6 @@ When these skills conflict with the spec documents, the spec documents take prec
 - Explicit `@Relationship(deleteRule:, inverse:)` on every relationship
 - All properties have defaults or are optional (CloudKit-ready)
 - No `@Attribute(.unique)` or `#Unique` (CloudKit-ready)
-- Use `#Index` on frequently queried properties
 - Use `PersistentIdentifier` when passing model references across boundaries
 - Call `save()` explicitly when correctness matters
 - Never use `@Query` outside SwiftUI views
@@ -199,4 +198,4 @@ Follow this sequence. Each step should be complete with tests before starting th
 - No XCTest for unit tests (Swift Testing only)
 - No `Task.sleep(nanoseconds:)` — use `Task.sleep(for:)`
 - No hardcoded API keys in source files
-- Do not modify files in `Specs/` — they are read-only reference documents
+- Do not modify files in `files/` — they are read-only reference documents

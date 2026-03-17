@@ -79,6 +79,46 @@ public struct SchedulingEngine: Sendable {
         return updated
     }
 
+    // MARK: - Schedule Projection
+
+    /// Projects the next training days forward from the given starting date.
+    /// Simulates completions on each scheduled date to compute subsequent dates.
+    /// Stops at the test day or when `count` days have been projected.
+    public func projectSchedule(
+        enrolment: EnrolmentSnapshot,
+        level: LevelSnapshot,
+        days: [DaySnapshot],
+        startDate: Date,
+        upTo count: Int = 10
+    ) -> [ProjectedDay] {
+        var projected: [ProjectedDay] = []
+        var current = enrolment
+        var currentDate = startDate
+
+        while projected.count < count, current.currentDay <= level.totalDays {
+            guard let prescription = days.first(where: { $0.dayNumber == current.currentDay }) else { break }
+
+            projected.append(ProjectedDay(
+                dayNumber: current.currentDay,
+                scheduledDate: currentDate,
+                sets: prescription.sets,
+                isTest: prescription.isTest,
+                testTarget: level.testTarget
+            ))
+
+            if prescription.isTest { break }
+
+            current.lastCompletedDate = currentDate
+            current.currentDay += 1
+            current.restPatternIndex += 1
+
+            guard let next = computeNextDate(enrolment: current, level: level) else { break }
+            currentDate = next
+        }
+
+        return projected
+    }
+
     // MARK: - Write-back helper
 
     /// Apply a computed EnrolmentSnapshot back to the @Model object.

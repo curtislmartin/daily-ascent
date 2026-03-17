@@ -8,6 +8,17 @@ public enum MuscleGroup: String, Codable, Sendable, CaseIterable {
     case coreFlexion = "core_flexion"
     case coreStability = "core_stability"
 
+    public var displayName: String {
+        switch self {
+        case .upperPush: "Upper Push"
+        case .upperPull: "Upper Pull"
+        case .lower: "Lower"
+        case .lowerPosterior: "Posterior"
+        case .coreFlexion: "Core Flexion"
+        case .coreStability: "Core Stability"
+        }
+    }
+
     /// Muscle groups that conflict with each other for test day isolation
     public var conflictGroups: [MuscleGroup] {
         switch self {

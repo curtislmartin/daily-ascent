@@ -6,6 +6,10 @@ struct RestTimerSettingsView: View {
     @Environment(\.modelContext) private var modelContext
     var viewModel: SettingsViewModel
 
+    private var hasOverrides: Bool {
+        !(viewModel.settings?.restOverrides.isEmpty ?? true)
+    }
+
     var body: some View {
         List {
             Section {
@@ -19,6 +23,15 @@ struct RestTimerSettingsView: View {
         .listStyle(.insetGrouped)
         .navigationTitle("Rest Timers")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if hasOverrides {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Reset All") {
+                        viewModel.resetRestTimers(context: modelContext)
+                    }
+                }
+            }
+        }
     }
 
     private func restTimerRow(for enrolment: ExerciseEnrolment) -> some View {

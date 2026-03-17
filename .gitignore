@@ -1,4 +1,5 @@
 .DS_Store
+inch/inch/Secrets.plist
 .worktrees/
 
 # Swift Package Manager build artifacts
