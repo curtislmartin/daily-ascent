@@ -122,7 +122,9 @@ final class DataUploadService {
         let storagePath = "\(recording.exerciseId)/\(fileName)"
 
         // Step 1: Upload binary file to Supabase Storage (zlib-compressed)
-        let storageURL = URL(string: "\(config.supabaseURL)/storage/v1/object/sensor-data/\(storagePath)")!
+        guard let storageURL = URL(string: "\(config.supabaseURL)/storage/v1/object/sensor-data/\(storagePath)") else {
+            throw UploadError.configurationMissing
+        }
         var uploadRequest = URLRequest(url: storageURL)
         uploadRequest.httpMethod = "POST"
         uploadRequest.setValue(config.anonKey, forHTTPHeaderField: "apikey")
@@ -156,7 +158,9 @@ final class DataUploadService {
             activityLevel: config.activityLevel
         )
 
-        let metadataURL = URL(string: "\(config.supabaseURL)/rest/v1/sensor_recordings")!
+        guard let metadataURL = URL(string: "\(config.supabaseURL)/rest/v1/sensor_recordings") else {
+            throw UploadError.configurationMissing
+        }
         var metadataRequest = URLRequest(url: metadataURL)
         metadataRequest.httpMethod = "POST"
         metadataRequest.setValue(config.anonKey, forHTTPHeaderField: "apikey")
