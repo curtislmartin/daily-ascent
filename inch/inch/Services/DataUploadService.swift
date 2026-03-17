@@ -28,17 +28,17 @@ final class DataUploadService {
     }
 
     func handleBGUpload(task: BGProcessingTask, context: ModelContext) async {
+        var cancelled = false
         var uploadTask: Task<Void, Never>?
         task.expirationHandler = {
+            cancelled = true
             uploadTask?.cancel()
         }
-
         uploadTask = Task {
             await uploadPending(context: context)
         }
-
         await uploadTask?.value
-        task.setTaskCompleted(success: true)
+        task.setTaskCompleted(success: !cancelled)
         scheduleBGUpload()
     }
 
