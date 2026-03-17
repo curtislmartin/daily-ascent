@@ -192,6 +192,10 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
 
         let attrs = try? FileManager.default.attributesOfItem(atPath: dest.path(percentEncoded: false))
         let size = (attrs?[.size] as? Int) ?? 0
+        guard size <= 5_000_000 else {
+            try? FileManager.default.removeItem(at: dest)
+            return
+        }
         let meta = WatchSensorMetadata(
             exerciseId: exerciseId,
             setNumber: raw["setNumber"] as? Int ?? 0,
