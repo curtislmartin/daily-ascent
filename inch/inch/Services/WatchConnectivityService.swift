@@ -5,6 +5,10 @@ import InchShared
 
 @Observable
 final class WatchConnectivityService: NSObject, WCSessionDelegate {
+    private static let validExerciseIds: Set<String> = [
+        "push_ups", "squats", "sit_ups", "pull_ups", "glute_bridges", "dead_bugs"
+    ]
+
     private var wcSession: WCSession?
 
     // let constants so nonisolated delegate methods can access them safely
@@ -169,17 +173,29 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
     }
 
     nonisolated func session(_ session: WCSession, didReceive file: WCSessionFile) {
+        guard let raw = file.metadata,
+              let exerciseId = raw["exerciseId"] as? String,
+              !exerciseId.isEmpty,
+              Self.validExerciseIds.contains(exerciseId)
+        else { return }
+
         let destDir = URL.documentsDirectory.appending(path: "sensor_data", directoryHint: .isDirectory)
         try? FileManager.default.createDirectory(at: destDir, withIntermediateDirectories: true)
+
+        var dirForBackup = destDir
+        var resourceValues = URLResourceValues()
+        resourceValues.isExcludedFromBackup = true
+        try? dirForBackup.setResourceValues(resourceValues)
+
         let dest = destDir.appending(path: file.fileURL.lastPathComponent)
         try? FileManager.default.moveItem(at: file.fileURL, to: dest)
 
-        guard let raw = file.metadata,
-              let exerciseId = raw["exerciseId"] as? String, !exerciseId.isEmpty
-        else { return }
-
         let attrs = try? FileManager.default.attributesOfItem(atPath: dest.path(percentEncoded: false))
         let size = (attrs?[.size] as? Int) ?? 0
+        guard size <= 5_000_000 else {
+            try? FileManager.default.removeItem(at: dest)
+            return
+        }
         let meta = WatchSensorMetadata(
             exerciseId: exerciseId,
             setNumber: raw["setNumber"] as? Int ?? 0,

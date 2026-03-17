@@ -20,7 +20,7 @@ final class HealthKitService {
 
         do {
             try await healthStore.requestAuthorization(toShare: typesToShare, read: typesToRead)
-            isAuthorized = true
+            isAuthorized = healthStore.authorizationStatus(for: HKObjectType.workoutType()) == .sharingAuthorized
         } catch {
             // Authorization failed — app continues without HealthKit
         }

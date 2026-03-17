@@ -8,15 +8,26 @@ import InchShared
 @Observable
 final class WatchMotionRecordingService {
     nonisolated(unsafe) private let motionManager = CMMotionManager()
+    // flushAndClose captures the in-flight buffer and FileHandle from startDeviceMotionUpdates.
+    // It is assigned on @MainActor (inside startRecording) and called on @MainActor (inside
+    // stopAndTransfer), so there is no actual data race. nonisolated(unsafe) is required to satisfy
+    // Swift's strict concurrency checker, following the same pattern as motionManager above.
+    nonisolated(unsafe) private var flushAndClose: (() -> Void)?
     private var sensorQueue: OperationQueue?
     private(set) var currentRecordingURL: URL?
     private(set) var isRecording: Bool = false
 
     func startRecording(exerciseId: String, setNumber: Int) {
+        flushAndClose = nil
         guard motionManager.isDeviceMotionAvailable else { return }
 
         let dir = URL.documentsDirectory.appending(path: "sensor_data", directoryHint: .isDirectory)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+
+        var dirForBackup = dir
+        var resourceValues = URLResourceValues()
+        resourceValues.isExcludedFromBackup = true
+        try? dirForBackup.setResourceValues(resourceValues)
 
         let fileName = "\(exerciseId)_watch_set\(setNumber)_\(Int(Date.now.timeIntervalSince1970)).bin"
         let fileURL = dir.appending(path: fileName)
@@ -57,6 +68,8 @@ final class WatchMotionRecordingService {
         countingMode: String
     ) -> URL? {
         motionManager.stopDeviceMotionUpdates()
+        flushAndClose?()
+        flushAndClose = nil
         sensorQueue = nil
         isRecording = false
         let url = currentRecordingURL
@@ -117,6 +130,12 @@ final class WatchMotionRecordingService {
                 try? fileHandle.write(contentsOf: buffer)
                 buffer.removeAll(keepingCapacity: true)
             }
+        }
+        flushAndClose = {
+            if !buffer.isEmpty {
+                try? fileHandle.write(contentsOf: buffer)
+            }
+            try? fileHandle.close()
         }
         motionManager.startDeviceMotionUpdates(to: queue, withHandler: handler)
     }
