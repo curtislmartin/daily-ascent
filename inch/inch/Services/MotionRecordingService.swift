@@ -6,11 +6,17 @@ import CoreMotion
 @Observable
 final class MotionRecordingService {
     nonisolated(unsafe) private let motionManager = CMMotionManager()
+    // flushAndClose captures the in-flight buffer and FileHandle from startAccelerometerUpdates.
+    // It is assigned on @MainActor (inside startRecording) and called on @MainActor (inside
+    // stopRecording), so there is no actual data race. nonisolated(unsafe) is required to satisfy
+    // Swift's strict concurrency checker, following the same pattern as motionManager above.
+    nonisolated(unsafe) private var flushAndClose: (() -> Void)?
     private var sensorQueue: OperationQueue?
     private(set) var currentRecordingURL: URL?
     private(set) var isRecording: Bool = false
 
     func startRecording(exerciseId: String, setNumber: Int) {
+        flushAndClose = nil
         guard motionManager.isAccelerometerAvailable else { return }
 
         let dir = URL.documentsDirectory.appending(path: "sensor_data", directoryHint: .isDirectory)
@@ -52,6 +58,8 @@ final class MotionRecordingService {
     /// Stops recording and returns the file URL. Returns nil if not recording.
     func stopRecording() -> URL? {
         motionManager.stopAccelerometerUpdates()
+        flushAndClose?()
+        flushAndClose = nil
         sensorQueue = nil
         isRecording = false
         let url = currentRecordingURL
@@ -86,6 +94,12 @@ final class MotionRecordingService {
                 try? fileHandle.write(contentsOf: buffer)
                 buffer.removeAll(keepingCapacity: true)
             }
+        }
+        flushAndClose = {
+            if !buffer.isEmpty {
+                try? fileHandle.write(contentsOf: buffer)
+            }
+            try? fileHandle.close()
         }
         motionManager.startAccelerometerUpdates(to: queue, withHandler: handler)
     }
