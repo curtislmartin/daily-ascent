@@ -5,7 +5,7 @@ import InchShared
 
 @Observable
 final class WatchConnectivityService: NSObject, WCSessionDelegate {
-    private static let validExerciseIds: Set<String> = [
+    private nonisolated(unsafe) static let validExerciseIds: Set<String> = [
         "push_ups", "squats", "sit_ups", "pull_ups", "glute_bridges", "dead_bugs"
     ]
 
