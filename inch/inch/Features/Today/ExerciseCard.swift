@@ -6,6 +6,7 @@ struct ExerciseCard: View {
     let enrolment: ExerciseEnrolment
     let prescription: DayPrescription?
     let conflictWarning: String?
+    var isCompleted: Bool = false
 
     private var definition: ExerciseDefinition? { enrolment.exerciseDefinition }
     private var isTestDay: Bool { prescription?.isTest ?? false }
@@ -19,7 +20,7 @@ struct ExerciseCard: View {
     var body: some View {
         NavigationLink(value: destination) {
             VStack(alignment: .leading, spacing: 0) {
-                if let warning = conflictWarning {
+                if let warning = conflictWarning, !isCompleted {
                     conflictBanner(warning)
                 }
                 cardContent
@@ -29,8 +30,10 @@ struct ExerciseCard: View {
                 RoundedRectangle(cornerRadius: 14)
                     .strokeBorder(accentColor.opacity(0.3), lineWidth: 1)
             )
+            .opacity(isCompleted ? 0.5 : 1)
         }
         .buttonStyle(.plain)
+        .disabled(isCompleted)
     }
 
     private var cardContent: some View {
@@ -47,18 +50,30 @@ struct ExerciseCard: View {
                     Spacer()
                     levelBadge
                 }
-                if let summary = setSummary {
-                    Text(summary)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                HStack(spacing: 6) {
+                    if let summary = setSummary {
+                        Text(summary)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    if let group = definition?.muscleGroup {
+                        muscleGroupTag(group)
+                    }
                 }
                 Text("Day \(enrolment.currentDay)")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
             }
-            Image(systemName: "chevron.right")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
+            if isCompleted {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.title3)
+                    .foregroundStyle(.green)
+            } else {
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
         }
         .padding(14)
     }
@@ -108,6 +123,16 @@ struct ExerciseCard: View {
         guard let prescription, !prescription.sets.isEmpty else { return nil }
         let repsStr = prescription.sets.map(String.init).joined(separator: "-")
         return "\(prescription.sets.count) sets · \(repsStr) reps"
+    }
+
+    private func muscleGroupTag(_ group: MuscleGroup) -> some View {
+        Text(group.displayName)
+            .font(.caption2)
+            .fontWeight(.medium)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 3)
+            .background(accentColor.opacity(0.1), in: Capsule())
+            .foregroundStyle(accentColor)
     }
 
     private var accentColor: Color {

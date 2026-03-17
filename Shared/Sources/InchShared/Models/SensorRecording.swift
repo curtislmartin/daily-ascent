@@ -12,6 +12,7 @@ public final class SensorRecording {
     public var confirmedReps: Int = 0
     public var sampleRateHz: Int = 100
     public var durationSeconds: Double = 0
+    public var countingMode: String = ""
     public var filePath: String = ""
     public var fileSizeBytes: Int = 0
 
@@ -30,6 +31,7 @@ public final class SensorRecording {
         confirmedReps: Int = 0,
         sampleRateHz: Int = 100,
         durationSeconds: Double = 0,
+        countingMode: String = "",
         filePath: String = "",
         fileSizeBytes: Int = 0,
         uploadStatus: UploadStatus = .pending,
@@ -44,6 +46,7 @@ public final class SensorRecording {
         self.confirmedReps = confirmedReps
         self.sampleRateHz = sampleRateHz
         self.durationSeconds = durationSeconds
+        self.countingMode = countingMode
         self.filePath = filePath
         self.fileSizeBytes = fileSizeBytes
         self.uploadStatus = uploadStatus
