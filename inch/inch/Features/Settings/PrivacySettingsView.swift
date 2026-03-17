@@ -27,7 +27,7 @@ struct PrivacySettingsView: View {
             }
             dataSection
             Section("Legal") {
-                Link("Privacy Policy", destination: URL(string: "https://clmartin.dev/inch/privacy")!)
+                Link("Privacy Policy", destination: URL(string: "https://curtislmartin.github.io/inch/privacy")!)
             }
         }
         .listStyle(.insetGrouped)
