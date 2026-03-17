@@ -18,6 +18,11 @@ final class WatchMotionRecordingService {
         let dir = URL.documentsDirectory.appending(path: "sensor_data", directoryHint: .isDirectory)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
 
+        var dirForBackup = dir
+        var resourceValues = URLResourceValues()
+        resourceValues.isExcludedFromBackup = true
+        try? dirForBackup.setResourceValues(resourceValues)
+
         let fileName = "\(exerciseId)_watch_set\(setNumber)_\(Int(Date.now.timeIntervalSince1970)).bin"
         let fileURL = dir.appending(path: fileName)
         FileManager.default.createFile(atPath: fileURL.path, contents: nil)
