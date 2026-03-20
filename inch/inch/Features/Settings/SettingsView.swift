@@ -16,12 +16,12 @@ struct SettingsView: View {
     var body: some View {
         List {
             aboutMeSection
-            if let s = viewModel.settings { AppearanceSectionView(settings: s) }
             workoutSection
             if let settings = viewModel.settings {
                 NotificationsSettingsSection(settings: settings)
                 ScheduleSettingsSection(settings: settings)
             }
+            if let s = viewModel.settings { AppearanceSectionView(settings: s) }
             privacySection
         }
         .listStyle(.insetGrouped)
