@@ -15,7 +15,7 @@ struct HistoryView: View {
 
     private var showSettingsBadge: Bool {
         guard let s = allSettings.first else { return false }
-        return s.motionDataUploadConsented && !s.hasDemographics
+        return !s.hasDemographics
     }
 
     enum Segment: String, CaseIterable {
@@ -54,15 +54,15 @@ struct HistoryView: View {
                 Button {
                     showingSettings = true
                 } label: {
-                    ZStack(alignment: .topTrailing) {
-                        Image(systemName: "gearshape")
-                        if showSettingsBadge {
-                            Circle()
-                                .fill(.red)
-                                .frame(width: 8, height: 8)
-                                .offset(x: 5, y: -5)
+                    Image(systemName: "gearshape")
+                        .overlay(alignment: .topTrailing) {
+                            if showSettingsBadge {
+                                Circle()
+                                    .fill(.red)
+                                    .frame(width: 7, height: 7)
+                                    .offset(x: 4, y: -3)
+                            }
                         }
-                    }
                 }
             }
         }

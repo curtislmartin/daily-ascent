@@ -35,11 +35,7 @@ struct OnboardingCoordinatorView: View {
                 case .consent:
                     DataConsentView { didConsent in
                         consented = didConsent
-                        if didConsent {
-                            step = .demographics
-                        } else {
-                            saveSettings(ageRange: nil, heightRange: nil, biologicalSex: nil, activityLevel: nil)
-                        }
+                        step = .demographics
                     }
                 case .demographics:
                     DemographicTagsView { ageRange, heightRange, biologicalSex, activityLevel in

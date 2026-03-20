@@ -12,7 +12,7 @@ struct AppTabView: View {
 
     private var showSettingsBadge: Bool {
         guard let s = allSettings.first else { return false }
-        return s.motionDataUploadConsented && !s.hasDemographics
+        return !s.hasDemographics
     }
 
     var body: some View {
@@ -33,7 +33,6 @@ struct AppTabView: View {
                     HistoryView()
                 }
             }
-            .badge(showSettingsBadge ? Text("") : nil)
         }
     }
 }
