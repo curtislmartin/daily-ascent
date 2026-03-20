@@ -10,7 +10,7 @@ struct SettingsView: View {
 
     private var showAboutMeBadge: Bool {
         guard let s = viewModel.settings else { return false }
-        return s.motionDataUploadConsented && !s.hasDemographics
+        return !s.hasDemographics
     }
 
     var body: some View {
