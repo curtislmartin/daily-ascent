@@ -48,6 +48,7 @@ struct OnboardingCoordinatorView: View {
                     }
                 }
             }
+            .id(step)
         }
         .task {
             if definitions.isEmpty {
