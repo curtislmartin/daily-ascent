@@ -8,7 +8,6 @@ enum UploadError: Error {
     case fileNotFound
     case fileUploadFailed(Int)
     case metadataInsertFailed(Int)
-    case unlinkFailed
 }
 
 /// Uploads pending SensorRecordings to Supabase in the background via BGProcessingTask.
@@ -42,25 +41,6 @@ final class DataUploadService {
         scheduleBGUpload()
     }
 
-    func unlinkContributorData(contributorId: String) async throws {
-        guard let plistURL = Bundle.main.url(forResource: "Secrets", withExtension: "plist"),
-              let dict = NSDictionary(contentsOf: plistURL) as? [String: Any],
-              let supabaseURL = dict["SupabaseURL"] as? String,
-              let anonKey = dict["SupabaseAnonKey"] as? String
-        else { throw UploadError.configurationMissing }
-
-        guard let url = URL(string: "\(supabaseURL)/rest/v1/sensor_recordings?contributor_id=eq.\(contributorId)") else {
-            throw UploadError.configurationMissing
-        }
-        var request = URLRequest(url: url)
-        request.httpMethod = "DELETE"
-        request.setValue(anonKey, forHTTPHeaderField: "apikey")
-
-        let (_, response) = try await URLSession.shared.data(for: request)
-        guard (response as? HTTPURLResponse)?.statusCode == 204 else {
-            throw UploadError.unlinkFailed
-        }
-    }
 
     // MARK: - Private
 
