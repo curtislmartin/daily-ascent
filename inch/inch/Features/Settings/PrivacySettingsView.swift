@@ -73,14 +73,16 @@ struct PrivacySettingsView: View {
                 }
             )) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Share motion data anonymously")
-                    Text("Helps improve automatic rep counting.")
+                    Text("Share data anonymously")
+                    Text("Sensor data and optional profile details, used only to improve rep counting in this app.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
             }
+        } header: {
+            Text("Sensor Data")
         } footer: {
-            Text("Motion sensor data is always recorded locally during workouts. Enabling sharing sends anonymised accelerometer and gyroscope data to help train rep-counting models for this app.")
+            Text("While you work out, Inch records motion sensor data locally on your device. If sharing is enabled, your sensor data and optional profile details (age range, height, biological sex, and activity level) are uploaded anonymously to help train a rep-counting model. Different body types move differently — this context makes the model more accurate for everyone. No data is ever linked to your identity.")
         }
     }
 
