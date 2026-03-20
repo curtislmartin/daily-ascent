@@ -15,7 +15,7 @@ enum HistoryDestination: Hashable {
 }
 
 enum TodayDestination: Hashable {
-    case privacySettings
+    case aboutMe
 }
 
 extension View {
@@ -51,8 +51,8 @@ extension View {
     func withTodayDestinations() -> some View {
         navigationDestination(for: TodayDestination.self) { destination in
             switch destination {
-            case .privacySettings:
-                PrivacySettingsView(viewModel: SettingsViewModel())
+            case .aboutMe:
+                AboutMeView(viewModel: SettingsViewModel())
             }
         }
     }

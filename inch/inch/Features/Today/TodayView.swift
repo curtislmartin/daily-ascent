@@ -15,7 +15,7 @@ struct TodayView: View {
 
     private var showDemographicsNudge: Bool {
         guard let s = allSettings.first else { return false }
-        return !nudgeDismissed && s.motionDataUploadConsented && !s.hasDemographics
+        return !nudgeDismissed && !s.hasDemographics
     }
 
     private var showConflictWarnings: Bool { allSettings.first?.showConflictWarnings ?? true }
@@ -56,6 +56,11 @@ struct TodayView: View {
                 if streak > 0 {
                     streakBanner
                 }
+                if showDemographicsNudge {
+                    TodayDemographicsNudge {
+                        nudgeDismissed = true
+                    }
+                }
                 ForEach(viewModel.dueExercises, id: \.persistentModelID) { enrolment in
                     let exerciseId = enrolment.exerciseDefinition?.exerciseId ?? ""
                     ExerciseCard(
@@ -64,11 +69,6 @@ struct TodayView: View {
                         conflictWarning: viewModel.conflictWarnings[exerciseId],
                         isCompleted: viewModel.completedTodayIds.contains(exerciseId)
                     )
-                }
-                if showDemographicsNudge {
-                    TodayDemographicsNudge {
-                        nudgeDismissed = true
-                    }
                 }
             }
             .padding(.horizontal)
