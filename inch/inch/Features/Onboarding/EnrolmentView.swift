@@ -14,7 +14,6 @@ struct EnrolmentView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     headerSection
                     exerciseSections
-                    startDateSection
                     balanceNudge
                     startButton
                 }
@@ -68,20 +67,6 @@ struct EnrolmentView: View {
                     }
                 }
             }
-        }
-    }
-
-    private var startDateSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Start Date")
-                .font(.headline)
-            DatePicker(
-                "Start Date",
-                selection: $viewModel.startDate,
-                displayedComponents: .date
-            )
-            .datePickerStyle(.compact)
-            .labelsHidden()
         }
     }
 
