@@ -47,7 +47,7 @@ struct DataConsentView: View {
                 .font(.subheadline)
                 .fontWeight(.medium)
 
-            Text("Inch records sensor data locally on your device during workouts. We will never collect this data without your consent. This keeps your options open to share later and may enable on-device features in the future. You can disable local recording in Settings.")
+            Text("Inch records sensor data locally on your device during workouts. We will never collect this data without your consent. This keeps your options open to share later and may enable on-device features in the future.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

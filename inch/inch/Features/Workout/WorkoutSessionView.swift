@@ -96,7 +96,7 @@ struct WorkoutSessionView: View {
             case .inSet:
                 if sensorConsented {
                     let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
-                    motionRecording.startRecording(exerciseId: exerciseId, setNumber: viewModel.currentSetIndex + 1)
+                    motionRecording.startRecording(exerciseId: exerciseId, setNumber: viewModel.currentSetIndex + 1, context: modelContext)
                 }
             case .confirming:
                 if motionRecording.isRecording {
@@ -168,7 +168,7 @@ struct WorkoutSessionView: View {
                     if sensorConsented {
                         realTimeSetStartDate = .now
                         let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
-                        motionRecording.startRecording(exerciseId: exerciseId, setNumber: viewModel.currentSetIndex + 1)
+                        motionRecording.startRecording(exerciseId: exerciseId, setNumber: viewModel.currentSetIndex + 1, context: modelContext)
                     }
                 }
             } else {
