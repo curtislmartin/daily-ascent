@@ -33,7 +33,7 @@ struct AppTabView: View {
                     HistoryView()
                 }
             }
-            .badge(showSettingsBadge ? 1 : 0)
+            .badge(showSettingsBadge ? Text("") : nil)
         }
     }
 }

@@ -8,8 +8,14 @@ struct SettingsView: View {
     @State private var viewModel = SettingsViewModel()
     @Environment(NotificationService.self) private var notifications
 
+    private var showAboutMeBadge: Bool {
+        guard let s = viewModel.settings else { return false }
+        return s.motionDataUploadConsented && !s.hasDemographics
+    }
+
     var body: some View {
         List {
+            aboutMeSection
             if let s = viewModel.settings { AppearanceSectionView(settings: s) }
             workoutSection
             if let settings = viewModel.settings {
@@ -23,6 +29,15 @@ struct SettingsView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task { viewModel.load(context: modelContext) }
         .task { await notifications.checkAuthorizationStatus() }
+    }
+
+    private var aboutMeSection: some View {
+        Section {
+            NavigationLink("About Me") {
+                AboutMeView(viewModel: viewModel)
+            }
+            .badge(showAboutMeBadge ? Text("") : nil)
+        }
     }
 
     private var workoutSection: some View {
