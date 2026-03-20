@@ -5,7 +5,7 @@ struct TodayDemographicsNudge: View {
 
     var body: some View {
         HStack {
-            NavigationLink(value: TodayDestination.privacySettings) {
+            NavigationLink(value: TodayDestination.aboutMe) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Complete your profile")
                         .font(.subheadline)
