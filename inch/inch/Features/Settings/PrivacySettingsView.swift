@@ -54,9 +54,6 @@ struct PrivacySettingsView: View {
                 set: { newValue in
                     settings?.motionDataUploadConsented = newValue
                     settings?.consentDate = newValue ? .now : nil
-                    if newValue && (settings?.contributorId.isEmpty ?? true) {
-                        settings?.contributorId = UUID().uuidString.lowercased()
-                    }
                     try? modelContext.save()
                 }
             )) {

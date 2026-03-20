@@ -25,7 +25,6 @@ public final class UserSettings {
 
     public var motionDataUploadConsented: Bool = false
     public var consentDate: Date? = nil
-    public var contributorId: String = ""
 
     public var ageRange: String? = nil
     public var heightRange: String? = nil
@@ -55,7 +54,6 @@ public final class UserSettings {
         showConflictWarnings: Bool = true,
         motionDataUploadConsented: Bool = false,
         consentDate: Date? = nil,
-        contributorId: String = "",
         ageRange: String? = nil,
         heightRange: String? = nil,
         biologicalSex: String? = nil,
@@ -78,7 +76,6 @@ public final class UserSettings {
         self.showConflictWarnings = showConflictWarnings
         self.motionDataUploadConsented = motionDataUploadConsented
         self.consentDate = consentDate
-        self.contributorId = contributorId
         self.ageRange = ageRange
         self.heightRange = heightRange
         self.biologicalSex = biologicalSex
