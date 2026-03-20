@@ -67,7 +67,6 @@ struct OnboardingCoordinatorView: View {
         let settings = UserSettings(
             motionDataUploadConsented: consented,
             consentDate: consented ? .now : nil,
-            contributorId: consented ? UUID().uuidString.lowercased() : "",
             ageRange: ageRange,
             heightRange: heightRange,
             biologicalSex: biologicalSex,
