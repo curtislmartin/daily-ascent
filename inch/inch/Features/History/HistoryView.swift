@@ -7,10 +7,16 @@ struct HistoryView: View {
     private var allSets: [CompletedSet]
     @Query private var allEnrolments: [ExerciseEnrolment]
     @Query private var streakStates: [StreakState]
+    @Query private var allSettings: [UserSettings]
 
     @State private var viewModel = HistoryViewModel()
     @State private var selectedSegment: Segment = .log
     @State private var showingSettings = false
+
+    private var showSettingsBadge: Bool {
+        guard let s = allSettings.first else { return false }
+        return s.motionDataUploadConsented && !s.hasDemographics
+    }
 
     enum Segment: String, CaseIterable {
         case log = "Log"
@@ -48,7 +54,15 @@ struct HistoryView: View {
                 Button {
                     showingSettings = true
                 } label: {
-                    Label("Settings", systemImage: "gearshape")
+                    ZStack(alignment: .topTrailing) {
+                        Image(systemName: "gearshape")
+                        if showSettingsBadge {
+                            Circle()
+                                .fill(.red)
+                                .frame(width: 8, height: 8)
+                                .offset(x: 5, y: -5)
+                        }
+                    }
                 }
             }
         }
