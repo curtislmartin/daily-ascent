@@ -46,8 +46,7 @@ final class DataUploadService {
 
     private func uploadPending(context: ModelContext) async {
         guard let settings = (try? context.fetch(FetchDescriptor<UserSettings>()))?.first,
-              settings.motionDataUploadConsented,
-              !settings.contributorId.isEmpty
+              settings.motionDataUploadConsented
         else { return }
 
         guard let plistURL = Bundle.main.url(forResource: "Secrets", withExtension: "plist"),
@@ -59,7 +58,6 @@ final class DataUploadService {
         let config = SupabaseConfig(
             supabaseURL: supabaseURL,
             anonKey: anonKey,
-            contributorId: settings.contributorId,
             ageRange: settings.ageRange,
             heightRange: settings.heightRange,
             biologicalSex: settings.biologicalSex,
@@ -98,7 +96,7 @@ final class DataUploadService {
         let rawData = try Data(contentsOf: fileURL)
         let compressedData = (try? (rawData as NSData).compressed(using: .zlib) as Data) ?? rawData
         let timestamp = Int(recording.recordedAt.timeIntervalSince1970)
-        let fileName = "\(config.contributorId)_\(timestamp).bin.zlib"
+        let fileName = "\(recording.exerciseId)_\(timestamp).bin.zlib"
         let storagePath = "\(recording.exerciseId)/\(fileName)"
 
         // Step 1: Upload binary file to Supabase Storage (zlib-compressed)
@@ -119,7 +117,6 @@ final class DataUploadService {
 
         // Step 2: Insert metadata row
         let payload = SensorRecordingPayload(
-            contributorId: config.contributorId,
             exerciseId: recording.exerciseId,
             level: recording.level,
             dayNumber: recording.dayNumber,
@@ -163,7 +160,6 @@ final class DataUploadService {
 private struct SupabaseConfig {
     let supabaseURL: String
     let anonKey: String
-    let contributorId: String
     let ageRange: String?
     let heightRange: String?
     let biologicalSex: String?
@@ -171,7 +167,6 @@ private struct SupabaseConfig {
 }
 
 private struct SensorRecordingPayload: Encodable {
-    let contributorId: String
     let exerciseId: String
     let level: Int
     let dayNumber: Int
@@ -190,7 +185,6 @@ private struct SensorRecordingPayload: Encodable {
     let activityLevel: String?
 
     enum CodingKeys: String, CodingKey {
-        case contributorId = "contributor_id"
         case exerciseId = "exercise_id"
         case level
         case dayNumber = "day_number"

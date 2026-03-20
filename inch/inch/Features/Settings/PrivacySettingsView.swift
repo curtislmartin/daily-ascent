@@ -86,7 +86,7 @@ struct PrivacySettingsView: View {
             Text("Data")
         } footer: {
             if settings?.motionDataUploadConsented == true {
-                Text("Contributed sensor data is uploaded without any personal identifier and cannot be linked back to you or your device. Because it is fully anonymous, individual deletion is not possible.")
+                Text("Contributed sensor data is uploaded with no identifier of any kind — not even a random ID. It cannot be linked back to you or your device, so individual deletion is not possible.")
             }
         }
     }
