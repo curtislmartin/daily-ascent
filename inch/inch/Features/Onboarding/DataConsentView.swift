@@ -27,11 +27,15 @@ struct DataConsentView: View {
             Text("Help improve automatic rep counting")
                 .font(.headline)
 
-            Text("While you work out, Inch records motion sensor data from your iPhone and Apple Watch. This data captures the patterns of each exercise — it's what lets the app learn to count reps automatically.")
+            Text("While you work out, Inch records motion sensor data from your iPhone and Apple Watch. This data captures the movement patterns of each exercise — it's what will allow the app to count reps automatically.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
-            Text("If you opt in, this sensor data is uploaded anonymously to help train a rep-counting model. Your data never includes any personal information — only accelerometer and gyroscope readings during exercises.")
+            Text("If you opt in, your sensor data and optional profile details (age range, height, biological sex, and activity level) are uploaded anonymously to help train a rep-counting model. Different body types move differently — this context makes the model more accurate for everyone.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+
+            Text("No data is ever linked to your identity.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
@@ -39,11 +43,11 @@ struct DataConsentView: View {
 
     private var localRecordingNote: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Label("Local recording always happens", systemImage: "iphone.circle")
+            Label("Local data", systemImage: "iphone.circle")
                 .font(.subheadline)
                 .fontWeight(.medium)
 
-            Text("Even if you don't opt in to sharing, Inch records sensor data locally on your device. This keeps your option open to share later, and may enable on-device ML features in the future. You can disable local recording in Settings.")
+            Text("Inch records sensor data locally on your device during workouts. We will never collect this data without your consent. This keeps your options open to share later and may enable on-device features in the future. You can disable local recording in Settings.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -54,9 +58,9 @@ struct DataConsentView: View {
     private var consentToggle: some View {
         Toggle(isOn: $consented) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Share sensor data anonymously")
+                Text("Share data anonymously")
                     .font(.body)
-                Text("Used only to improve automatic rep counting in this app.")
+                Text("Sensor data and optional profile details, used only to improve rep counting in this app.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
