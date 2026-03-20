@@ -1,5 +1,7 @@
 import Foundation
 import CoreMotion
+import SwiftData
+import InchShared
 
 /// Records accelerometer + gyroscope (device motion) to binary files during active sets.
 /// Uses OperationQueue callbacks per Core Motion framework guidance.
@@ -15,9 +17,15 @@ final class MotionRecordingService {
     private(set) var currentRecordingURL: URL?
     private(set) var isRecording: Bool = false
 
-    func startRecording(exerciseId: String, setNumber: Int) {
+    private static let maxSensorDataBytes = 50 * 1024 * 1024   // 50 MB cap on sensor_data folder
+    private static let minDeviceFreeBytes: Int64 = 50 * 1024 * 1024  // 50 MB minimum device free space
+
+    func startRecording(exerciseId: String, setNumber: Int, context: ModelContext) {
         flushAndClose = nil
         guard motionManager.isDeviceMotionAvailable else { return }
+
+        // Skip if device storage is critically low.
+        guard hasAdequateDeviceStorage() else { return }
 
         let dir = URL.documentsDirectory.appending(path: "sensor_data", directoryHint: .isDirectory)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
@@ -26,6 +34,12 @@ final class MotionRecordingService {
         var resourceValues = URLResourceValues()
         resourceValues.isExcludedFromBackup = true
         try? dirForBackup.setResourceValues(resourceValues)
+
+        // Prune oldest uploaded files if folder is over the cap.
+        if sensorDataFolderSizeBytes(at: dir) > Self.maxSensorDataBytes {
+            pruneUploadedFiles(in: dir, context: context)
+            guard sensorDataFolderSizeBytes(at: dir) <= Self.maxSensorDataBytes else { return }
+        }
 
         let fileName = "\(exerciseId)_set\(setNumber)_\(Int(Date.now.timeIntervalSince1970)).bin"
         let fileURL = dir.appending(path: fileName)
@@ -119,5 +133,46 @@ final class MotionRecordingService {
         withUnsafeBytes(of: &sampleRate) { header.append(contentsOf: $0) }
         header.append(1) // sensorType: 1 = deviceMotion (accel + gyro)
         try? fileHandle.write(contentsOf: header)
+    }
+
+    // MARK: - Storage Management
+
+    private func hasAdequateDeviceStorage() -> Bool {
+        guard let values = try? URL.documentsDirectory.resourceValues(
+            forKeys: [.volumeAvailableCapacityForImportantUsageKey]
+        ), let available = values.volumeAvailableCapacityForImportantUsage else {
+            return true // Assume adequate if we can't determine
+        }
+        return available >= Self.minDeviceFreeBytes
+    }
+
+    private func sensorDataFolderSizeBytes(at dir: URL) -> Int {
+        guard let contents = try? FileManager.default.contentsOfDirectory(
+            at: dir,
+            includingPropertiesForKeys: [.fileSizeKey]
+        ) else { return 0 }
+        return contents.reduce(0) { sum, url in
+            let size = (try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0
+            return sum + size
+        }
+    }
+
+    /// Deletes binary files for the oldest uploaded SensorRecordings until the folder is under the cap.
+    private func pruneUploadedFiles(in dir: URL, context: ModelContext) {
+        let uploaded = UploadStatus.uploaded
+        var descriptor = FetchDescriptor<SensorRecording>(
+            predicate: #Predicate { $0.uploadStatus == uploaded && $0.filePath != "" },
+            sortBy: [SortDescriptor(\.recordedAt, order: .forward)]
+        )
+        descriptor.fetchLimit = 50
+        guard let recordings = try? context.fetch(descriptor) else { return }
+
+        for recording in recordings {
+            guard sensorDataFolderSizeBytes(at: dir) > Self.maxSensorDataBytes else { break }
+            let fileURL = URL(fileURLWithPath: recording.filePath)
+            try? FileManager.default.removeItem(at: fileURL)
+            recording.filePath = ""
+        }
+        try? context.save()
     }
 }
