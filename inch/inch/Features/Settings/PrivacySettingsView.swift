@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import InchShared
+import WatchConnectivity
 
 struct PrivacySettingsView: View {
     @Environment(\.modelContext) private var modelContext
@@ -63,6 +64,23 @@ struct PrivacySettingsView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
+            }
+            if WCSession.isSupported() {
+                Toggle(isOn: Binding(
+                    get: { settings?.dualDeviceRecordingEnabled ?? true },
+                    set: { newValue in
+                        settings?.dualDeviceRecordingEnabled = newValue
+                        try? modelContext.save()
+                    }
+                )) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Record on Apple Watch")
+                        Text("When your Watch is nearby and the app is open, both devices record simultaneously.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .disabled(settings?.motionDataUploadConsented == false)
             }
         } header: {
             Text("Sensor Data")
