@@ -128,6 +128,7 @@
         <li><strong>Workout history</strong> — stored locally on your device using SwiftData. Never uploaded to any server.</li>
         <li><strong>HealthKit data</strong> — calories burned and active minutes, read and written to the Apple Health app on your device. Stays on your device and your personal iCloud account. Inch does not receive or store this data on any external server.</li>
         <li><strong>Motion sensor data (optional)</strong> — accelerometer and gyroscope readings captured during workouts, only if you explicitly opt in. See the section below.</li>
+        <li><strong>Crash diagnostics</strong> — if the app crashes, Apple's MetricKit framework writes a diagnostic report to the app's local Documents folder on your device. These files are not automatically uploaded anywhere; they may be reviewed by the developer only if you choose to share them manually (e.g. via the iOS Files app).</li>
       </ul>
       <p>Inch collects no location data, no contacts, no camera or microphone access, no browsing history, and no advertising identifiers.</p>
     </section>
@@ -143,7 +144,8 @@
       <p>Inch includes an optional feature to help improve automatic rep counting in future versions. If you enable <em>"Share motion data anonymously"</em> in Settings, Inch will record accelerometer and gyroscope data from your iPhone and Apple Watch during workouts and upload it to a secure server.</p>
       <p>This upload is:</p>
       <ul>
-        <li><strong>Truly anonymous</strong> — uploaded with no identifier of any kind. No user ID, device ID, or random token is included. Records cannot be traced back to any individual.</li>
+        <li><strong>Anonymous</strong> — no name, email, account, or device ID is included. Records cannot be traced back to any individual.</li>
+        <li><strong>Optionally enriched with demographic data</strong> — if you choose to provide an age range, height range, biological sex, or activity level in the app's Settings screen, this information is included alongside the motion data to improve model accuracy for different body types. Providing this information is entirely optional.</li>
         <li><strong>Used only for training ML models</strong> for rep counting. It is not sold, shared with advertisers, or used for any other purpose.</li>
         <li><strong>Opt-in only</strong> — the toggle is off by default. You can disable it at any time in the app's Settings screen.</li>
       </ul>
@@ -152,8 +154,8 @@
 
     <section>
       <h2>Data Retention</h2>
-      <p><strong>Local data</strong> (workout history, settings) is retained on your device until you delete the app.</p>
-      <p><strong>Uploaded motion data</strong>, if you opted in, is retained on our server for as long as it is useful for improving rep counting models, and deleted thereafter. Uploaded records contain no identifier of any kind — not a user ID, device ID, or random token — so it is not possible to associate them with any individual or to selectively delete a specific person's data. If you have concerns, please contact us before enabling the toggle.</p>
+      <p><strong>Local data</strong> (workout history, settings, crash diagnostics) is retained on your device until you delete the app or manually remove it.</p>
+      <p><strong>Uploaded motion data</strong>, if you opted in, is retained on our server for as long as it is useful for improving rep counting models, and deleted thereafter. Uploaded records contain no identifier of any kind, so it is not possible to associate them with any individual or to selectively delete a specific person's data. If you have concerns, please contact us before enabling the toggle.</p>
     </section>
 
     <section>
