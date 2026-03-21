@@ -35,6 +35,10 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
         wcSession?.activate()
     }
 
+    var isWatchReachable: Bool {
+        wcSession?.isReachable ?? false
+    }
+
     // MARK: - Sending
 
     func sendSchedule(_ sessions: [WatchSession]) {
@@ -77,6 +81,24 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
         sendSchedule(sessions)
     }
 
+    func sendRecordingStart(exerciseId: String, setNumber: Int, sessionId: String) {
+        guard let wcSession, wcSession.isReachable else { return }
+        wcSession.sendMessage(
+            ["type": "recordingStart", "exerciseId": exerciseId, "setNumber": setNumber, "sessionId": sessionId],
+            replyHandler: nil,
+            errorHandler: nil
+        )
+    }
+
+    func sendRecordingStop(exerciseId: String, setNumber: Int) {
+        guard let wcSession, wcSession.isReachable else { return }
+        wcSession.sendMessage(
+            ["type": "recordingStop", "exerciseId": exerciseId, "setNumber": setNumber],
+            replyHandler: nil,
+            errorHandler: nil
+        )
+    }
+
     // MARK: - Receiving
 
     func handleCompletionReports(context: ModelContext) async {
@@ -100,7 +122,8 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
                 durationSeconds: meta.durationSeconds,
                 countingMode: meta.countingMode,
                 filePath: received.fileURL.path,
-                fileSizeBytes: received.fileSizeBytes
+                fileSizeBytes: received.fileSizeBytes,
+                sessionId: meta.sessionId
             )
             context.insert(recording)
             try? context.save()
@@ -206,7 +229,8 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
             durationSeconds: raw["durationSeconds"] as? Double ?? 0,
             countingMode: raw["countingMode"] as? String ?? "",
             sampleRateHz: raw["sampleRateHz"] as? Int ?? 50,
-            recordedAt: raw["recordedAt"] as? Double ?? Date.now.timeIntervalSince1970
+            recordedAt: raw["recordedAt"] as? Double ?? Date.now.timeIntervalSince1970,
+            sessionId: raw["sessionId"] as? String ?? ""
         )
         _receivedFiles.yield(ReceivedSensorFile(fileURL: dest, metadata: meta, fileSizeBytes: size))
     }

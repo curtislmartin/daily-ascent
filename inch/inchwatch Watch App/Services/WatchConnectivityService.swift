@@ -10,6 +10,8 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
     // let constants so nonisolated delegate methods can access them safely
     private let sessionContinuation: AsyncStream<[WatchSession]>.Continuation
     private let sessionStream: AsyncStream<[WatchSession]>
+    private let _recordingTriggers: AsyncStream<WatchRecordingTrigger>.Continuation
+    let recordingTriggers: AsyncStream<WatchRecordingTrigger>
 
     var sessions: [WatchSession] = []
     var lastSyncDate: Date? = nil
@@ -18,6 +20,9 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
         let (stream, continuation) = AsyncStream<[WatchSession]>.makeStream()
         sessionStream = stream
         sessionContinuation = continuation
+        let (triggerStream, triggerContinuation) = AsyncStream<WatchRecordingTrigger>.makeStream()
+        recordingTriggers = triggerStream
+        _recordingTriggers = triggerContinuation
         super.init()
     }
 
@@ -94,6 +99,28 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
               let received = try? JSONDecoder().decode([WatchSession].self, from: data)
         else { return }
         sessionContinuation.yield(received)
+    }
+
+    nonisolated func session(
+        _ session: WCSession,
+        didReceiveMessage message: [String: Any]
+    ) {
+        guard let type = message["type"] as? String else { return }
+        switch type {
+        case "recordingStart":
+            guard let exerciseId = message["exerciseId"] as? String,
+                  let setNumber = message["setNumber"] as? Int,
+                  let sessionId = message["sessionId"] as? String
+            else { return }
+            _recordingTriggers.yield(.start(exerciseId: exerciseId, setNumber: setNumber, sessionId: sessionId))
+        case "recordingStop":
+            guard let exerciseId = message["exerciseId"] as? String,
+                  let setNumber = message["setNumber"] as? Int
+            else { return }
+            _recordingTriggers.yield(.stop(exerciseId: exerciseId, setNumber: setNumber))
+        default:
+            break
+        }
     }
 
     nonisolated func session(
