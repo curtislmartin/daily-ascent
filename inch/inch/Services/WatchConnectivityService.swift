@@ -35,6 +35,10 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
         wcSession?.activate()
     }
 
+    var isWatchReachable: Bool {
+        wcSession?.isReachable ?? false
+    }
+
     // MARK: - Sending
 
     func sendSchedule(_ sessions: [WatchSession]) {
@@ -75,6 +79,24 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
         }
 
         sendSchedule(sessions)
+    }
+
+    func sendRecordingStart(exerciseId: String, setNumber: Int, sessionId: String) {
+        guard let wcSession, wcSession.isReachable else { return }
+        wcSession.sendMessage(
+            ["type": "recordingStart", "exerciseId": exerciseId, "setNumber": setNumber, "sessionId": sessionId],
+            replyHandler: nil,
+            errorHandler: nil
+        )
+    }
+
+    func sendRecordingStop(exerciseId: String, setNumber: Int) {
+        guard let wcSession, wcSession.isReachable else { return }
+        wcSession.sendMessage(
+            ["type": "recordingStop", "exerciseId": exerciseId, "setNumber": setNumber],
+            replyHandler: nil,
+            errorHandler: nil
+        )
     }
 
     // MARK: - Receiving
