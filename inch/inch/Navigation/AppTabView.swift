@@ -15,6 +15,14 @@ struct AppTabView: View {
         return !s.hasDemographics
     }
 
+    private var preferredColorScheme: ColorScheme? {
+        switch allSettings.first?.appearanceMode {
+        case "light": .light
+        case "dark": .dark
+        default: nil
+        }
+    }
+
     var body: some View {
         TabView(selection: $selectedTab) {
             Tab("Today", systemImage: "calendar", value: AppTab.today) {
@@ -34,5 +42,6 @@ struct AppTabView: View {
                 }
             }
         }
+        .preferredColorScheme(preferredColorScheme)
     }
 }
