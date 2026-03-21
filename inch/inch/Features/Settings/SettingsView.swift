@@ -6,7 +6,6 @@ struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
 
     @State private var viewModel = SettingsViewModel()
-    @Environment(NotificationService.self) private var notifications
 
     private var showAboutMeBadge: Bool {
         guard let s = viewModel.settings else { return false }
@@ -15,23 +14,21 @@ struct SettingsView: View {
 
     var body: some View {
         List {
-            aboutMeSection
+            profileSection
+            programSection
             workoutSection
             if let settings = viewModel.settings {
-                NotificationsSettingsSection(settings: settings)
-                ScheduleSettingsSection(settings: settings)
+                generalSection(settings: settings)
             }
-            if let s = viewModel.settings { AppearanceSectionView(settings: s) }
             privacySection
         }
         .listStyle(.insetGrouped)
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
         .task { viewModel.load(context: modelContext) }
-        .task { await notifications.checkAuthorizationStatus() }
     }
 
-    private var aboutMeSection: some View {
+    private var profileSection: some View {
         Section {
             NavigationLink("About Me") {
                 AboutMeView(viewModel: viewModel)
@@ -40,17 +37,34 @@ struct SettingsView: View {
         }
     }
 
+    private var programSection: some View {
+        Section("Program") {
+            NavigationLink("Manage Exercises") {
+                ManageEnrolmentsView()
+            }
+        }
+    }
+
     private var workoutSection: some View {
         Section("Workout") {
             NavigationLink("Rest Timers") {
                 RestTimerSettingsView(viewModel: viewModel)
             }
-            NavigationLink("Tracking Method") {
+            NavigationLink("Counting Method") {
                 TrackingMethodView(viewModel: viewModel)
             }
-            NavigationLink("Manage Programs") {
-                ManageEnrolmentsView()
+        }
+    }
+
+    private func generalSection(settings: UserSettings) -> some View {
+        Section("General") {
+            NavigationLink("Notifications") {
+                NotificationsSettingsView(settings: settings)
             }
+            NavigationLink("Schedule") {
+                ScheduleSettingsView(settings: settings)
+            }
+            AppearancePicker(settings: settings)
         }
     }
 
@@ -63,21 +77,18 @@ struct SettingsView: View {
     }
 }
 
-private struct AppearanceSectionView: View {
+private struct AppearancePicker: View {
     @Bindable var settings: UserSettings
     @Environment(\.modelContext) private var modelContext
 
     var body: some View {
-        Section("Appearance") {
-            Picker("Theme", selection: $settings.appearanceMode) {
-                Text("System").tag("system")
-                Text("Light").tag("light")
-                Text("Dark").tag("dark")
-            }
-            .pickerStyle(.segmented)
-            .onChange(of: settings.appearanceMode) {
-                try? modelContext.save()
-            }
+        Picker("Appearance", selection: $settings.appearanceMode) {
+            Text("System").tag("system")
+            Text("Light").tag("light")
+            Text("Dark").tag("dark")
+        }
+        .onChange(of: settings.appearanceMode) {
+            try? modelContext.save()
         }
     }
 }

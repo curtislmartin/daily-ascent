@@ -1,16 +1,15 @@
 import SwiftUI
-import UserNotifications
 import InchShared
 
-struct NotificationsSettingsSection: View {
+struct NotificationsSettingsView: View {
     @Bindable var settings: UserSettings
     @Environment(\.openURL) private var openURL
     @Environment(NotificationService.self) private var notifications
 
     var body: some View {
-        Group {
+        List {
             if notifications.isAuthorized {
-                Section("Notifications") {
+                Section {
                     Toggle("Daily Reminder", isOn: $settings.dailyReminderEnabled)
                     if settings.dailyReminderEnabled {
                         DatePicker(
@@ -19,7 +18,6 @@ struct NotificationsSettingsSection: View {
                             displayedComponents: .hourAndMinute
                         )
                     }
-
                     Toggle("Streak Protection", isOn: $settings.streakProtectionEnabled)
                     if settings.streakProtectionEnabled {
                         DatePicker(
@@ -28,11 +26,10 @@ struct NotificationsSettingsSection: View {
                             displayedComponents: .hourAndMinute
                         )
                     }
-
                     Toggle("Level Unlock Alerts", isOn: $settings.levelUnlockNotificationEnabled)
                 }
             } else if notifications.authorizationStatus == .notDetermined {
-                Section("Notifications") {
+                Section {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Allow notifications to get workout reminders and streak alerts.")
                             .font(.subheadline)
@@ -44,7 +41,7 @@ struct NotificationsSettingsSection: View {
                     .padding(.vertical, 4)
                 }
             } else {
-                Section("Notifications") {
+                Section {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Notifications are disabled")
                             .font(.subheadline)
@@ -65,6 +62,9 @@ struct NotificationsSettingsSection: View {
                 }
             }
         }
+        .listStyle(.insetGrouped)
+        .navigationTitle("Notifications")
+        .navigationBarTitleDisplayMode(.inline)
         .task { await notifications.checkAuthorizationStatus() }
     }
 
