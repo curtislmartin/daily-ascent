@@ -302,6 +302,7 @@ struct WorkoutSessionView: View {
                     .foregroundStyle(.secondary)
             }
         }
+        .accessibilityElement(children: .combine)
     }
 }
 

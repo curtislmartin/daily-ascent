@@ -24,6 +24,8 @@ struct ExerciseCompleteView: View {
                     .font(.title3)
                     .foregroundStyle(.secondary)
             }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(exerciseName) complete. \(totalReps) total reps.")
 
             VStack(spacing: 8) {
                 if totalReps > 0 {

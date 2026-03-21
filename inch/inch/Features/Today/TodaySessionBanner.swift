@@ -32,6 +32,8 @@ struct TodaySessionBanner: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(streak)-day streak. \(totalCount) exercise\(totalCount == 1 ? "" : "s") available today.")
     }
 
     // MARK: - E-style
@@ -62,6 +64,8 @@ struct TodaySessionBanner: View {
         }
         .padding(14)
         .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Today's session: \(completedCount) of \(totalCount) done. \(progressCopy)")
     }
 
     private var progressCopy: String {

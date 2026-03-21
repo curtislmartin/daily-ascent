@@ -34,6 +34,7 @@ struct ExerciseCard: View {
         }
         .buttonStyle(.plain)
         .disabled(isCompleted)
+        .accessibilityLabel(cardAccessibilityLabel)
     }
 
     private var cardContent: some View {
@@ -69,10 +70,12 @@ struct ExerciseCard: View {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.title3)
                     .foregroundStyle(.green)
+                    .accessibilityLabel("Completed")
             } else {
                 Image(systemName: "chevron.right")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
+                    .accessibilityHidden(true)
             }
         }
         .padding(14)
@@ -83,6 +86,7 @@ struct ExerciseCard: View {
             .fill(accentColor)
             .frame(width: 4)
             .frame(height: 52)
+            .accessibilityHidden(true)
     }
 
     private var testDayBadge: some View {
@@ -93,6 +97,7 @@ struct ExerciseCard: View {
             .padding(.vertical, 3)
             .background(.orange.opacity(0.15), in: Capsule())
             .foregroundStyle(.orange)
+            .accessibilityLabel("Test day")
     }
 
     private var levelBadge: some View {
@@ -103,6 +108,7 @@ struct ExerciseCard: View {
             .padding(.vertical, 4)
             .background(.secondary.opacity(0.12), in: Capsule())
             .foregroundStyle(.secondary)
+            .accessibilityLabel("Level \(enrolment.currentLevel)")
     }
 
     private func conflictBanner(_ message: String) -> some View {
@@ -133,6 +139,18 @@ struct ExerciseCard: View {
             .padding(.vertical, 3)
             .background(accentColor.opacity(0.1), in: Capsule())
             .foregroundStyle(accentColor)
+            .accessibilityHidden(true)
+    }
+
+    private var cardAccessibilityLabel: String {
+        var parts: [String] = []
+        parts.append(definition?.name ?? "Exercise")
+        if isTestDay { parts.append("Test day") }
+        parts.append("Level \(enrolment.currentLevel), day \(enrolment.currentDay)")
+        if let summary = setSummary { parts.append(summary) }
+        if let warning = conflictWarning { parts.append("Warning: \(warning)") }
+        if isCompleted { parts.append("Completed") }
+        return parts.joined(separator: ", ")
     }
 
     private var accentColor: Color {

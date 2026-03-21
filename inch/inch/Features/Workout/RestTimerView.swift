@@ -40,6 +40,8 @@ struct RestTimerView: View {
                     .monospacedDigit()
             }
             .frame(width: 200, height: 200)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Rest timer, \(remaining) second\(remaining == 1 ? "" : "s") remaining")
 
             if let nextSetReps {
                 Text("Next: \(nextSetReps) reps")

@@ -43,5 +43,7 @@ struct WeeklyVolumeChart: View {
             }
         }
         .frame(height: 180)
+        .accessibilityLabel("Weekly volume chart. Shows total reps per week for the last \(weeklyData.count) weeks.")
+        .accessibilityHidden(weeklyData.isEmpty)
     }
 }

@@ -45,5 +45,7 @@ struct SessionHistoryChart: View {
             }
         }
         .frame(height: 180)
+        .accessibilityLabel("Session history chart. Shows reps per session across \(history.count) session\(history.count == 1 ? "" : "s").\(testTarget > 0 ? " Target to pass: \(testTarget) reps." : "")")
+        .accessibilityHidden(history.isEmpty)
     }
 }

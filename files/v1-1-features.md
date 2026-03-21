@@ -446,138 +446,7 @@ final class NotificationService {
 
 ---
 
-## 4. Watch Complications
-
-### Implementation: WidgetKit (watchOS 10+)
-
-watchOS 10+ uses WidgetKit for complications (ClockKit is deprecated). Complications are small widgets on the watch face.
-
-### Supported Families
-
-| Family | Layout | Content |
-|---|---|---|
-| `accessoryCircular` | Small circle | Exercise count: "4/6" or "REST" |
-| `accessoryCorner` | Corner gauge | Progress arc showing exercises done / due |
-| `accessoryRectangular` | Medium rectangle | "4 exercises due" with coloured dots per exercise |
-| `accessoryInline` | Single-line text | "4 exercises today" or "Rest day" |
-
-### Timeline Provider
-
-```swift
-import WidgetKit
-import SwiftUI
-
-struct InchComplicationProvider: TimelineProvider {
-    typealias Entry = InchComplicationEntry
-    
-    func placeholder(in context: Context) -> InchComplicationEntry {
-        InchComplicationEntry(date: .now, dueCount: 4, completedCount: 0, totalEnrolled: 6, isRestDay: false, exerciseColors: [])
-    }
-    
-    func getSnapshot(in context: Context, completion: @escaping (InchComplicationEntry) -> Void) {
-        // Return current state from shared data
-        let entry = loadCurrentState()
-        completion(entry)
-    }
-    
-    func getTimeline(in context: Context, completion: @escaping (Timeline<InchComplicationEntry>) -> Void) {
-        let entry = loadCurrentState()
-        // Refresh at midnight (schedule changes) and after each workout
-        let midnight = Calendar.current.startOfDay(for: .now).addingTimeInterval(86400)
-        let timeline = Timeline(entries: [entry], policy: .after(midnight))
-        completion(timeline)
-    }
-    
-    private func loadCurrentState() -> InchComplicationEntry {
-        // Read from shared UserDefaults (app group) or WatchConnectivity cache
-        // This data is pushed from the iPhone whenever the schedule changes
-    }
-}
-
-struct InchComplicationEntry: TimelineEntry {
-    let date: Date
-    let dueCount: Int
-    let completedCount: Int
-    let totalEnrolled: Int
-    let isRestDay: Bool
-    let exerciseColors: [String]  // hex colours for due exercises
-}
-```
-
-### Complication Views
-
-```swift
-struct InchCircularComplication: View {
-    let entry: InchComplicationEntry
-    
-    var body: some View {
-        if entry.isRestDay {
-            VStack(spacing: 2) {
-                Text("REST")
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundStyle(.green)
-                Text("DAY")
-                    .font(.system(size: 8))
-                    .foregroundStyle(.secondary)
-            }
-        } else {
-            VStack(spacing: 2) {
-                Text("DUE")
-                    .font(.system(size: 8))
-                    .foregroundStyle(.secondary)
-                Text("\(entry.completedCount)/\(entry.dueCount)")
-                    .font(.system(size: 18, weight: .bold, design: .monospaced))
-            }
-        }
-    }
-}
-
-struct InchRectangularComplication: View {
-    let entry: InchComplicationEntry
-    
-    var body: some View {
-        if entry.isRestDay {
-            Text("Rest day — next training tomorrow")
-                .font(.caption)
-        } else {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("\(entry.dueCount - entry.completedCount) exercises remaining")
-                    .font(.headline)
-                HStack(spacing: 4) {
-                    ForEach(entry.exerciseColors, id: \.self) { hex in
-                        Circle()
-                            .fill(Color(hex: hex))
-                            .frame(width: 6, height: 6)
-                    }
-                }
-            }
-        }
-    }
-}
-```
-
-### Data Sharing Between App and Widget
-
-Complications run in a separate process and can't access the main app's SwiftData store directly. Use a shared App Group for communication:
-
-1. iPhone pushes complication data to Watch via `transferUserInfo` alongside the schedule sync
-2. Watch stores complication state in shared `UserDefaults` (App Group)
-3. The complication's `TimelineProvider` reads from shared `UserDefaults`
-4. After each workout completion on the Watch, update `UserDefaults` and call `WidgetCenter.shared.reloadAllTimelines()`
-
-```swift
-// Shared data key
-let complicationData = UserDefaults(suiteName: "group.com.inch.bodyweight")
-
-// After workout completion
-complicationData?.set(completedCount, forKey: "complication.completedCount")
-complicationData?.set(dueCount, forKey: "complication.dueCount")
-WidgetCenter.shared.reloadAllTimelines()
-```
-
----
-
-## 5. Dashboard Conflict Warnings
+## 4. Dashboard Conflict Warnings
 
 ### UI Treatment
 
@@ -713,14 +582,6 @@ InchApp/Features/Today/
 InchApp/Services/
   └── NotificationService.swift   // UNUserNotificationCenter wrapper
 
-InchWatch/
-  ├── Complications/
-  │   ├── InchComplicationProvider.swift
-  │   ├── InchComplicationEntry.swift
-  │   ├── InchCircularComplication.swift
-  │   ├── InchRectangularComplication.swift
-  │   └── InchInlineComplication.swift
-  └── (modify WatchConnectivityService to push complication data)
 ```
 
 ### Modified Files
@@ -730,7 +591,6 @@ InchApp/Features/Today/TodayViewModel.swift   — add conflict detection
 InchApp/Features/Settings/SettingsView.swift   — add notification and schedule sections
 InchApp/Features/Settings/SettingsViewModel.swift — notification permission handling
 InchApp/InchApp.swift                          — register notification service
-InchWatch/InchWatchApp.swift                   — register widget extension
 ```
 
 ---
@@ -745,8 +605,7 @@ InchWatch/InchWatchApp.swift                   — register widget extension
 6. **ConflictWarningBanner + TodayViewModel updates** — wire up conflict display
 7. **NotificationService** — permission, scheduling, cancellation
 8. **Settings notification section** — toggles and time pickers
-9. **Watch complications** — timeline provider, views, App Group data sharing
-10. **Integration testing** — verify notification scheduling after completions, complication updates after sync
+9. **Integration testing** — verify notification scheduling after completions
 
 ---
 

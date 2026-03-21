@@ -64,6 +64,8 @@ struct DayGroupRow: View {
                 }
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(collapsedLabel)
+            .accessibilityHint(isExpanded ? "Double-tap to collapse" : "Double-tap to expand")
 
             if isExpanded {
                 Divider()
@@ -115,5 +117,12 @@ struct DayGroupRow: View {
                     .frame(width: 8, height: 8)
             }
         }
+        .accessibilityHidden(true)
+    }
+
+    private var collapsedLabel: String {
+        var parts = [dayLabel, "\(day.totalReps) reps", "\(day.exercises.count) exercises"]
+        if let dur = durationLabel { parts.append(dur) }
+        return parts.joined(separator: ", ")
     }
 }
