@@ -22,6 +22,12 @@ struct TodayView: View {
 
     private var streak: Int { streakStates.first?.currentStreak ?? 0 }
 
+    private var completedTodayCount: Int {
+        viewModel.dueExercises.filter {
+            viewModel.completedTodayIds.contains($0.exerciseDefinition?.exerciseId ?? "")
+        }.count
+    }
+
     var body: some View {
         Group {
             if viewModel.isRestDay {
@@ -36,6 +42,17 @@ struct TodayView: View {
         }
         .navigationTitle("Today")
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            if completedTodayCount >= 1 && streak > 0 {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Label("\(streak)", systemImage: "flame.fill")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.orange)
+                        .labelStyle(.titleAndIcon)
+                }
+            }
+        }
         .withWorkoutDestinations()
         .withTodayDestinations()
         .task {
@@ -53,9 +70,11 @@ struct TodayView: View {
     private var exerciseList: some View {
         ScrollView {
             LazyVStack(spacing: 12) {
-                if streak > 0 {
-                    streakBanner
-                }
+                TodaySessionBanner(
+                    streak: streak,
+                    completedCount: completedTodayCount,
+                    totalCount: viewModel.dueExercises.count
+                )
                 if showDemographicsNudge {
                     TodayDemographicsNudge {
                         nudgeDismissed = true
@@ -74,14 +93,5 @@ struct TodayView: View {
             .padding(.horizontal)
             .padding(.bottom, 16)
         }
-    }
-
-    private var streakBanner: some View {
-        Label("\(streak)-day training streak", systemImage: "flame.fill")
-            .font(.subheadline)
-            .fontWeight(.medium)
-            .foregroundStyle(.orange)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.top, 4)
     }
 }
