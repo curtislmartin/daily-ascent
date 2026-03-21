@@ -82,6 +82,7 @@ private struct EnrolmentRow: View {
                 }
             }
             .frame(height: 6)
+            .accessibilityHidden(true)
 
             HStack {
                 Text("Day \(enrolment.currentDay) of \(totalDays)")
@@ -96,6 +97,19 @@ private struct EnrolmentRow: View {
             }
         }
         .padding(.vertical, 4)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(rowAccessibilityLabel)
+    }
+
+    private var rowAccessibilityLabel: String {
+        var parts: [String] = []
+        parts.append(def?.name ?? "Exercise")
+        parts.append("Level \(enrolment.currentLevel), day \(enrolment.currentDay) of \(totalDays)")
+        parts.append("\(Int(progress * 100))% complete")
+        if let next = enrolment.nextScheduledDate {
+            parts.append("Next session \(next.formatted(.relative(presentation: .named)))")
+        }
+        return parts.joined(separator: ", ")
     }
 
     private var accentColor: Color {

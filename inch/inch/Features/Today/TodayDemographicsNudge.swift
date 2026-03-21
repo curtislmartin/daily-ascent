@@ -25,6 +25,7 @@ struct TodayDemographicsNudge: View {
                     .foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("Dismiss profile nudge")
         }
         .padding(12)
         .background(.tint.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))

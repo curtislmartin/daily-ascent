@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 import InchShared
 
-private enum TestPhase {
+private enum TestPhase: Equatable {
     case ready
     case counting(reps: Int)
     case result(reps: Int, passed: Bool, nextDate: Date?)
@@ -13,6 +13,10 @@ struct TestDayView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+
+    @Environment(NotificationService.self) private var notifications
+    @Query private var allSettings: [UserSettings]
+    private var settings: UserSettings? { allSettings.first }
 
     @State private var enrolment: ExerciseEnrolment?
     @State private var testTarget: Int = 0
@@ -34,6 +38,22 @@ struct TestDayView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .tabBar)
         .task { load() }
+        .onChange(of: phase) { _, newPhase in
+            guard case .result(_, let passed, _) = newPhase,
+                  let settings else { return }
+            Task {
+                await notifications.requestPermission()
+                await notifications.refresh(context: modelContext, settings: settings)
+                if passed, settings.levelUnlockNotificationEnabled,
+                   let enrolment {
+                    notifications.postLevelUnlock(
+                        exerciseName: enrolment.exerciseDefinition?.name ?? "",
+                        newLevel: enrolment.currentLevel,
+                        startsIn: SchedulingEngine.interLevelGapDays
+                    )
+                }
+            }
+        }
     }
 
     private var readyView: some View {

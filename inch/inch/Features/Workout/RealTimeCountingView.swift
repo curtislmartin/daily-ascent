@@ -28,6 +28,8 @@ struct RealTimeCountingView: View {
                     .contentTransition(.numericText())
             }
             .frame(width: 200, height: 200)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(count) reps")
 
             Text("target: \(targetReps)")
                 .font(.subheadline)
@@ -44,6 +46,7 @@ struct RealTimeCountingView: View {
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
             .disabled(showingCompletion)
+            .accessibilityHint("Double-tap to count one rep")
 
             if count > 0 {
                 Button("Done — \(count) reps") {
