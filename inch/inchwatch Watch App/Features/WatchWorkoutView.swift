@@ -18,6 +18,7 @@ struct WatchWorkoutView: View {
     @State private var setStartDate: Date = .now
     @State private var elapsed: Int = 0
     @State private var hasAlerted: Bool = false
+    @State private var inboundSessionId: String = ""
 
     init(session: WatchSession, settings: WatchSettings, onStartNext: ((WatchSession) -> Void)? = nil) {
         self.session = session
@@ -94,19 +95,55 @@ struct WatchWorkoutView: View {
         }
         .background(.background)
         .ignoresSafeArea()
+        .task {
+            for await trigger in watchConnectivity.recordingTriggers {
+                switch trigger {
+                case .start(let exerciseId, let setNumber, let sessionId):
+                    guard exerciseId == session.exerciseId,
+                          !motionRecording.isRecording else { break }
+                    inboundSessionId = sessionId
+                    motionRecording.startRecording(
+                        exerciseId: exerciseId,
+                        setNumber: setNumber,
+                        sessionId: sessionId
+                    )
+                case .stop(let exerciseId, let setNumber):
+                    guard exerciseId == session.exerciseId,
+                          motionRecording.isRecording else { break }
+                    _ = motionRecording.stopAndTransfer(
+                        exerciseId: exerciseId,
+                        setNumber: setNumber,
+                        sessionId: inboundSessionId,
+                        level: session.level,
+                        dayNumber: session.dayNumber,
+                        confirmedReps: 0,
+                        durationSeconds: 0,
+                        countingMode: session.countingMode
+                    )
+                    inboundSessionId = ""
+                }
+            }
+        }
         .onChange(of: viewModel.phase) { _, newPhase in
             switch newPhase {
             case .inSet:
                 // Reset elapsed timer — covers both manual Start and auto-advance after rest
                 setStartDate = .now
                 elapsed = 0
-                motionRecording.startRecording(exerciseId: session.exerciseId, setNumber: viewModel.currentSet)
+                // Use sessionId from iPhone if available (dual-device), else generate own
+                let sid = inboundSessionId.isEmpty ? UUID().uuidString : inboundSessionId
+                motionRecording.startRecording(
+                    exerciseId: session.exerciseId,
+                    setNumber: viewModel.currentSet,
+                    sessionId: sid
+                )
             case .confirming:
                 if motionRecording.isRecording,
                    case .confirming(let targetReps, let duration) = newPhase {
                     _ = motionRecording.stopAndTransfer(
                         exerciseId: session.exerciseId,
                         setNumber: viewModel.currentSet,
+                        sessionId: motionRecording.currentSessionId,
                         level: session.level,
                         dayNumber: session.dayNumber,
                         confirmedReps: viewModel.pendingRealTimeCount ?? targetReps,
