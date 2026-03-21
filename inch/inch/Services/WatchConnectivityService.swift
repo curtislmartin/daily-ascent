@@ -122,7 +122,8 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
                 durationSeconds: meta.durationSeconds,
                 countingMode: meta.countingMode,
                 filePath: received.fileURL.path,
-                fileSizeBytes: received.fileSizeBytes
+                fileSizeBytes: received.fileSizeBytes,
+                sessionId: meta.sessionId
             )
             context.insert(recording)
             try? context.save()
@@ -228,7 +229,8 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
             durationSeconds: raw["durationSeconds"] as? Double ?? 0,
             countingMode: raw["countingMode"] as? String ?? "",
             sampleRateHz: raw["sampleRateHz"] as? Int ?? 50,
-            recordedAt: raw["recordedAt"] as? Double ?? Date.now.timeIntervalSince1970
+            recordedAt: raw["recordedAt"] as? Double ?? Date.now.timeIntervalSince1970,
+            sessionId: raw["sessionId"] as? String ?? ""
         )
         _receivedFiles.yield(ReceivedSensorFile(fileURL: dest, metadata: meta, fileSizeBytes: size))
     }
