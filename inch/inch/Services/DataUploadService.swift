@@ -95,8 +95,9 @@ final class DataUploadService {
 
         let rawData = try Data(contentsOf: fileURL)
         let compressedData = (try? (rawData as NSData).compressed(using: .zlib) as Data) ?? rawData
+        let localBaseName = URL(filePath: recording.filePath).deletingPathExtension().lastPathComponent
         let timestamp = Int(recording.recordedAt.timeIntervalSince1970)
-        let fileName = "\(recording.exerciseId)_\(timestamp).bin.zlib"
+        let fileName = "\(localBaseName)_\(timestamp).bin.zlib"
         let storagePath = "\(recording.exerciseId)/\(fileName)"
 
         // Step 1: Upload binary file to Supabase Storage (zlib-compressed)
@@ -132,7 +133,8 @@ final class DataUploadService {
             ageRange: config.ageRange,
             heightRange: config.heightRange,
             biologicalSex: config.biologicalSex,
-            activityLevel: config.activityLevel
+            activityLevel: config.activityLevel,
+            sessionId: recording.sessionId
         )
 
         guard let metadataURL = URL(string: "\(config.supabaseURL)/rest/v1/sensor_recordings") else {
@@ -183,6 +185,7 @@ private struct SensorRecordingPayload: Encodable {
     let heightRange: String?
     let biologicalSex: String?
     let activityLevel: String?
+    let sessionId: String
 
     enum CodingKeys: String, CodingKey {
         case exerciseId = "exercise_id"
@@ -201,5 +204,6 @@ private struct SensorRecordingPayload: Encodable {
         case heightRange = "height_range"
         case biologicalSex = "biological_sex"
         case activityLevel = "activity_level"
+        case sessionId = "session_id"
     }
 }

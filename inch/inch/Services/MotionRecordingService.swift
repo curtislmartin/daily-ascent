@@ -15,12 +15,13 @@ final class MotionRecordingService {
     nonisolated(unsafe) private var flushAndClose: (() -> Void)?
     private var sensorQueue: OperationQueue?
     private(set) var currentRecordingURL: URL?
+    private(set) var currentSessionId: String = ""
     private(set) var isRecording: Bool = false
 
     private static let maxSensorDataBytes = 50 * 1024 * 1024   // 50 MB cap on sensor_data folder
     private static let minDeviceFreeBytes: Int64 = 50 * 1024 * 1024  // 50 MB minimum device free space
 
-    func startRecording(exerciseId: String, setNumber: Int, context: ModelContext) {
+    func startRecording(exerciseId: String, setNumber: Int, sessionId: String, context: ModelContext) {
         flushAndClose = nil
         guard motionManager.isDeviceMotionAvailable else { return }
 
@@ -41,7 +42,7 @@ final class MotionRecordingService {
             guard sensorDataFolderSizeBytes(at: dir) <= Self.maxSensorDataBytes else { return }
         }
 
-        let fileName = "\(exerciseId)_set\(setNumber)_\(Int(Date.now.timeIntervalSince1970)).bin"
+        let fileName = "\(exerciseId)_set\(setNumber)_\(sessionId)_iphone.bin"
         let fileURL = dir.appending(path: fileName)
         FileManager.default.createFile(atPath: fileURL.path, contents: nil)
 
@@ -66,6 +67,7 @@ final class MotionRecordingService {
         startDeviceMotionUpdates(to: queue, fileHandle: fileHandle, recordingStart: recordingStart)
 
         currentRecordingURL = fileURL
+        currentSessionId = sessionId
         isRecording = true
     }
 
@@ -78,6 +80,7 @@ final class MotionRecordingService {
         isRecording = false
         let url = currentRecordingURL
         currentRecordingURL = nil
+        currentSessionId = ""
         return url
     }
 

@@ -15,9 +15,10 @@ final class WatchMotionRecordingService {
     nonisolated(unsafe) private var flushAndClose: (() -> Void)?
     private var sensorQueue: OperationQueue?
     private(set) var currentRecordingURL: URL?
+    private(set) var currentSessionId: String = ""
     private(set) var isRecording: Bool = false
 
-    func startRecording(exerciseId: String, setNumber: Int) {
+    func startRecording(exerciseId: String, setNumber: Int, sessionId: String) {
         flushAndClose = nil
         guard motionManager.isDeviceMotionAvailable else { return }
 
@@ -29,7 +30,7 @@ final class WatchMotionRecordingService {
         resourceValues.isExcludedFromBackup = true
         try? dirForBackup.setResourceValues(resourceValues)
 
-        let fileName = "\(exerciseId)_watch_set\(setNumber)_\(Int(Date.now.timeIntervalSince1970)).bin"
+        let fileName = "\(exerciseId)_set\(setNumber)_\(sessionId)_watch.bin"
         let fileURL = dir.appending(path: fileName)
         FileManager.default.createFile(atPath: fileURL.path, contents: nil)
 
@@ -54,6 +55,7 @@ final class WatchMotionRecordingService {
         startDeviceMotionUpdates(to: queue, fileHandle: fileHandle, recordingStart: recordingStart)
 
         currentRecordingURL = fileURL
+        currentSessionId = sessionId
         isRecording = true
     }
 
@@ -61,6 +63,7 @@ final class WatchMotionRecordingService {
     func stopAndTransfer(
         exerciseId: String,
         setNumber: Int,
+        sessionId: String,
         level: Int,
         dayNumber: Int,
         confirmedReps: Int,
@@ -74,6 +77,7 @@ final class WatchMotionRecordingService {
         isRecording = false
         let url = currentRecordingURL
         currentRecordingURL = nil
+        currentSessionId = ""
 
         guard let url,
               WCSession.default.activationState == .activated
@@ -82,6 +86,7 @@ final class WatchMotionRecordingService {
         let metadata: [String: Any] = [
             "exerciseId": exerciseId,
             "setNumber": setNumber,
+            "sessionId": sessionId,
             "device": SensorDevice.appleWatch.rawValue,
             "level": level,
             "dayNumber": dayNumber,

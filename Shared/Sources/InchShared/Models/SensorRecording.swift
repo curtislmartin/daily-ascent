@@ -15,6 +15,7 @@ public final class SensorRecording {
     public var countingMode: String = ""
     public var filePath: String = ""
     public var fileSizeBytes: Int = 0
+    public var sessionId: String = ""
 
     public var uploadStatus: UploadStatus = UploadStatus.pending
     public var uploadedAt: Date? = nil
@@ -34,6 +35,7 @@ public final class SensorRecording {
         countingMode: String = "",
         filePath: String = "",
         fileSizeBytes: Int = 0,
+        sessionId: String = "",
         uploadStatus: UploadStatus = .pending,
         uploadedAt: Date? = nil
     ) {
@@ -49,6 +51,7 @@ public final class SensorRecording {
         self.countingMode = countingMode
         self.filePath = filePath
         self.fileSizeBytes = fileSizeBytes
+        self.sessionId = sessionId
         self.uploadStatus = uploadStatus
         self.uploadedAt = uploadedAt
     }
