@@ -11,15 +11,18 @@ struct WorkoutSessionView: View {
     @Environment(MotionRecordingService.self) private var motionRecording
     @Environment(DataUploadService.self) private var dataUpload
     @Environment(NotificationService.self) private var notifications
+    @Environment(WatchConnectivityService.self) private var watchConnectivity
 
     @Query private var allSettings: [UserSettings]
     private var sensorConsented: Bool { allSettings.first?.motionDataUploadConsented ?? false }
     private var settings: UserSettings? { allSettings.first }
+    private var dualRecordingEnabled: Bool { allSettings.first?.dualDeviceRecordingEnabled ?? true }
 
     @State private var viewModel: WorkoutViewModel
     @State private var pendingRecordingURL: URL?
     @State private var realTimeSetStartDate: Date?
     @State private var showingQuitConfirm = false
+    @State private var sessionId: String = ""
 
     init(enrolmentId: PersistentIdentifier) {
         self.enrolmentId = enrolmentId
@@ -88,6 +91,7 @@ struct WorkoutSessionView: View {
             Text("Your progress so far won't be saved.")
         }
         .task {
+            sessionId = UUID().uuidString
             viewModel.load(context: modelContext)
             await healthKit.requestAuthorization()
         }
@@ -96,11 +100,30 @@ struct WorkoutSessionView: View {
             case .inSet:
                 if sensorConsented {
                     let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
-                    motionRecording.startRecording(exerciseId: exerciseId, setNumber: viewModel.currentSetIndex + 1, context: modelContext)
+                    motionRecording.startRecording(
+                        exerciseId: exerciseId,
+                        setNumber: viewModel.currentSetIndex + 1,
+                        sessionId: sessionId,
+                        context: modelContext
+                    )
+                    if dualRecordingEnabled {
+                        watchConnectivity.sendRecordingStart(
+                            exerciseId: exerciseId,
+                            setNumber: viewModel.currentSetIndex + 1,
+                            sessionId: sessionId
+                        )
+                    }
                 }
             case .confirming:
                 if motionRecording.isRecording {
                     pendingRecordingURL = motionRecording.stopRecording()
+                }
+                if dualRecordingEnabled {
+                    let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
+                    watchConnectivity.sendRecordingStop(
+                        exerciseId: exerciseId,
+                        setNumber: viewModel.currentSetIndex + 1
+                    )
                 }
             case .complete:
                 dataUpload.scheduleBGUpload()
@@ -159,6 +182,13 @@ struct WorkoutSessionView: View {
                     targetReps: viewModel.currentTargetReps
                 ) { actual in
                     let url = sensorConsented ? motionRecording.stopRecording() : nil
+                    if dualRecordingEnabled {
+                        let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
+                        watchConnectivity.sendRecordingStop(
+                            exerciseId: exerciseId,
+                            setNumber: viewModel.currentSetIndex + 1
+                        )
+                    }
                     let duration = realTimeSetStartDate.map { Date.now.timeIntervalSince($0) } ?? 0
                     realTimeSetStartDate = nil
                     viewModel.completeRealTimeSet(actual: actual, context: modelContext, recordingURL: url, duration: duration)
@@ -168,7 +198,19 @@ struct WorkoutSessionView: View {
                     if sensorConsented {
                         realTimeSetStartDate = .now
                         let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
-                        motionRecording.startRecording(exerciseId: exerciseId, setNumber: viewModel.currentSetIndex + 1, context: modelContext)
+                        motionRecording.startRecording(
+                            exerciseId: exerciseId,
+                            setNumber: viewModel.currentSetIndex + 1,
+                            sessionId: sessionId,
+                            context: modelContext
+                        )
+                        if dualRecordingEnabled {
+                            watchConnectivity.sendRecordingStart(
+                                exerciseId: exerciseId,
+                                setNumber: viewModel.currentSetIndex + 1,
+                                sessionId: sessionId
+                            )
+                        }
                     }
                 }
             } else {
