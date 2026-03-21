@@ -18,11 +18,27 @@ struct WorkoutSessionView: View {
     private var settings: UserSettings? { allSettings.first }
     private var dualRecordingEnabled: Bool { allSettings.first?.dualDeviceRecordingEnabled ?? true }
 
+    private var exerciseId: String {
+        viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
+    }
+
+    private var isHoldPhoneExercise: Bool {
+        exerciseId == "sit_ups" || exerciseId == "dead_bugs"
+    }
+
+    private var shouldShowHoldPhoneHint: Bool {
+        showHoldPhoneHint &&
+        isHoldPhoneExercise &&
+        !watchConnectivity.isWatchReachable &&
+        viewModel.currentSetIndex == 0
+    }
+
     @State private var viewModel: WorkoutViewModel
     @State private var pendingRecordingURL: URL?
     @State private var realTimeSetStartDate: Date?
     @State private var showingQuitConfirm = false
     @State private var sessionId: String = ""
+    @State private var showHoldPhoneHint = true
 
     init(enrolmentId: PersistentIdentifier) {
         self.enrolmentId = enrolmentId
@@ -98,6 +114,7 @@ struct WorkoutSessionView: View {
         .onChange(of: viewModel.phase) { _, newPhase in
             switch newPhase {
             case .inSet:
+                showHoldPhoneHint = false
                 if sensorConsented {
                     let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
                     motionRecording.startRecording(
@@ -163,6 +180,27 @@ struct WorkoutSessionView: View {
 
     private var readyView: some View {
         VStack(spacing: 32) {
+            if shouldShowHoldPhoneHint {
+                HStack(spacing: 10) {
+                    Image(systemName: "hand.raised.fill")
+                        .foregroundStyle(.secondary)
+                    Text("Hold your phone for better tracking")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Button {
+                        showHoldPhoneHint = false
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(12)
+                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 10))
+            }
+
             setProgressHeader
 
             Spacer()
