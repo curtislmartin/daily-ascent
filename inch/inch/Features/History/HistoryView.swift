@@ -18,6 +18,14 @@ struct HistoryView: View {
         return !s.hasDemographics
     }
 
+    private var preferredColorScheme: ColorScheme? {
+        switch allSettings.first?.appearanceMode {
+        case "light": .light
+        case "dark": .dark
+        default: nil
+        }
+    }
+
     enum Segment: String, CaseIterable {
         case log = "Log"
         case stats = "Stats"
@@ -70,6 +78,7 @@ struct HistoryView: View {
             NavigationStack {
                 SettingsView()
             }
+            .preferredColorScheme(preferredColorScheme)
         }
     }
 }
