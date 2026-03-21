@@ -14,6 +14,7 @@ struct WatchSensorMetadata: Sendable {
     let countingMode: String
     let sampleRateHz: Int
     let recordedAt: Double  // Unix timestamp
+    let sessionId: String
 }
 
 struct ReceivedSensorFile: Sendable {
