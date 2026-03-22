@@ -11,17 +11,64 @@ struct DemographicTagsView: View {
     private let ageOptions = ["Under 18", "18–29", "30–39", "40–49", "50–59", "60+"]
     private let heightOptions = ["Under 160cm", "160–170cm", "171–180cm", "181–190cm", "Over 190cm"]
     private let sexOptions = ["Male", "Female", "Prefer not to say"]
-    private let activityOptions = ["Beginner", "Intermediate", "Advanced"]
+    private let activityOptions: [(label: String, subtitle: String)] = [
+        ("Beginner",     "New to training"),
+        ("Intermediate", "2–3× per week"),
+        ("Advanced",     "Training 2+ years"),
+    ]
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 28) {
+            VStack(alignment: .leading, spacing: 24) {
                 header
 
-                PickerSection(title: "Age", options: ageOptions, selection: $ageRange)
-                PickerSection(title: "Height", options: heightOptions, selection: $heightRange)
-                PickerSection(title: "Biological sex", options: sexOptions, selection: $biologicalSex)
-                PickerSection(title: "Activity level", options: activityOptions, selection: $activityLevel)
+                section(title: "Age") {
+                    ForEach(ageOptions, id: \.self) { option in
+                        DemographicOptionCard(
+                            label: option,
+                            subtitle: nil,
+                            isSelected: ageRange == option
+                        ) {
+                            ageRange = ageRange == option ? nil : option
+                        }
+                    }
+                }
+
+                section(title: "Height") {
+                    ForEach(heightOptions, id: \.self) { option in
+                        DemographicOptionCard(
+                            label: option,
+                            subtitle: nil,
+                            isSelected: heightRange == option
+                        ) {
+                            heightRange = heightRange == option ? nil : option
+                        }
+                    }
+                }
+
+                section(title: "Biological sex") {
+                    ForEach(sexOptions, id: \.self) { option in
+                        DemographicOptionCard(
+                            label: option,
+                            subtitle: nil,
+                            isSelected: biologicalSex == option
+                        ) {
+                            biologicalSex = biologicalSex == option ? nil : option
+                        }
+                    }
+                }
+
+                section(title: "Activity level") {
+                    ForEach(activityOptions, id: \.label) { option in
+                        DemographicOptionCard(
+                            label: option.label,
+                            subtitle: option.subtitle,
+                            isSelected: activityLevel == option.label
+                        ) {
+                            activityLevel = activityLevel == option.label ? nil : option.label
+                        }
+                    }
+                }
 
                 Button {
                     onComplete(ageRange, heightRange, biologicalSex, activityLevel)
@@ -36,64 +83,70 @@ struct DemographicTagsView: View {
             .padding(.horizontal)
             .padding(.bottom, 32)
         }
-        .navigationTitle("Optional Profile")
+        .navigationTitle("Profile")
         .navigationBarTitleDisplayMode(.large)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Skip") {
-                    onComplete(nil, nil, nil, nil)
-                }
-            }
-        }
     }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Help us build better models")
+            Text("Tell us about yourself")
                 .font(.headline)
-            Text("Different body types produce different movement signatures. These optional fields help us train accurate rep counting for everyone.")
+            Text("All optional — tap Continue to skip.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-            Text("All fields are optional and anonymous — never linked to your identity.")
+        }
+    }
+
+    private func section<Content: View>(title: String, @ViewBuilder cards: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
                 .font(.caption)
-                .foregroundStyle(.tertiary)
+                .textCase(.uppercase)
+                .foregroundStyle(.secondary)
+            cards()
         }
     }
 }
 
-private struct PickerSection: View {
-    let title: String
-    let options: [String]
-    @Binding var selection: String?
+
+// MARK: - Option Card
+
+struct DemographicOptionCard: View {
+    let label: String
+    let subtitle: String?
+    let isSelected: Bool
+    let onTap: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.subheadline)
-                .fontWeight(.medium)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(options, id: \.self) { option in
-                        Button {
-                            selection = selection == option ? nil : option
-                        } label: {
-                            Text(option)
-                                .font(.caption)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(
-                                    selection == option
-                                        ? Color.accentColor
-                                        : Color(.secondarySystemFill),
-                                    in: Capsule()
-                                )
-                                .foregroundStyle(selection == option ? .white : .primary)
-                        }
-                        .buttonStyle(.plain)
-                    }
+        Button(action: onTap) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label)
+                    .font(.body)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.primary)
+                if let subtitle {
+                    Text(subtitle)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 12)
+            .padding(.horizontal, 14)
+            .background(isSelected ? Color.accentColor.opacity(0.08) : Color(.secondarySystemGroupedBackground))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(isSelected ? Color.accentColor : Color.clear, lineWidth: 1.5)
+            )
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
+        .animation(.easeInOut(duration: 0.15), value: isSelected)
+    }
+}
+
+#Preview {
+    NavigationStack {
+        DemographicTagsView { _, _, _, _ in }
     }
 }
