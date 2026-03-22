@@ -3,10 +3,12 @@ import SwiftData
 import InchShared
 
 struct SettingsView: View {
+    // internal (not private) — accessed by DebugPanelSection extension in a separate file
     @Environment(\.modelContext) var modelContext
 
     @State private var viewModel = SettingsViewModel()
 
+    // internal (not private) — accessed by DebugPanelSection extension in a separate file
     #if DEBUG
     @State var debugViewModel = DebugViewModel()
     @Environment(NotificationService.self) var notificationService
