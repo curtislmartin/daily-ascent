@@ -12,7 +12,7 @@ final class MotionRecordingService {
     // It is assigned on @MainActor (inside startRecording) and called on @MainActor (inside
     // stopRecording), so there is no actual data race. nonisolated(unsafe) is required to satisfy
     // Swift's strict concurrency checker, following the same pattern as motionManager above.
-    nonisolated private var flushAndClose: (() -> Void)?
+    nonisolated(unsafe) private var flushAndClose: (() -> Void)?
     private var sensorQueue: OperationQueue?
     private(set) var currentRecordingURL: URL?
     private(set) var currentSessionId: String = ""
