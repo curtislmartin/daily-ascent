@@ -34,20 +34,30 @@ final class HealthKitService {
     ) async {
         guard HKHealthStore.isHealthDataAvailable(), isAuthorized else { return }
 
-        let workout = HKWorkout(
-            activityType: .functionalStrengthTraining,
-            start: startDate,
-            end: endDate,
-            duration: endDate.timeIntervalSince(startDate),
-            totalEnergyBurned: totalEnergyBurned.map {
-                HKQuantity(unit: .kilocalorie(), doubleValue: $0)
-            },
-            totalDistance: nil,
-            metadata: metadata
-        )
+        let configuration = HKWorkoutConfiguration()
+        configuration.activityType = .functionalStrengthTraining
+
+        let builder = HKWorkoutBuilder(healthStore: healthStore, configuration: configuration, device: .local())
 
         do {
-            try await healthStore.save(workout)
+            try await builder.beginCollection(at: startDate)
+
+            if let calories = totalEnergyBurned {
+                let energySample = HKQuantitySample(
+                    type: HKQuantityType(.activeEnergyBurned),
+                    quantity: HKQuantity(unit: .kilocalorie(), doubleValue: calories),
+                    start: startDate,
+                    end: endDate
+                )
+                try await builder.addSamples([energySample])
+            }
+
+            if !metadata.isEmpty {
+                try await builder.addMetadata(metadata)
+            }
+
+            try await builder.endCollection(at: endDate)
+            try await builder.finishWorkout()
         } catch {
             // Save failed silently — workout data is already in SwiftData
         }
