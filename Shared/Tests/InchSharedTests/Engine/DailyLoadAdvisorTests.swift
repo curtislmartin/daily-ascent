@@ -62,9 +62,9 @@ struct DailyLoadAdvisorTests {
     // MARK: - Base budget (no modifiers)
 
     @Test(.tags(.loadAdvisor))
-    func freshDayWithCoreOnlySessionHasHighHeadroom() {
+    func freshDayWithCoreOnlySessionHasHighHeadroom() throws {
         // sit_ups (cost 1) + dead_bugs (cost 1) = 2 consumed of 10
-        // 4 pending: avg cost ~2.5 → floor(8/2.5) = 3, capped at 4 → total 6
+        // 4 pending: avg cost 2.5 → floor(8/2.5) = floor(3.2) = 3, capped at 4 → total 5
         let context = makeContext(
             completed: [
                 makeCompleted("sit_ups", muscleGroup: .coreFlexion),
@@ -79,8 +79,8 @@ struct DailyLoadAdvisorTests {
         )
         let result = advisor.recommend(context: context)
         let count = try #require(result)
-        // With 8 budget remaining and 4 medium/high cost exercises, should recommend all 6
-        #expect(count.recommendedCount == 6)
+        // With 8 budget remaining and avg pending cost 2.5, floor(3.2) = 3 more → total 5
+        #expect(count.recommendedCount == 5)
     }
 
     @Test(.tags(.loadAdvisor))
@@ -122,7 +122,7 @@ struct DailyLoadAdvisorTests {
     // MARK: - Test day multiplier (×1.5)
 
     @Test(.tags(.loadAdvisor))
-    func testDayCompletedCostsMoreThanRegular() {
+    func testDayCompletedCostsMoreThanRegular() throws {
         // push_ups test: 2 × 1.5 = 3.0 consumed (vs 2.0 without test)
         let testContext = makeContext(
             completed: [makeCompleted("push_ups", muscleGroup: .upperPush, isTest: true)],
@@ -207,7 +207,7 @@ struct DailyLoadAdvisorTests {
     // MARK: - Rescheduled exercise (×1.25)
 
     @Test(.tags(.loadAdvisor))
-    func rescheduledExerciseCostsMore() {
+    func rescheduledExerciseCostsMore() throws {
         let rescheduled = makeContext(
             completed: [makeCompleted("push_ups", muscleGroup: .upperPush, wasRescheduled: true)],
             pending: [makePending("sit_ups", muscleGroup: .coreFlexion)]
@@ -224,7 +224,7 @@ struct DailyLoadAdvisorTests {
     // MARK: - Budget-level reductions
 
     @Test(.tags(.loadAdvisor))
-    func preTestTaperReducesBudgetAndSetsFlag() {
+    func preTestTaperReducesBudgetAndSetsFlag() throws {
         let tomorrow = Date.now.addingTimeInterval(24 * 3600)
         let withTaper = makeContext(
             completed: [makeCompleted("push_ups", muscleGroup: .upperPush)],
@@ -243,7 +243,7 @@ struct DailyLoadAdvisorTests {
     }
 
     @Test(.tags(.loadAdvisor))
-    func lookbackPenaltyFromYesterdaysTestSetsFlag() {
+    func lookbackPenaltyFromYesterdaysTestSetsFlag() throws {
         let withPenalty = makeContext(
             completed: [makeCompleted("push_ups", muscleGroup: .upperPush)],
             pending: [makePending("sit_ups", muscleGroup: .coreFlexion)],
@@ -261,7 +261,7 @@ struct DailyLoadAdvisorTests {
     }
 
     @Test(.tags(.loadAdvisor))
-    func lookbackPenaltyFromTwoHighCostYesterdayExercises() {
+    func lookbackPenaltyFromTwoHighCostYesterdayExercises() throws {
         let context = makeContext(
             completed: [makeCompleted("push_ups", muscleGroup: .upperPush)],
             pending: [makePending("sit_ups", muscleGroup: .coreFlexion)],
@@ -277,7 +277,7 @@ struct DailyLoadAdvisorTests {
     // MARK: - Overloaded and caution groups
 
     @Test(.tags(.loadAdvisor))
-    func squatsTestDayMarksLowerGroupOverloaded() {
+    func squatsTestDayMarksLowerGroupOverloaded() throws {
         // squats test: 3 × 1.5 = 4.5 ≥ 3.0 threshold → .lower is overloaded
         let context = makeContext(
             completed: [makeCompleted("squats", muscleGroup: .lower, isTest: true)]
@@ -287,7 +287,7 @@ struct DailyLoadAdvisorTests {
     }
 
     @Test(.tags(.loadAdvisor))
-    func lowCostExerciseDoesNotOverloadGroup() {
+    func lowCostExerciseDoesNotOverloadGroup() throws {
         // sit_ups: cost 1.0 < 3.0 threshold → .coreFlexion is NOT overloaded
         let context = makeContext(
             completed: [makeCompleted("sit_ups", muscleGroup: .coreFlexion)]
@@ -297,7 +297,7 @@ struct DailyLoadAdvisorTests {
     }
 
     @Test(.tags(.loadAdvisor))
-    func squatsDoneCreatesCautionGroupForLowerPosterior() {
+    func squatsDoneCreatesCautionGroupForLowerPosterior() throws {
         // squats (.lower) worked → .lowerPosterior should appear in cautionGroups
         let context = makeContext(
             completed: [makeCompleted("squats", muscleGroup: .lower)],
@@ -308,7 +308,7 @@ struct DailyLoadAdvisorTests {
     }
 
     @Test(.tags(.loadAdvisor))
-    func bothLowerGroupsWorkedClearsAllCautionGroups() {
+    func bothLowerGroupsWorkedClearsAllCautionGroups() throws {
         // When both partners are already worked, neither is a "caution" (they're done)
         let context = makeContext(
             completed: [
@@ -323,7 +323,7 @@ struct DailyLoadAdvisorTests {
     }
 
     @Test(.tags(.loadAdvisor))
-    func coreGroupsNeverAppearInCautionGroups() {
+    func coreGroupsNeverAppearInCautionGroups() throws {
         // Core exercises have no compounding partners → never in cautionGroups
         let context = makeContext(
             completed: [makeCompleted("sit_ups", muscleGroup: .coreFlexion)]
@@ -336,7 +336,7 @@ struct DailyLoadAdvisorTests {
     // MARK: - Budget fraction
 
     @Test(.tags(.loadAdvisor))
-    func budgetFractionReflectsConsumedLoad() {
+    func budgetFractionReflectsConsumedLoad() throws {
         // push_ups (2) of budget 10 → fraction = 0.2
         let context = makeContext(
             completed: [makeCompleted("push_ups", muscleGroup: .upperPush)]
@@ -346,7 +346,7 @@ struct DailyLoadAdvisorTests {
     }
 
     @Test(.tags(.loadAdvisor))
-    func budgetFractionCanExceedOne() {
+    func budgetFractionCanExceedOne() throws {
         // All 6: 3+3+2+2+1+1 = 12 of budget 10 → fraction = 1.2
         let context = makeContext(
             completed: [
@@ -365,7 +365,7 @@ struct DailyLoadAdvisorTests {
     // MARK: - Boundary conditions
 
     @Test(.tags(.loadAdvisor))
-    func recommendedCountNeverLessThanCompletedCount() {
+    func recommendedCountNeverLessThanCompletedCount() throws {
         // Force budget exhaustion
         let tomorrow = Date.now.addingTimeInterval(24 * 3600)
         let context = makeContext(
