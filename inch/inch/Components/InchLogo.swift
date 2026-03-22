@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The Inch brand mark — a ruler tick mark rendered as a SwiftUI shape.
+/// The Daily Ascent brand mark — a ruler tick mark rendered as a SwiftUI shape.
 /// Draws a left vertical spine with five horizontal marks of graduated width:
 /// full (top), short (1/4), medium (1/2), short (3/4), full (bottom/base).
 struct InchLogo: View {
@@ -66,7 +66,7 @@ struct InchLogo: View {
         Color(hex: "#111113") ?? .black
         VStack(spacing: 16) {
             InchLogo(size: 120)
-            Text("inch")
+            Text("Daily Ascent")
                 .font(.system(size: 28, weight: .light, design: .default))
                 .foregroundStyle(Color(hex: "#7DD3A8") ?? .green)
         }

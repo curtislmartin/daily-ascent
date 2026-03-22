@@ -1,26 +1,26 @@
 #!/usr/bin/env zsh
-# upload-testflight.sh — Archive, export, and upload inch to TestFlight
+# upload-testflight.sh — Archive, export, and upload Daily Ascent to TestFlight
 #
 # Credentials stored in macOS Keychain:
-#   security add-generic-password -s "inch-apple-id" -a "apple_id" -w "your@email.com"
-#   security add-generic-password -s "inch-apple-id" -a "app_specific_password" -w "xxxx-xxxx-xxxx-xxxx"
+#   security add-generic-password -s "daily-ascent-apple-id" -a "apple_id" -w "your@email.com"
+#   security add-generic-password -s "daily-ascent-apple-id" -a "app_specific_password" -w "xxxx-xxxx-xxxx-xxxx"
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-ARCHIVE_PATH=/tmp/inch.xcarchive
-EXPORT_PATH=/tmp/inch-export
+ARCHIVE_PATH=/tmp/daily-ascent.xcarchive
+EXPORT_PATH=/tmp/daily-ascent-export
 EXPORT_OPTIONS="$SCRIPT_DIR/ExportOptions.plist"
 
 # ── Credentials ──────────────────────────────────────────────────────────────
-APPLE_ID="$(security find-generic-password -s inch-apple-id -a apple_id -w 2>/dev/null)"
-APP_PASSWORD="$(security find-generic-password -s inch-apple-id -a app_specific_password -w 2>/dev/null)"
+APPLE_ID="$(security find-generic-password -s daily-ascent-apple-id -a apple_id -w 2>/dev/null)"
+APP_PASSWORD="$(security find-generic-password -s daily-ascent-apple-id -a app_specific_password -w 2>/dev/null)"
 
 if [[ -z "$APPLE_ID" || -z "$APP_PASSWORD" ]]; then
   echo "❌ Credentials not found in Keychain. Add them with:"
-  echo "   security add-generic-password -s inch-apple-id -a apple_id -w your@email.com"
-  echo "   security add-generic-password -s inch-apple-id -a app_specific_password -w xxxx-xxxx-xxxx-xxxx"
+  echo "   security add-generic-password -s daily-ascent-apple-id -a apple_id -w your@email.com"
+  echo "   security add-generic-password -s daily-ascent-apple-id -a app_specific_password -w xxxx-xxxx-xxxx-xxxx"
   exit 1
 fi
 
@@ -55,7 +55,7 @@ xcodebuild -exportArchive \
 echo "🚀 Uploading to TestFlight (build $NEW)..."
 xcrun altool --upload-app \
   --type ios \
-  --file "$EXPORT_PATH/inch.ipa" \
+  --file "$EXPORT_PATH/daily-ascent.ipa" \
   --username "$APPLE_ID" \
   --password "$APP_PASSWORD" \
   2>&1 | grep -v "^$"

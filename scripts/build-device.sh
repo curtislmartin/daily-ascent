@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build and install Inch (iOS + Watch) to physical devices.
+# Build and install Daily Ascent (iOS + Watch) to physical devices.
 #
 # Usage:
 #   ./scripts/build-device.sh          # builds to iPhone (Watch app included)

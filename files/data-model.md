@@ -309,7 +309,7 @@ let modelConfiguration = ModelConfiguration(
     schema: schema,
     isStoredInMemoryOnly: false,
     // CloudKit container name reserved for future use
-    // cloudKitDatabase: .private("iCloud.com.inch.bodyweight")
+    // cloudKitDatabase: .private("iCloud.com.dailyascent.bodyweight")
 )
 ```
 

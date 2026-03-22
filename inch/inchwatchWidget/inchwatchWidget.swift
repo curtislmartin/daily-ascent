@@ -23,7 +23,7 @@ struct inchwatchWidgetEntryView: View {
     var entry: InchwatchPlaceholderEntry
 
     var body: some View {
-        Text("Inch")
+        Text("Daily Ascent")
             .font(.caption)
             .foregroundStyle(.secondary)
     }
@@ -37,7 +37,7 @@ struct inchwatchWidget: Widget {
             inchwatchWidgetEntryView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
         }
-        .configurationDisplayName("Inch")
+        .configurationDisplayName("Daily Ascent")
         .description("Today's training status.")
         .supportedFamilies([.accessoryCircular, .accessoryCorner, .accessoryRectangular, .accessoryInline])
     }

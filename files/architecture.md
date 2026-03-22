@@ -14,8 +14,8 @@
 ## Xcode Project Structure
 
 ```
-Inch/
-├── Inch.xcodeproj
+Daily Ascent/
+├── Daily Ascent.xcodeproj
 ├── CLAUDE.md
 ├── Shared/                          # Shared Swift package (iOS + watchOS)
 │   ├── Package.swift
@@ -454,7 +454,7 @@ import BackgroundTasks
 
 @Observable
 final class DataUploadService {
-    static let taskIdentifier = "com.inch.bodyweight.sensor-upload"
+    static let taskIdentifier = "com.dailyascent.bodyweight.sensor-upload"
     
     func registerBackgroundTask() {
         BGTaskScheduler.shared.register(

@@ -1,4 +1,4 @@
-# Inch — Bodyweight Training App
+# Daily Ascent — Bodyweight Training App
 
 iOS + watchOS app that guides users through structured bodyweight training programs. Six exercises, three progressive levels each. Users enrol in exercises, follow a prescribed set/rep scheme per day, and advance through levels by passing a max-rep test.
 

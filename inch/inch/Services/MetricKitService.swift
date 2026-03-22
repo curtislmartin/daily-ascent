@@ -2,7 +2,7 @@ import MetricKit
 import OSLog
 
 final class MetricKitService: NSObject, MXMetricManagerSubscriber {
-    private let logger = Logger(subsystem: "com.curtislmartin.inch", category: "MetricKit")
+    private let logger = Logger(subsystem: "com.curtislmartin.dailyascent", category: "MetricKit")
 
     override init() {
         super.init()

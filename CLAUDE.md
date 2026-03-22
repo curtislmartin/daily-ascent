@@ -1,8 +1,8 @@
-# CLAUDE.md — Inch Bodyweight Training App
+# CLAUDE.md — Daily Ascent Bodyweight Training App
 
 ## Project Overview
 
-Inch is an iOS + watchOS bodyweight training app with 6 exercises (Push-Ups, Squats, Sit-Ups, Pull-Ups, Glute Bridges, Dead Bugs), each with 3 progressive levels. Users enrol in exercises, follow prescribed set/rep schemes, and progress through levels by passing max-rep tests. The app features injury-aware scheduling, two rep counting modes, and collects anonymous sensor data for future ML-based auto rep counting.
+Daily Ascent is an iOS + watchOS bodyweight training app with 6 exercises (Push-Ups, Squats, Sit-Ups, Pull-Ups, Glute Bridges, Dead Bugs), each with 3 progressive levels. Users enrol in exercises, follow prescribed set/rep schemes, and progress through levels by passing max-rep tests. The app features injury-aware scheduling, two rep counting modes, and collects anonymous sensor data for future ML-based auto rep counting.
 
 ## Specification Documents
 

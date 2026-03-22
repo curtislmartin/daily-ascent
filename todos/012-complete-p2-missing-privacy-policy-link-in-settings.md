@@ -10,13 +10,13 @@ dependencies: []
 
 ## Problem Statement
 
-The app's privacy policy exists at `https://clmartin.dev/inch/privacy` but there is no in-app link to it. The `PrivacySettingsView` only shows consent toggle, demographics, and destructive actions. Apple's App Store Review Guidelines require that apps with any data collection must make the privacy policy accessible from within the app. Many reviewers specifically check for an in-app privacy policy link.
+The app's privacy policy exists at `https://clmartin.dev/daily-ascent/privacy` but there is no in-app link to it. The `PrivacySettingsView` only shows consent toggle, demographics, and destructive actions. Apple's App Store Review Guidelines require that apps with any data collection must make the privacy policy accessible from within the app. Many reviewers specifically check for an in-app privacy policy link.
 
 ## Findings
 
 - `inch/inch/Features/Settings/PrivacySettingsView.swift` — no privacy policy link anywhere
 - `inch/inch/Features/Settings/SettingsView.swift` — no privacy policy link in the settings root
-- `files/privacy-policy.md` states the policy is hosted at `https://clmartin.dev/inch/privacy`
+- `files/privacy-policy.md` states the policy is hosted at `https://clmartin.dev/daily-ascent/privacy`
 - App Store metadata requires a privacy policy URL, but in-app link is strongly recommended and expected by reviewers
 
 ## Proposed Solutions
@@ -27,7 +27,7 @@ The app's privacy policy exists at `https://clmartin.dev/inch/privacy` but there
 
 ```swift
 Section {
-    Link("Privacy Policy", destination: URL(string: "https://clmartin.dev/inch/privacy")!)
+    Link("Privacy Policy", destination: URL(string: "https://clmartin.dev/daily-ascent/privacy")!)
 } footer: {
     Text("Last updated March 2026")
 }
@@ -67,11 +67,11 @@ Section {
 **Affected files:**
 - `inch/inch/Features/Settings/PrivacySettingsView.swift`
 
-**Privacy policy URL:** `https://clmartin.dev/inch/privacy`
+**Privacy policy URL:** `https://clmartin.dev/daily-ascent/privacy`
 
 ## Acceptance Criteria
 
-- [ ] Tapping "Privacy Policy" in settings opens `https://clmartin.dev/inch/privacy` in Safari
+- [ ] Tapping "Privacy Policy" in settings opens `https://clmartin.dev/daily-ascent/privacy` in Safari
 - [ ] Link is visible in Data & Privacy settings section
 - [ ] Works correctly on first launch before onboarding is complete (if accessible)
 

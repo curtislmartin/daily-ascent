@@ -45,7 +45,7 @@ struct NotificationsSettingsView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Notifications are disabled")
                             .font(.subheadline)
-                        Text("Enable in Settings → Notifications → Inch")
+                        Text("Enable in Settings → Notifications → Daily Ascent")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         Button("Open Settings") {

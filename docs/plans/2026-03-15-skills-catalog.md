@@ -1,6 +1,6 @@
-# Skills Catalog — Inch
+# Skills Catalog — Daily Ascent
 
-All skill packages reviewed against the Inch spec documents and 17-step build order. Organised by tier and mapped to specific build phases.
+All skill packages reviewed against the Daily Ascent spec documents and 17-step build order. Organised by tier and mapped to specific build phases.
 
 ---
 
@@ -47,7 +47,7 @@ Skills that address significant surface areas of the project.
 ### `writing-for-interfaces` — skills-main.zip (writing-for-interfaces/)
 **Covers:** UI copy, button labels, empty states, error messages, onboarding text, microcopy principles.
 **Used in:** Steps 7–10 (onboarding, Today dashboard, workout session, program view).
-**Notes:** Inch has substantial UI copy — exercise names, coaching prompts, conflict warnings, consent text. This skill prevents AI-generated filler copy.
+**Notes:** Daily Ascent has substantial UI copy — exercise names, coaching prompts, conflict warnings, consent text. This skill prevents AI-generated filler copy.
 
 ---
 
@@ -132,16 +132,16 @@ These skills are valuable but only needed for specific phases.
 ### `macos-spm-app-packaging` — Skills-main/macos-spm-app-packaging/
 **Covers:** Scaffolding, building, and packaging SwiftPM-based macOS apps without an Xcode project. Bundle assembly, signing, notarization, appcast.
 **Used in:** If a macOS companion app is added to the project.
-**Notes:** Not applicable to the current Inch iOS/watchOS Xcode project. Relevant if expanding to a macOS target — either as a standalone SPM app or a menu bar companion. Keep available but do not install for v1.
+**Notes:** Not applicable to the current Daily Ascent iOS/watchOS Xcode project. Relevant if expanding to a macOS target — either as a standalone SPM app or a menu bar companion. Keep available but do not install for v1.
 
 ---
 
-## Tier 5: Not Applicable to Inch v1
+## Tier 5: Not Applicable to Daily Ascent v1
 
 | Skill | Reason |
 |---|---|
 | `core-data-expert` | Project uses SwiftData, not Core Data |
-| `appkit-accessibility-auditor` | macOS AppKit only; Inch is iOS/watchOS |
+| `appkit-accessibility-auditor` | macOS AppKit only; Daily Ascent is iOS/watchOS |
 | `github` | Utility skill for `gh` CLI; not domain-specific |
 | `critical-reasoning` | Process/epistemology skill; invoke manually when needed |
 

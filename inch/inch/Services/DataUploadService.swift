@@ -13,7 +13,7 @@ enum UploadError: Error {
 /// Uploads pending SensorRecordings to Supabase in the background via BGProcessingTask.
 @Observable
 final class DataUploadService {
-    static let taskIdentifier = "com.inch.bodyweight.sensor-upload"
+    static let taskIdentifier = "com.dailyascent.bodyweight.sensor-upload"
 
     private static let validExerciseIds: Set<String> = [
         "push_ups", "squats", "sit_ups", "pull_ups", "glute_bridges", "dead_bugs"

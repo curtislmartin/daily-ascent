@@ -1,4 +1,4 @@
-# v2+ Roadmap — Inch Bodyweight Training App
+# v2+ Roadmap — Daily Ascent Bodyweight Training App
 
 > **Status:** Brainstorm / bullet-point level. Nothing here is specced at implementation level yet.
 >
