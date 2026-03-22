@@ -9,7 +9,7 @@ struct SettingsView: View {
     @State private var viewModel = SettingsViewModel()
 
     // internal (not private) — accessed by DebugPanelSection extension in a separate file
-    #if DEBUG
+    #if DEBUG || TESTFLIGHT
     @State var debugViewModel = DebugViewModel()
     @Environment(NotificationService.self) var notificationService
     @Environment(WatchConnectivityService.self) var watchConnectivity
@@ -31,7 +31,7 @@ struct SettingsView: View {
                 generalSection(settings: settings)
             }
             privacySection
-            #if DEBUG
+            #if DEBUG || TESTFLIGHT
             debugContent
             #endif
         }
@@ -39,7 +39,7 @@ struct SettingsView: View {
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
         .task { viewModel.load(context: modelContext) }
-        #if DEBUG
+        #if DEBUG || TESTFLIGHT
         .alert(debugViewModel.alertTitle, isPresented: $debugViewModel.showAlert) {
             Button("OK") {}
         } message: {
