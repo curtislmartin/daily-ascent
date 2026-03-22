@@ -541,7 +541,7 @@ Notifications
 
 If notification permission is denied, show:
 ```
-Notifications are disabled. Enable in Settings → Notifications → Inch
+Notifications are disabled. Enable in Settings → Notifications → Daily Ascent
 [Open Settings]  // links to UIApplication.openSettingsURLString
 ```
 

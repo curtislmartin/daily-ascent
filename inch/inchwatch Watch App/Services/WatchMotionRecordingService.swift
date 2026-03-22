@@ -147,7 +147,7 @@ final class WatchMotionRecordingService {
 
     private func writeHeader(to fileHandle: FileHandle) {
         var header = Data()
-        header.append(contentsOf: [0x49, 0x4E, 0x43, 0x48]) // "INCH"
+        header.append(contentsOf: [0x44, 0x41, 0x53, 0x43]) // "DASC"
         header.append(1) // version
         var sampleRate: UInt16 = 50
         withUnsafeBytes(of: &sampleRate) { header.append(contentsOf: $0) }

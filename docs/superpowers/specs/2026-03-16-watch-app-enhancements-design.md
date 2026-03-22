@@ -249,8 +249,8 @@ Full-screen: "No workouts yet" + "Complete one from the Today tab."
 ```
 
 **Info.plist** (watch target):
-- `NSHealthShareUsageDescription` — "Inch reads your heart rate during workouts."
-- `NSHealthUpdateUsageDescription` — "Inch saves your strength workouts to the Health app."
+- `NSHealthShareUsageDescription` — "Daily Ascent reads your heart rate during workouts."
+- `NSHealthUpdateUsageDescription` — "Daily Ascent saves your strength workouts to the Health app."
 
 **Read types**: `HKQuantityType(.heartRate)`
 **Write types**: `HKObjectType.workoutType()` only — the app does not write HR samples directly; `HKLiveWorkoutBuilder` collects them automatically

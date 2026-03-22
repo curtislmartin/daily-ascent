@@ -27,7 +27,7 @@ struct DataConsentView: View {
             Text("Help improve automatic rep counting")
                 .font(.headline)
 
-            Text("While you work out, Inch records motion sensor data from your iPhone and Apple Watch. This data captures the movement patterns of each exercise — it's what will allow the app to count reps automatically.")
+            Text("While you work out, Daily Ascent records motion sensor data from your iPhone and Apple Watch. This data captures the movement patterns of each exercise — it's what will allow the app to count reps automatically.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
@@ -47,7 +47,7 @@ struct DataConsentView: View {
                 .font(.subheadline)
                 .fontWeight(.medium)
 
-            Text("Inch records sensor data locally on your device during workouts. We will never collect this data without your consent. This keeps your options open to share later and may enable on-device features in the future.")
+            Text("Daily Ascent records sensor data locally on your device during workouts. We will never collect this data without your consent. This keeps your options open to share later and may enable on-device features in the future.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

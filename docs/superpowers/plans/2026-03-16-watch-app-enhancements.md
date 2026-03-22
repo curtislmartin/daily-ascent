@@ -329,8 +329,8 @@ In Xcode: select the `inchwatch Watch App` target → Signing & Capabilities →
 In the watch target's Debug build configuration in `project.pbxproj` (around line 618), add after `GENERATE_INFOPLIST_FILE = YES;`:
 
 ```
-INFOPLIST_KEY_NSHealthShareUsageDescription = "Inch logs workouts to Apple Health to show your training history.";
-INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Inch logs workouts to Apple Health to show your training history.";
+INFOPLIST_KEY_NSHealthShareUsageDescription = "Daily Ascent logs workouts to Apple Health to show your training history.";
+INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Daily Ascent logs workouts to Apple Health to show your training history.";
 ```
 
 Repeat the same two lines in the Release build configuration block (around line 654). These strings match the iOS target.

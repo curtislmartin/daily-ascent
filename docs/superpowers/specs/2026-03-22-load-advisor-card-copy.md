@@ -36,29 +36,32 @@ When `advisory` is non-nil, `advisoryCopy` evaluates signals in this order and r
 
 `advisory.preTestTaperActive == true`
 
-The sub-message depends on remaining headroom:
+The sub-message depends on remaining headroom. Use `advisory.recommendedCount - completedCount` to determine how much room is left. `completedCount` here is the same value passed into the banner (fully-completed exercises). The advisor's `recommendedCount` is derived from exercises that have any completed set, so the two counts are expected to agree in practice — both update after the same workout write-back.
 
 | Condition | Copy |
 |---|---|
-| `completedCount >= advisory.recommendedCount` | "Test day tomorrow — good place to stop." |
+| `advisory.recommendedCount - completedCount <= 0` | "Test day tomorrow — good place to stop." |
 | `advisory.recommendedCount - completedCount == 1` | "One more is fine — test day tomorrow." |
 | `advisory.recommendedCount - completedCount >= 2` | "Test day tomorrow — keep today light." |
+
+When `completedCount` has already exceeded `recommendedCount` (remainder is negative), the `<= 0` row fires — "good place to stop" remains appropriate.
 
 ### 2. Overloaded muscle group
 
 `advisory.overloadedGroups` is non-empty (taper not active)
 
-Use the first group in `overloadedGroups` (already sorted by rawValue in the advisor):
+Use the first group in `overloadedGroups`. The advisor sorts by `rawValue` alphabetically (`core_flexion` < `core_stability` < `lower` < `lower_posterior` < `upper_pull` < `upper_push`) — this is not a severity ordering, just a stable tie-breaker.
+
+All six `MuscleGroup` cases must be covered:
 
 | Group | Copy |
 |---|---|
 | `.lower` | "Your lower body is carrying a lot today." |
 | `.lowerPosterior` | "Your posterior chain is carrying a lot today." |
-| `.push` | "Your pushing muscles are carrying a lot today." |
-| `.pull` | "Your pulling muscles are carrying a lot today." |
-| `.core` | "Your core is carrying a lot today." |
-
-Fallback for any unexpected group: `"One muscle group is carrying a lot today."`
+| `.upperPush` | "Your pushing muscles are carrying a lot today." |
+| `.upperPull` | "Your pulling muscles are carrying a lot today." |
+| `.coreFlexion` | "Your core is carrying a lot today." |
+| `.coreStability` | "Your core is carrying a lot today." |
 
 ### 3. Lookback penalty active
 
@@ -76,6 +79,8 @@ No warnings active. Use `recommendedCount - completedCount`:
 | `== 1` | "One more is within your budget." |
 | `>= 2` | "Plenty of room to keep going." |
 
+Note: the `<= 0` count-based message is only reached when no warning signals are active. When taper is active and `remaining <= 0`, the taper branch fires first and returns "Test day tomorrow — good place to stop" instead.
+
 ### Fallback (advisory == nil)
 
 Return existing hardcoded copy unchanged:
@@ -92,13 +97,18 @@ default: "Solid session — the rest are optional."
 
 ## MuscleGroup Display Names
 
-`MuscleGroup` raw values are exercise IDs (e.g. `.lower`, `.push`). The copy uses plain English names. This mapping lives inline in `TodaySessionBanner` — no new type needed.
+`MuscleGroup` has six cases (raw values are snake_case strings). The copy uses plain English names. This mapping lives inline in `TodaySessionBanner` as a `switch` — no new type needed.
 
 ---
 
 ## Accessibility
 
-The existing `.accessibilityLabel` on the `sessionProgressCard` already embeds `progressCopy`. Update it to use `advisoryCopy` instead so VoiceOver reads the advisory text.
+The existing `.accessibilityLabel` on `sessionProgressCard` (line 68 of `TodaySessionBanner.swift`) interpolates `progressCopy` at the end of the string. Replace `\(progressCopy)` with `\(advisoryCopy)` so VoiceOver reads the advisory text.
+
+## Previews and Tests
+
+- Update the existing `#Preview` for `TodaySessionBanner` to exercise at least one advisory state (e.g. taper active) alongside the nil fallback.
+- Add unit tests covering: nil advisory fallback, taper sub-messages (all three remaining counts), overloaded group copy for each MuscleGroup case, lookback copy, and count-based defaults.
 
 ---
 

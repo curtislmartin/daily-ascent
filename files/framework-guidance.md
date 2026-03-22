@@ -234,7 +234,7 @@ In `Info.plist`, add the task identifier to `BGTaskSchedulerPermittedIdentifiers
 ```xml
 <key>BGTaskSchedulerPermittedIdentifiers</key>
 <array>
-    <string>com.inch.bodyweight.sensor-upload</string>
+    <string>com.dailyascent.bodyweight.sensor-upload</string>
 </array>
 ```
 
@@ -242,7 +242,7 @@ Register the handler early — in the `App` `init()` or app delegate:
 
 ```swift
 BGTaskScheduler.shared.register(
-    forTaskWithIdentifier: "com.inch.bodyweight.sensor-upload",
+    forTaskWithIdentifier: "com.dailyascent.bodyweight.sensor-upload",
     using: nil  // main queue
 ) { task in
     guard let processingTask = task as? BGProcessingTask else { return }
@@ -256,7 +256,7 @@ BGTaskScheduler.shared.register(
 
 ```swift
 func scheduleSensorUpload() {
-    let request = BGProcessingTaskRequest(identifier: "com.inch.bodyweight.sensor-upload")
+    let request = BGProcessingTaskRequest(identifier: "com.dailyascent.bodyweight.sensor-upload")
     request.requiresNetworkConnectivity = true
     request.requiresExternalPower = true  // charging required
     request.earliestBeginDate = nil       // as soon as conditions are met
@@ -296,7 +296,7 @@ func handleSensorUpload(task: BGProcessingTask) async {
 
 ### Important Notes
 
-- **Test on a real device.** `BGTaskScheduler` does not work in the simulator. Use the Xcode debug command `e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWithIdentifier:@"com.inch.bodyweight.sensor-upload"]` to trigger tasks during development.
+- **Test on a real device.** `BGTaskScheduler` does not work in the simulator. Use the Xcode debug command `e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWithIdentifier:@"com.dailyascent.bodyweight.sensor-upload"]` to trigger tasks during development.
 - **System decides when to run.** Even with `requiresExternalPower = true` and `requiresNetworkConnectivity = true`, the system chooses the exact timing. Typically overnight during charging.
 - **Expiration is real.** The system can terminate the task at any time. Always implement `expirationHandler` and save partial progress.
 - **Re-schedule after completion.** `BGProcessingTask` is one-shot. After handling, submit a new request for the next run.
@@ -336,8 +336,8 @@ func checkEntitlements() async {
     for await result in Transaction.currentEntitlements {
         if case .verified(let transaction) = result {
             // Update isPremium based on active subscription
-            if transaction.productID == "com.inch.premium.monthly"
-                || transaction.productID == "com.inch.premium.annual" {
+            if transaction.productID == "com.dailyascent.premium.monthly"
+                || transaction.productID == "com.dailyascent.premium.annual" {
                 isPremium = transaction.revocationDate == nil
             }
         }

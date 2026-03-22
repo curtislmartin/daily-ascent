@@ -1,8 +1,8 @@
-# Inch — Implementation Plan
+# Daily Ascent — Implementation Plan
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Build the Inch iOS + watchOS bodyweight training app across 17 build phases, starting with the shared package and ending with sensor upload.
+**Goal:** Build the Daily Ascent iOS + watchOS bodyweight training app across 17 build phases, starting with the shared package and ending with sensor upload.
 
 **Architecture:** Shared Swift package (`Shared/`) for models, business logic, and WatchConnectivity DTOs; consumed by iOS target (`InchApp/`) and watchOS target (`InchWatch/`). All persistence through SwiftData. All UI in SwiftUI. Strict Swift 6.2 concurrency.
 
@@ -30,8 +30,8 @@ This must be done in Xcode before writing any code.
 **Step 1: Create the project**
 In Xcode 16+:
 - File → New → Project → iOS → App
-- Product Name: `Inch`
-- Bundle ID: `com.inch.bodyweight`
+- Product Name: `Daily Ascent`
+- Bundle ID: `com.dailyascent.bodyweight`
 - Interface: SwiftUI
 - Language: Swift
 - Storage: None (we add SwiftData manually)
@@ -41,14 +41,14 @@ In Xcode 16+:
 **Step 2: Add watchOS target**
 - File → New → Target → watchOS → Watch App
 - Product Name: `InchWatch`
-- Bundle ID: `com.inch.bodyweight.watchkitapp`
+- Bundle ID: `com.dailyascent.bodyweight.watchkitapp`
 - Interface: SwiftUI
 - Uncheck "Include Notification Scene"
 
 **Step 3: Add the shared Swift package**
 - File → New → Package → Library
 - Name: `Shared`
-- Save inside the Inch project folder
+- Save inside the Daily Ascent project folder
 - Remove the default `Shared` target and tests; replace with:
   - Library target: `InchShared` (iOS 18.0 + watchOS 11.0)
   - Test target: `InchSharedTests`
@@ -2018,7 +2018,7 @@ git commit -m "feat: add Watch motion recording with file transfer to iPhone"
 Read `Specs/framework-guidance.md` → "BGProcessingTask" and `Specs/backend-api.md` → "Upload Endpoint".
 
 **Info.plist additions:**
-- `BGTaskSchedulerPermittedIdentifiers`: `["com.inch.bodyweight.sensor-upload"]`
+- `BGTaskSchedulerPermittedIdentifiers`: `["com.dailyascent.bodyweight.sensor-upload"]`
 
 **Capability required:** Background Modes → Background processing.
 
@@ -2123,5 +2123,5 @@ Verify: today view shows pushed sessions, workout completes and syncs back to iP
 **Step 4: Final commit**
 ```bash
 git add .
-git commit -m "feat: Inch v1 complete — all 17 build phases implemented"
+git commit -m "feat: Daily Ascent v1 complete — all 17 build phases implemented"
 ```

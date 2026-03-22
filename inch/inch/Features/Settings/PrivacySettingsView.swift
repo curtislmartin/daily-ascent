@@ -17,7 +17,7 @@ struct PrivacySettingsView: View {
             consentSection
             dataSection
             Section("Legal") {
-                Link("Privacy Policy", destination: URL(string: "https://curtislmartin.github.io/inch/privacy")!)
+                Link("Privacy Policy", destination: URL(string: "https://curtislmartin.github.io/daily-ascent/privacy")!)
             }
         }
         .listStyle(.insetGrouped)
@@ -85,7 +85,7 @@ struct PrivacySettingsView: View {
         } header: {
             Text("Sensor Data")
         } footer: {
-            Text("While you work out, Inch records motion sensor data locally on your device. If sharing is enabled, your sensor data and optional profile details (age range, height, biological sex, and activity level) are uploaded anonymously to help train a rep-counting model. Different body types move differently — this context makes the model more accurate for everyone. No data is ever linked to your identity.")
+            Text("While you work out, Daily Ascent records motion sensor data locally on your device. If sharing is enabled, your sensor data and optional profile details (age range, height, biological sex, and activity level) are uploaded anonymously to help train a rep-counting model. Different body types move differently — this context makes the model more accurate for everyone. No data is ever linked to your identity.")
         }
     }
 
