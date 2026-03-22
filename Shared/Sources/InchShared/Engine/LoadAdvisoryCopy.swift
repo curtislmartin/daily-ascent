@@ -1,5 +1,3 @@
-import Foundation
-
 /// Derives the one-line copy string for the Today session card based on advisory signals.
 /// Priority: taper → overloaded group → lookback → count-based default → nil fallback.
 public enum LoadAdvisoryCopy {
@@ -27,6 +25,8 @@ public enum LoadAdvisoryCopy {
         }
 
         // 2. Overloaded muscle group — specific recovery call-out
+        // Relies on overloadedGroups being pre-sorted by rawValue (guaranteed by DailyLoadAdvisor).
+        // The first group wins when multiple are overloaded.
         if let group = advisory.overloadedGroups.first {
             return overloadCopy(for: group)
         }
@@ -63,7 +63,7 @@ public enum LoadAdvisoryCopy {
         case .upperPush:      return "Your pushing muscles are carrying a lot today."
         case .upperPull:      return "Your pulling muscles are carrying a lot today."
         case .coreFlexion:    return "Your core is carrying a lot today."
-        case .coreStability:  return "Your core is carrying a lot today."
+        case .coreStability:  return "Your core is carrying a lot today." // same copy — both are core groups
         }
     }
 }
