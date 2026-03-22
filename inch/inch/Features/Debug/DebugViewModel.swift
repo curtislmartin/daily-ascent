@@ -9,16 +9,25 @@ final class DebugViewModel {
     // MARK: - Checkmark State
 
     private let defaults = UserDefaults.standard
+    private var doneKeys: Set<DebugCheckKey>  // @Observable-tracked mirror of UserDefaults
+
+    init() {
+        doneKeys = Set(DebugCheckKey.allCases.filter {
+            UserDefaults.standard.bool(forKey: $0.rawValue)
+        })
+    }
 
     func isDone(_ key: DebugCheckKey) -> Bool {
-        defaults.bool(forKey: key.rawValue)
+        doneKeys.contains(key)
     }
 
     func markDone(_ key: DebugCheckKey) {
+        doneKeys.insert(key)
         defaults.set(true, forKey: key.rawValue)
     }
 
     func resetAllDone() {
+        doneKeys.removeAll()
         for key in DebugCheckKey.allCases {
             defaults.removeObject(forKey: key.rawValue)
         }
