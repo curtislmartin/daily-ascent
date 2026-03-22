@@ -59,7 +59,12 @@ public struct DailyLoadAdvisor: Sendable {
             - (preTestTaperActive ? 1.0 : 0.0)
             - (lookbackPenaltyActive ? 1.0 : 0.0)
 
-        // Compute per-exercise costs, tracking per-group totals for overloadedGroups
+        // Compute per-exercise costs, tracking per-group totals for overloadedGroups.
+        // completedMuscleGroups is built from the full list upfront so both exercises
+        // in a compounding pair receive the ×1.5 multiplier. This is intentional —
+        // it makes the result order-independent when the pair has different base costs
+        // (squats=3, glute_bridges=2). Using an incremental set would produce different
+        // totals depending on which exercise was processed first.
         let completedMuscleGroups = Set(context.completedToday.map(\.muscleGroup))
         var costByGroup: [MuscleGroup: Double] = [:]
         var consumed: Double = 0

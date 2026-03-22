@@ -153,8 +153,9 @@ struct DailyLoadAdvisorTests {
 
     @Test(.tags(.loadAdvisor))
     func squatsAndGluteBridgesBothCountedWithCompounding() {
-        // squats (3) + glute_bridges with compounding (2 × 1.5 = 3) = 6 consumed
-        // 2 pending core at cost 1 → floor(4/1) = 4, capped at 2 → total 4
+        // squats (3 × 1.5 = 4.5) + glute_bridges (2 × 1.5 = 3.0) = 7.5 consumed
+        // Both get the ×1.5 multiplier for order-independence (see DailyLoadAdvisor)
+        // 2 pending core at cost 1 → floor(2.5/1) = 2, capped at 2 → total 4
         let context = makeContext(
             completed: [
                 makeCompleted("squats", muscleGroup: .lower),
