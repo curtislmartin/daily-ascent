@@ -6,4 +6,5 @@ extension Tag {
     @Tag static var streak: Self
     @Tag static var dataLoader: Self
     @Tag static var integration: Self
+    @Tag static var loadAdvisor: Self
 }
