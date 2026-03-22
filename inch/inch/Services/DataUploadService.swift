@@ -44,7 +44,7 @@ final class DataUploadService {
 
     // MARK: - Private
 
-    private func uploadPending(context: ModelContext) async {
+    func uploadPending(context: ModelContext) async {
         guard let settings = (try? context.fetch(FetchDescriptor<UserSettings>()))?.first,
               settings.motionDataUploadConsented
         else { return }
