@@ -227,8 +227,87 @@ final class DebugViewModel {
             markDone(.notifList)  // Inside Task — checkmark set after async fetch completes
         }
     }
-    func seedHistory(weeks: Int, withGaps: Bool, key: DebugCheckKey, context: ModelContext) { markDone(key) }
-    func addTestDayResult(passed: Bool, context: ModelContext) { markDone(passed ? .histTestPass : .histTestFail) }
+    private func insertSets(
+        exerciseId: String,
+        level: Int,
+        dayNumber: Int,
+        setCount: Int,
+        repsPerSet: Int,
+        sessionDate: Date,
+        context: ModelContext
+    ) {
+        for i in 1...setCount {
+            context.insert(CompletedSet(
+                completedAt: sessionDate,
+                sessionDate: sessionDate,
+                exerciseId: exerciseId,
+                level: level,
+                dayNumber: dayNumber,
+                setNumber: i,
+                targetReps: repsPerSet,
+                actualReps: repsPerSet
+            ))
+        }
+    }
+
+    func seedHistory(weeks: Int, withGaps: Bool, key: DebugCheckKey, context: ModelContext) {
+        let exercises: [(id: String, reps: Int)] = [
+            (id: "push_ups", reps: 10),
+            (id: "squats",   reps: 12),
+            (id: "sit_ups",  reps: 10),
+        ]
+        var dayNumbers = [String: Int]()
+        exercises.forEach { dayNumbers[$0.id] = 1 }
+
+        let totalCalendarDays = weeks * 7
+        let gapStart = totalCalendarDays / 2       // gap begins here
+        let gapEnd   = gapStart + 5                // 5-day gap
+
+        var calendarOffset = 0
+        var workoutCount = 0
+
+        while calendarOffset < totalCalendarDays {
+            if withGaps && calendarOffset >= gapStart && calendarOffset < gapEnd {
+                calendarOffset += 1
+                continue
+            }
+            let ex = exercises[workoutCount % exercises.count]
+            let daysAgo = totalCalendarDays - calendarOffset
+            let sessionDate = Calendar.current.date(
+                byAdding: .day,
+                value: -daysAgo,
+                to: Calendar.current.startOfDay(for: Date.now)
+            ) ?? Date.now
+
+            let dn = dayNumbers[ex.id] ?? 1
+            insertSets(exerciseId: ex.id, level: 1, dayNumber: dn,
+                       setCount: 3, repsPerSet: ex.reps, sessionDate: sessionDate, context: context)
+            dayNumbers[ex.id] = dn + 1
+            workoutCount += 1
+
+            // Rest pattern: 2, 2, 3, 2, 2, 3...
+            calendarOffset += (workoutCount % 3 == 0) ? 3 : 2
+        }
+        try? context.save()
+        markDone(key)
+    }
+
+    func addTestDayResult(passed: Bool, context: ModelContext) {
+        context.insert(CompletedSet(
+            completedAt: Date.now,
+            sessionDate: Date.now,
+            exerciseId: "push_ups",
+            level: 1,
+            dayNumber: 10,
+            setNumber: 1,
+            targetReps: 50,
+            actualReps: passed ? 55 : 43,
+            isTest: true,
+            testPassed: passed
+        ))
+        try? context.save()
+        markDone(passed ? .histTestPass : .histTestFail)
+    }
     func simulateWatchReport(context: ModelContext, watchConnectivity: WatchConnectivityService) { markDone(.watchSimReport) }
     func pushScheduleToWatch(context: ModelContext, watchConnectivity: WatchConnectivityService) { markDone(.watchPushSchedule) }
     func logTestHealthKitWorkout(healthKit: HealthKitService) { markDone(.hkLogWorkout) }
