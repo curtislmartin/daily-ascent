@@ -53,16 +53,123 @@ final class DebugViewModel {
         showDangerConfirmation = true
     }
 
-    // MARK: - Action stubs (replaced in Tasks 5–10)
-    func setDueToday(context: ModelContext) { markDone(.schedDueToday) }
-    func forceRestDay(context: ModelContext) { markDone(.schedRestDay) }
-    func setDueTomorrow(context: ModelContext) { markDone(.schedDueTomorrow) }
-    func triggerDoubleTestConflict(context: ModelContext) { markDone(.conflictDoubleTest) }
-    func triggerSameGroupConflict(context: ModelContext) { markDone(.conflictSameGroup) }
-    func setExerciseToTestDay(context: ModelContext) { markDone(.schedTestDay) }
-    func advancePushUpsToLevel(_ level: Int, context: ModelContext, key: DebugCheckKey) { markDone(key) }
-    func showDemographicsNudge(context: ModelContext) { markDone(.showDemoNudge) }
-    func setStreak(_ value: Int, key: DebugCheckKey, context: ModelContext) { markDone(key) }
+    // MARK: - Scheduling & State Actions
+
+    func setDueToday(context: ModelContext) {
+        let desc = FetchDescriptor<ExerciseEnrolment>(predicate: #Predicate { $0.isActive })
+        guard let enrolments = try? context.fetch(desc) else { return }
+        for e in enrolments { e.nextScheduledDate = Date.now }
+        try? context.save()
+        markDone(.schedDueToday)
+    }
+
+    func forceRestDay(context: ModelContext) {
+        let tomorrow = Calendar.current.startOfDay(
+            for: Calendar.current.date(byAdding: .day, value: 1, to: Date.now) ?? Date.now
+        )
+        let desc = FetchDescriptor<ExerciseEnrolment>(predicate: #Predicate { $0.isActive })
+        guard let enrolments = try? context.fetch(desc) else { return }
+        for e in enrolments { e.nextScheduledDate = tomorrow }
+        try? context.save()
+        markDone(.schedRestDay)
+    }
+
+    func setDueTomorrow(context: ModelContext) {
+        let tomorrow = Calendar.current.startOfDay(
+            for: Calendar.current.date(byAdding: .day, value: 1, to: Date.now) ?? Date.now
+        )
+        let desc = FetchDescriptor<ExerciseEnrolment>(predicate: #Predicate { $0.isActive })
+        guard let enrolments = try? context.fetch(desc) else { return }
+        for e in enrolments { e.nextScheduledDate = tomorrow }
+        try? context.save()
+        markDone(.schedDueTomorrow)
+    }
+
+    func triggerDoubleTestConflict(context: ModelContext) {
+        let desc = FetchDescriptor<ExerciseEnrolment>(predicate: #Predicate { $0.isActive })
+        guard let enrolments = try? context.fetch(desc) else { return }
+        let candidates = enrolments.compactMap { e -> (ExerciseEnrolment, Int)? in
+            guard let levelDef = e.exerciseDefinition?.levels?.first(where: { $0.level == e.currentLevel }),
+                  let totalDays = levelDef.days?.count, totalDays > 0 else { return nil }
+            return (e, totalDays)
+        }
+        guard candidates.count >= 2 else { return }
+        for (e, testDay) in candidates.prefix(2) {
+            e.currentDay = testDay
+            e.nextScheduledDate = Date.now
+        }
+        try? context.save()
+        markDone(.conflictDoubleTest)
+    }
+
+    func triggerSameGroupConflict(context: ModelContext) {
+        let desc = FetchDescriptor<ExerciseEnrolment>(predicate: #Predicate { $0.isActive })
+        guard let enrolments = try? context.fetch(desc) else { return }
+        if let squats = enrolments.first(where: { $0.exerciseDefinition?.exerciseId == "squats" }),
+           let levelDef = squats.exerciseDefinition?.levels?.first(where: { $0.level == squats.currentLevel }),
+           let totalDays = levelDef.days?.count {
+            squats.currentDay = totalDays
+            squats.nextScheduledDate = Date.now
+        }
+        if let glutes = enrolments.first(where: { $0.exerciseDefinition?.exerciseId == "glute_bridges" }) {
+            glutes.currentDay = 1
+            glutes.nextScheduledDate = Date.now
+        }
+        try? context.save()
+        markDone(.conflictSameGroup)
+    }
+
+    func setExerciseToTestDay(context: ModelContext) {
+        let desc = FetchDescriptor<ExerciseEnrolment>(predicate: #Predicate { $0.isActive })
+        guard let enrolments = try? context.fetch(desc),
+              let pushUps = enrolments.first(where: { $0.exerciseDefinition?.exerciseId == "push_ups" }),
+              let levelDef = pushUps.exerciseDefinition?.levels?.first(where: { $0.level == pushUps.currentLevel }),
+              let totalDays = levelDef.days?.count else { return }
+        pushUps.currentDay = totalDays
+        pushUps.nextScheduledDate = Date.now
+        try? context.save()
+        markDone(.schedTestDay)
+    }
+
+    func advancePushUpsToLevel(_ level: Int, context: ModelContext, key: DebugCheckKey) {
+        let desc = FetchDescriptor<ExerciseEnrolment>(predicate: #Predicate { $0.isActive })
+        guard let enrolments = try? context.fetch(desc),
+              let pushUps = enrolments.first(where: { $0.exerciseDefinition?.exerciseId == "push_ups" }) else { return }
+        pushUps.currentLevel = level
+        pushUps.currentDay = 1
+        pushUps.restPatternIndex = 0
+        pushUps.nextScheduledDate = Date.now
+        try? context.save()
+        markDone(key)
+    }
+
+    func showDemographicsNudge(context: ModelContext) {
+        let desc = FetchDescriptor<UserSettings>()
+        guard let settings = (try? context.fetch(desc))?.first else { return }
+        settings.ageRange = nil
+        settings.heightRange = nil
+        settings.biologicalSex = nil
+        settings.activityLevel = nil
+        try? context.save()
+        markDone(.showDemoNudge)
+    }
+
+    func setStreak(_ value: Int, key: DebugCheckKey, context: ModelContext) {
+        let desc = FetchDescriptor<StreakState>()
+        let existing = (try? context.fetch(desc))?.first
+        let state: StreakState
+        if let existing {
+            state = existing
+        } else {
+            state = StreakState()
+            context.insert(state)
+        }
+        state.currentStreak = value
+        state.longestStreak = value
+        state.lastActiveDate = value > 0 ? Date.now : nil
+        try? context.save()
+        markDone(key)
+    }
     func fireDailyReminder() { markDone(.notifDailyReminder) }
     func fireDailyReminderMulti() { markDone(.notifDailyReminderMulti) }
     func fireTestDayReminder() { markDone(.notifTestDay) }
