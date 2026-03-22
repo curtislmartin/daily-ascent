@@ -389,7 +389,22 @@ final class DebugViewModel {
         showAlert = true
         markDone(.uploadStatus)
     }
-    func clearAllHistory(context: ModelContext) {}    // No markDone — Danger Zone actions have no checkmarks
-    func resetAllEnrolments(context: ModelContext) {} // No markDone — Danger Zone actions have no checkmarks
+    func clearAllHistory(context: ModelContext) {
+        try? context.delete(model: CompletedSet.self)
+        try? context.save()
+    }
+
+    func resetAllEnrolments(context: ModelContext) {
+        let desc = FetchDescriptor<ExerciseEnrolment>()
+        guard let enrolments = try? context.fetch(desc) else { return }
+        for e in enrolments {
+            e.currentLevel = 1
+            e.currentDay = 1
+            e.restPatternIndex = 0
+            e.lastCompletedDate = nil
+            e.nextScheduledDate = Date.now
+        }
+        try? context.save()
+    }
 }
 #endif
