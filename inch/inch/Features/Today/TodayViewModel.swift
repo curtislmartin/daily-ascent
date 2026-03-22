@@ -148,6 +148,13 @@ final class TodayViewModel {
         // Step 1: Capture rescheduled status.
         // Any active enrolment whose nextScheduledDate is strictly before today
         // was overdue when this load call ran.
+        //
+        // Timing note: writeBack() advances nextScheduledDate before loadToday() is
+        // called again after a workout. This means rescheduledExerciseIds will be
+        // non-empty only on a call where no sets have been completed yet (advisor
+        // returns nil early). In practice wasRescheduled is always false for completed
+        // exercises — the ×1.25 multiplier requires recording this flag into CompletedSet
+        // at workout-recording time to work correctly. Tracked for a future improvement.
         rescheduledExerciseIds = Set(all.compactMap { enrolment -> String? in
             guard let scheduled = enrolment.nextScheduledDate,
                   Calendar.current.startOfDay(for: scheduled) < startOfToday,
@@ -165,6 +172,8 @@ final class TodayViewModel {
                 exerciseId: exerciseId,
                 exerciseName: definition.name,
                 muscleGroup: definition.muscleGroup,
+                // Use the set's recorded value, not currentPrescription — after writeBack
+                // advances currentDay, the prescription returns the next day's isTest value.
                 isTest: anySet.isTest,
                 wasRescheduled: rescheduledExerciseIds.contains(exerciseId)
             )
