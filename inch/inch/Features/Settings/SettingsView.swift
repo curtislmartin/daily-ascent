@@ -3,9 +3,17 @@ import SwiftData
 import InchShared
 
 struct SettingsView: View {
-    @Environment(\.modelContext) private var modelContext
+    @Environment(\.modelContext) var modelContext
 
     @State private var viewModel = SettingsViewModel()
+
+    #if DEBUG
+    @State var debugViewModel = DebugViewModel()
+    @Environment(NotificationService.self) var notificationService
+    @Environment(WatchConnectivityService.self) var watchConnectivity
+    @Environment(HealthKitService.self) var healthKit
+    @Environment(DataUploadService.self) var dataUpload
+    #endif
 
     private var showAboutMeBadge: Bool {
         guard let s = viewModel.settings else { return false }
@@ -21,11 +29,29 @@ struct SettingsView: View {
                 generalSection(settings: settings)
             }
             privacySection
+            #if DEBUG
+            debugContent
+            #endif
         }
         .listStyle(.insetGrouped)
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
         .task { viewModel.load(context: modelContext) }
+        #if DEBUG
+        .alert(debugViewModel.alertTitle, isPresented: $debugViewModel.showAlert) {
+            Button("OK") {}
+        } message: {
+            Text(debugViewModel.alertMessage)
+        }
+        .alert(debugViewModel.dangerTitle, isPresented: $debugViewModel.showDangerConfirmation) {
+            Button("Cancel", role: .cancel) {}
+            Button("Confirm", role: .destructive) {
+                debugViewModel.pendingDangerAction?()
+            }
+        } message: {
+            Text(debugViewModel.dangerMessage)
+        }
+        #endif
     }
 
     private var profileSection: some View {

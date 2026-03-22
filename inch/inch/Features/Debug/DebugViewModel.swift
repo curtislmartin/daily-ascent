@@ -52,5 +52,41 @@ final class DebugViewModel {
         pendingDangerAction = action
         showDangerConfirmation = true
     }
+
+    // MARK: - Action stubs (replaced in Tasks 5–10)
+    func setDueToday(context: ModelContext) { markDone(.schedDueToday) }
+    func forceRestDay(context: ModelContext) { markDone(.schedRestDay) }
+    func setDueTomorrow(context: ModelContext) { markDone(.schedDueTomorrow) }
+    func triggerDoubleTestConflict(context: ModelContext) { markDone(.conflictDoubleTest) }
+    func triggerSameGroupConflict(context: ModelContext) { markDone(.conflictSameGroup) }
+    func setExerciseToTestDay(context: ModelContext) { markDone(.schedTestDay) }
+    func advancePushUpsToLevel(_ level: Int, context: ModelContext, key: DebugCheckKey) { markDone(key) }
+    func showDemographicsNudge(context: ModelContext) { markDone(.showDemoNudge) }
+    func setStreak(_ value: Int, key: DebugCheckKey, context: ModelContext) { markDone(key) }
+    func fireDailyReminder() { markDone(.notifDailyReminder) }
+    func fireDailyReminderMulti() { markDone(.notifDailyReminderMulti) }
+    func fireTestDayReminder() { markDone(.notifTestDay) }
+    func fireStreakProtection(streak: Int, key: DebugCheckKey) { markDone(key) }
+    func fireLevelUnlock(notificationService: NotificationService) { markDone(.notifLevelUnlock) }
+    func fireScheduleAdjustment(notificationService: NotificationService) { markDone(.notifScheduleAdj) }
+    func listPendingNotifications() {
+        Task {
+            let pending = await UNUserNotificationCenter.current().pendingNotificationRequests()
+            alertTitle = "Pending Notifications (\(pending.count))"
+            alertMessage = pending.isEmpty ? "None scheduled" : pending.map(\.identifier).joined(separator: "\n")
+            showAlert = true
+            markDone(.notifList)  // Inside Task — checkmark set after async fetch completes
+        }
+    }
+    func seedHistory(weeks: Int, withGaps: Bool, key: DebugCheckKey, context: ModelContext) { markDone(key) }
+    func addTestDayResult(passed: Bool, context: ModelContext) { markDone(passed ? .histTestPass : .histTestFail) }
+    func simulateWatchReport(context: ModelContext, watchConnectivity: WatchConnectivityService) { markDone(.watchSimReport) }
+    func pushScheduleToWatch(context: ModelContext, watchConnectivity: WatchConnectivityService) { markDone(.watchPushSchedule) }
+    func logTestHealthKitWorkout(healthKit: HealthKitService) { markDone(.hkLogWorkout) }
+    func seedPendingRecordings(context: ModelContext) { markDone(.uploadSeedPending) }
+    func triggerForegroundUpload(context: ModelContext, dataUpload: DataUploadService) { markDone(.uploadTrigger) }
+    func showUploadStatus(context: ModelContext) { markDone(.uploadStatus) }
+    func clearAllHistory(context: ModelContext) {}    // No markDone — Danger Zone actions have no checkmarks
+    func resetAllEnrolments(context: ModelContext) {} // No markDone — Danger Zone actions have no checkmarks
 }
 #endif
