@@ -1,4 +1,4 @@
-#if DEBUG
+#if DEBUG || TESTFLIGHT
 import SwiftUI
 import SwiftData
 import InchShared
@@ -7,7 +7,7 @@ import InchShared
 
 extension SettingsView {
 
-    /// All debug sections, embedded in SettingsView's List via #if DEBUG.
+    /// All debug sections, embedded in SettingsView's List via #if DEBUG || TESTFLIGHT.
     @ViewBuilder
     var debugContent: some View {
         debugSchedulingSection
