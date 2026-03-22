@@ -170,12 +170,54 @@ final class DebugViewModel {
         try? context.save()
         markDone(key)
     }
-    func fireDailyReminder() { markDone(.notifDailyReminder) }
-    func fireDailyReminderMulti() { markDone(.notifDailyReminderMulti) }
-    func fireTestDayReminder() { markDone(.notifTestDay) }
-    func fireStreakProtection(streak: Int, key: DebugCheckKey) { markDone(key) }
-    func fireLevelUnlock(notificationService: NotificationService) { markDone(.notifLevelUnlock) }
-    func fireScheduleAdjustment(notificationService: NotificationService) { markDone(.notifScheduleAdj) }
+    private func postDebugNotification(id: String, title: String, body: String) {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3, repeats: false)
+        let request = UNNotificationRequest(identifier: "debug-\(id)-\(UUID().uuidString)",
+                                            content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request)
+    }
+
+    func fireDailyReminder() {
+        postDebugNotification(id: "daily", title: "Time to train", body: "Push-Ups")
+        markDone(.notifDailyReminder)
+    }
+
+    func fireDailyReminderMulti() {
+        postDebugNotification(id: "daily-multi", title: "Time to train",
+                              body: "3 exercises today — Push-Ups, Squats, Sit-Ups")
+        markDone(.notifDailyReminderMulti)
+    }
+
+    func fireTestDayReminder() {
+        postDebugNotification(id: "testday", title: "Test day", body: "Push-Ups — max reps today")
+        markDone(.notifTestDay)
+    }
+
+    func fireStreakProtection(streak: Int, key: DebugCheckKey) {
+        if streak > 1 {
+            postDebugNotification(id: "streak-protect", title: "Don't break your streak",
+                                  body: "\(streak)-day streak — 3 exercises still waiting")
+        } else {
+            postDebugNotification(id: "streak-protect-0", title: "Start building your streak",
+                                  body: "3 exercises due today")
+        }
+        markDone(key)
+    }
+
+    func fireLevelUnlock(notificationService: NotificationService) {
+        notificationService.postLevelUnlock(exerciseName: "Push-Ups", newLevel: 2, startsIn: 2)
+        markDone(.notifLevelUnlock)
+    }
+
+    func fireScheduleAdjustment(notificationService: NotificationService) {
+        notificationService.postScheduleAdjustment(exerciseName: "Push-Ups", newDateDescription: "tomorrow")
+        markDone(.notifScheduleAdj)
+    }
+
     func listPendingNotifications() {
         Task {
             let pending = await UNUserNotificationCenter.current().pendingNotificationRequests()
