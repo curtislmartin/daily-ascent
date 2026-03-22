@@ -346,9 +346,49 @@ final class DebugViewModel {
             markDone(.hkLogWorkout)
         }
     }
-    func seedPendingRecordings(context: ModelContext) { markDone(.uploadSeedPending) }
-    func triggerForegroundUpload(context: ModelContext, dataUpload: DataUploadService) { markDone(.uploadTrigger) }
-    func showUploadStatus(context: ModelContext) { markDone(.uploadStatus) }
+    func seedPendingRecordings(context: ModelContext) {
+        let sensorDataDir = URL.documentsDirectory.appending(path: "sensor_data")
+        try? FileManager.default.createDirectory(at: sensorDataDir, withIntermediateDirectories: true)
+        let stubData = Data(count: 1024)
+        for n in 1...3 {
+            let fileURL = URL.documentsDirectory.appending(path: "sensor_data/debug_stub_\(n).bin")
+            try? stubData.write(to: fileURL)
+            context.insert(SensorRecording(
+                exerciseId: "push_ups",
+                level: 1,
+                dayNumber: 1,
+                setNumber: n,
+                filePath: fileURL.path,
+                fileSizeBytes: 1024,
+                uploadStatus: .pending
+            ))
+        }
+        try? context.save()
+        markDone(.uploadSeedPending)
+    }
+
+    func triggerForegroundUpload(context: ModelContext, dataUpload: DataUploadService) {
+        Task {
+            await dataUpload.uploadPending(context: context)
+            alertTitle = "Upload Complete"
+            alertMessage = "uploadPending() finished."
+            showAlert = true
+            markDone(.uploadTrigger)
+        }
+    }
+
+    func showUploadStatus(context: ModelContext) {
+        let all = (try? context.fetch(FetchDescriptor<SensorRecording>())) ?? []
+        let pending   = all.filter { $0.uploadStatus == .pending }.count
+        let uploading = all.filter { $0.uploadStatus == .uploading }.count
+        let uploaded  = all.filter { $0.uploadStatus == .uploaded }.count
+        let failed    = all.filter { $0.uploadStatus == .failed }.count
+        let localOnly = all.filter { $0.uploadStatus == .localOnly }.count
+        alertTitle = "Upload Status"
+        alertMessage = "pending: \(pending), uploading: \(uploading), uploaded: \(uploaded), failed: \(failed), localOnly: \(localOnly)"
+        showAlert = true
+        markDone(.uploadStatus)
+    }
     func clearAllHistory(context: ModelContext) {}    // No markDone — Danger Zone actions have no checkmarks
     func resetAllEnrolments(context: ModelContext) {} // No markDone — Danger Zone actions have no checkmarks
 }
