@@ -12,6 +12,7 @@ struct InchApp: App {
     let dataUpload = DataUploadService()
     let notificationService = NotificationService()
     let metricKit = MetricKitService()
+    let notificationDelegate = ForegroundNotificationDelegate()
 
     init() {
         do {
@@ -20,6 +21,7 @@ struct InchApp: App {
             fatalError("Failed to create ModelContainer: \(error)")
         }
 
+        UNUserNotificationCenter.current().delegate = notificationDelegate
         registerBGTasks()
     }
 
