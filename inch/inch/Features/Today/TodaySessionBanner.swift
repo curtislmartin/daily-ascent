@@ -1,4 +1,5 @@
 import SwiftUI
+import InchShared
 
 /// Shown at the top of the Today exercise list.
 /// - Before any exercise is done: a compact streak + availability line (D-style).
@@ -7,6 +8,7 @@ struct TodaySessionBanner: View {
     let streak: Int
     let completedCount: Int
     let totalCount: Int
+    let advisory: LoadAdvisory?
 
     var body: some View {
         if completedCount == 0 {
@@ -58,24 +60,56 @@ struct TodaySessionBanner: View {
                 }
             }
 
-            Text(progressCopy)
+            Text(advisoryCopy)
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
         .padding(14)
         .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Today's session: \(completedCount) of \(totalCount) done. \(progressCopy)")
+        .accessibilityLabel("Today's session: \(completedCount) of \(totalCount) done. \(advisoryCopy)")
     }
 
-    private var progressCopy: String {
-        switch completedCount {
-        case 1:
-            return "Good start — keep going if you feel up to it."
-        case 2:
-            return "Building momentum — listen to your body."
-        default:
-            return "Solid session — the rest are optional."
-        }
+    private var advisoryCopy: String {
+        LoadAdvisoryCopy.copy(completedCount: completedCount, advisory: advisory)
     }
+}
+
+#Preview("No advisory") {
+    TodaySessionBanner(streak: 3, completedCount: 1, totalCount: 4, advisory: nil)
+        .padding()
+}
+
+#Preview("Taper — stop here") {
+    TodaySessionBanner(
+        streak: 3,
+        completedCount: 2,
+        totalCount: 4,
+        advisory: LoadAdvisory(
+            recommendedCount: 2,
+            overloadedGroups: [],
+            cautionGroups: [],
+            preTestTaperActive: true,
+            lookbackPenaltyActive: false,
+            budgetFraction: 0.7
+        )
+    )
+    .padding()
+}
+
+#Preview("Lower body overloaded") {
+    TodaySessionBanner(
+        streak: 3,
+        completedCount: 2,
+        totalCount: 4,
+        advisory: LoadAdvisory(
+            recommendedCount: 3,
+            overloadedGroups: [.lower],
+            cautionGroups: [.lowerPosterior],
+            preTestTaperActive: false,
+            lookbackPenaltyActive: false,
+            budgetFraction: 0.85
+        )
+    )
+    .padding()
 }

@@ -73,7 +73,8 @@ struct TodayView: View {
                 TodaySessionBanner(
                     streak: streak,
                     completedCount: completedTodayCount,
-                    totalCount: viewModel.dueExercises.count
+                    totalCount: viewModel.dueExercises.count,
+                    advisory: viewModel.advisory
                 )
                 if showDemographicsNudge {
                     TodayDemographicsNudge {
