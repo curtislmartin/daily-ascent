@@ -10,7 +10,12 @@ final class TodayViewModel {
     var conflictWarnings: [String: String] = [:]
     var nextTrainingDate: Date? = nil
     var nextTrainingCount: Int = 0
+    /// Advisor recommendation for today's training load. Nil until the first exercise is completed.
+    var advisory: LoadAdvisory? = nil
     private let detector = ConflictDetector()
+    /// Exercise IDs whose nextScheduledDate was before today when loadToday() ran.
+    /// Captured each load call so rescheduled status is always current.
+    private var rescheduledExerciseIds: Set<String> = []
 
     func loadToday(context: ModelContext, showWarnings: Bool = true) {
         let today = Calendar.current.startOfDay(for: .now)
@@ -65,6 +70,7 @@ final class TodayViewModel {
             conflictWarnings = [:]
         }
         resetStreakForMissedDayIfNeeded(context: context, today: today)
+        buildAndRunAdvisor(context: context, all: all, todaySets: todaySets, today: today)
     }
 
     private func computeNextTraining(from all: [ExerciseEnrolment], after today: Date) {
@@ -125,5 +131,135 @@ final class TodayViewModel {
             .first(where: { $0.level == enrolment.currentLevel })?
             .days?
             .first(where: { $0.dayNumber == enrolment.currentDay })
+    }
+
+    // MARK: - Daily Load Advisor
+
+    private func buildAndRunAdvisor(
+        context: ModelContext,
+        all: [ExerciseEnrolment],
+        todaySets: [CompletedSet],
+        today: Date
+    ) {
+        let startOfToday = Calendar.current.startOfDay(for: .now)
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: startOfToday) ?? startOfToday
+        let endOfYesterday = startOfToday
+
+        // Step 1: Capture rescheduled status.
+        // Any active enrolment whose nextScheduledDate is strictly before today
+        // was overdue when this load call ran.
+        //
+        // Timing note: writeBack() advances nextScheduledDate before loadToday() is
+        // called again after a workout. This means rescheduledExerciseIds will be
+        // non-empty only on a call where no sets have been completed yet (advisor
+        // returns nil early). In practice wasRescheduled is always false for completed
+        // exercises — the ×1.25 multiplier requires recording this flag into CompletedSet
+        // at workout-recording time to work correctly. Tracked for a future improvement.
+        rescheduledExerciseIds = Set(all.compactMap { enrolment -> String? in
+            guard let scheduled = enrolment.nextScheduledDate,
+                  Calendar.current.startOfDay(for: scheduled) < startOfToday,
+                  let id = enrolment.exerciseDefinition?.exerciseId else { return nil }
+            return id
+        })
+
+        // Step 2: Build completedToday records (one per exercise, collapsed from sets)
+        let setsByExercise = Dictionary(grouping: todaySets, by: \.exerciseId)
+        let completedToday: [CompletedExerciseRecord] = setsByExercise.compactMap { exerciseId, sets in
+            guard let enrolment = all.first(where: { $0.exerciseDefinition?.exerciseId == exerciseId }),
+                  let definition = enrolment.exerciseDefinition,
+                  let anySet = sets.first else { return nil }
+            return CompletedExerciseRecord(
+                exerciseId: exerciseId,
+                exerciseName: definition.name,
+                muscleGroup: definition.muscleGroup,
+                // Use the set's recorded value, not currentPrescription — after writeBack
+                // advances currentDay, the prescription returns the next day's isTest value.
+                isTest: anySet.isTest,
+                wasRescheduled: rescheduledExerciseIds.contains(exerciseId)
+            )
+        }
+
+        guard !completedToday.isEmpty else {
+            advisory = nil
+            return
+        }
+
+        // Step 3: Build dueButNotDone
+        let completedIds = Set(completedToday.map(\.exerciseId))
+        let dueButNotDone: [PendingExerciseRecord] = all.compactMap { enrolment in
+            guard enrolment.isActive,
+                  let scheduled = enrolment.nextScheduledDate,
+                  Calendar.current.startOfDay(for: scheduled) <= startOfToday,
+                  let definition = enrolment.exerciseDefinition,
+                  !completedIds.contains(definition.exerciseId) else { return nil }
+            let isTest = currentPrescription(for: enrolment)?.isTest ?? false
+            return PendingExerciseRecord(
+                exerciseId: definition.exerciseId,
+                exerciseName: definition.name,
+                muscleGroup: definition.muscleGroup,
+                isTest: isTest
+            )
+        }
+
+        // Step 4: Build testDaysInNext48h using SchedulingEngine.projectSchedule()
+        let engine = SchedulingEngine()
+        let fortyEightHoursFromNow = Date.now.addingTimeInterval(48 * 3600)
+        var testDaysInNext48h: [(exerciseId: String, exerciseName: String, scheduledDate: Date)] = []
+
+        for enrolment in all where enrolment.isActive {
+            guard let definition = enrolment.exerciseDefinition,
+                  let levelDef = definition.levels?.first(where: { $0.level == enrolment.currentLevel }),
+                  let rawStartDate = enrolment.nextScheduledDate else { continue }
+            let startDate = max(rawStartDate, startOfToday)
+            let enrolmentSnapshot = EnrolmentSnapshot(enrolment)
+            let levelSnapshot = LevelSnapshot(levelDef)
+            let daySnapshots = (levelDef.days ?? []).map { DaySnapshot($0) }
+            let projected = engine.projectSchedule(
+                enrolment: enrolmentSnapshot,
+                level: levelSnapshot,
+                days: daySnapshots,
+                startDate: startDate,
+                upTo: 5
+            )
+            if let upcoming = projected.first(where: {
+                $0.isTest && $0.scheduledDate > startOfToday && $0.scheduledDate <= fortyEightHoursFromNow
+            }) {
+                testDaysInNext48h.append((
+                    exerciseId: definition.exerciseId,
+                    exerciseName: definition.name,
+                    scheduledDate: upcoming.scheduledDate
+                ))
+            }
+        }
+
+        // Step 5: Build yesterdayCompletions
+        let yesterdayStart = yesterday
+        let yesterdayEnd = endOfYesterday
+        let yesterdayDescriptor = FetchDescriptor<CompletedSet>(
+            predicate: #Predicate { $0.sessionDate >= yesterdayStart && $0.sessionDate < yesterdayEnd }
+        )
+        let yesterdaySets = (try? context.fetch(yesterdayDescriptor)) ?? []
+        let yesterdayByExercise = Dictionary(grouping: yesterdaySets, by: \.exerciseId)
+        let yesterdayCompletions: [CompletedExerciseRecord] = yesterdayByExercise.compactMap { exerciseId, sets in
+            guard let enrolment = all.first(where: { $0.exerciseDefinition?.exerciseId == exerciseId }),
+                  let definition = enrolment.exerciseDefinition,
+                  let anySet = sets.first else { return nil }
+            return CompletedExerciseRecord(
+                exerciseId: exerciseId,
+                exerciseName: definition.name,
+                muscleGroup: definition.muscleGroup,
+                isTest: anySet.isTest,
+                wasRescheduled: false
+            )
+        }
+
+        // Step 6: Run advisor
+        let loadContext = DailyLoadContext(
+            completedToday: completedToday,
+            dueButNotDone: dueButNotDone,
+            testDaysInNext48h: testDaysInNext48h,
+            yesterdayCompletions: yesterdayCompletions
+        )
+        advisory = DailyLoadAdvisor().recommend(context: loadContext)
     }
 }
