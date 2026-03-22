@@ -99,6 +99,14 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
         )
     }
 
+    // MARK: - Debug
+
+    /// Injects a synthetic completion report into the live stream.
+    /// Only called from DebugViewModel in #if DEBUG builds.
+    func simulateCompletionReport(_ report: WatchCompletionReport) {
+        _completionReports.yield(report)
+    }
+
     // MARK: - Receiving
 
     func handleCompletionReports(context: ModelContext) async {
