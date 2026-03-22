@@ -308,9 +308,44 @@ final class DebugViewModel {
         try? context.save()
         markDone(passed ? .histTestPass : .histTestFail)
     }
-    func simulateWatchReport(context: ModelContext, watchConnectivity: WatchConnectivityService) { markDone(.watchSimReport) }
-    func pushScheduleToWatch(context: ModelContext, watchConnectivity: WatchConnectivityService) { markDone(.watchPushSchedule) }
-    func logTestHealthKitWorkout(healthKit: HealthKitService) { markDone(.hkLogWorkout) }
+    func simulateWatchReport(context: ModelContext, watchConnectivity: WatchConnectivityService) {
+        let report = WatchCompletionReport(
+            exerciseId: "push_ups",
+            level: 1,
+            dayNumber: 1,
+            completedSets: [
+                WatchSetResult(setNumber: 1, targetReps: 10, actualReps: 10, durationSeconds: 30),
+                WatchSetResult(setNumber: 2, targetReps: 10, actualReps: 10, durationSeconds: 28),
+                WatchSetResult(setNumber: 3, targetReps: 10, actualReps: 10, durationSeconds: 32),
+            ],
+            completedAt: Date.now
+        )
+        watchConnectivity.simulateCompletionReport(report)
+        markDone(.watchSimReport)
+    }
+
+    func pushScheduleToWatch(context: ModelContext, watchConnectivity: WatchConnectivityService) {
+        let enrolmentsDesc = FetchDescriptor<ExerciseEnrolment>(predicate: #Predicate { $0.isActive })
+        let enrolments = (try? context.fetch(enrolmentsDesc)) ?? []
+        let settings = (try? context.fetch(FetchDescriptor<UserSettings>()))?.first
+        watchConnectivity.sendTodaySchedule(enrolments: enrolments, settings: settings)
+        markDone(.watchPushSchedule)
+    }
+
+    func logTestHealthKitWorkout(healthKit: HealthKitService) {
+        Task {
+            await healthKit.requestAuthorization()
+            let end = Date.now
+            let start = end.addingTimeInterval(-600) // 10 minutes ago
+            await healthKit.saveWorkout(
+                startDate: start,
+                endDate: end,
+                totalEnergyBurned: nil,
+                metadata: [:]
+            )
+            markDone(.hkLogWorkout)
+        }
+    }
     func seedPendingRecordings(context: ModelContext) { markDone(.uploadSeedPending) }
     func triggerForegroundUpload(context: ModelContext, dataUpload: DataUploadService) { markDone(.uploadTrigger) }
     func showUploadStatus(context: ModelContext) { markDone(.uploadStatus) }
