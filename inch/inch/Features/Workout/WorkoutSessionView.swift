@@ -22,13 +22,20 @@ struct WorkoutSessionView: View {
         viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
     }
 
-    private var isHoldPhoneExercise: Bool {
-        exerciseId == "sit_ups" || exerciseId == "dead_bugs"
+    private var phoneHint: (message: String, icon: String)? {
+        switch exerciseId {
+        case "sit_ups", "dead_bugs", "squats":
+            return ("Hold your phone for better tracking", "hand.raised.fill")
+        case "pull_ups", "push_ups", "glute_bridges":
+            return ("Put your phone in your pocket for better tracking", "iphone")
+        default:
+            return nil
+        }
     }
 
     private var shouldShowHoldPhoneHint: Bool {
         showHoldPhoneHint &&
-        isHoldPhoneExercise &&
+        phoneHint != nil &&
         !watchConnectivity.isWatchReachable &&
         viewModel.currentSetIndex == 0
     }
@@ -180,11 +187,11 @@ struct WorkoutSessionView: View {
 
     private var readyView: some View {
         VStack(spacing: 32) {
-            if shouldShowHoldPhoneHint {
+            if shouldShowHoldPhoneHint, let hint = phoneHint {
                 HStack(spacing: 10) {
-                    Image(systemName: "hand.raised.fill")
+                    Image(systemName: hint.icon)
                         .foregroundStyle(.secondary)
-                    Text("Hold your phone for better tracking")
+                    Text(hint.message)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                     Spacer()
