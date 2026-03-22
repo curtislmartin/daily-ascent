@@ -103,7 +103,8 @@ struct DailyLoadAdvisorTests {
 
     @Test(.tags(.loadAdvisor))
     func allSixExercisesExceedsBudget() {
-        // All 6 completed: 3+3+2+2+1+1 = 12 > 10 → remainingBudget = 0 → N_more = 0
+        // All 6 completed. squats (.lower) and glute_bridges (.lowerPosterior) both get ×1.5
+        // compounding: 3×1.5=4.5, 2×1.5=3.0. Total: 4.5+3.0+3+2+1+1 = 14.5 > 10 → N_more = 0
         let context = makeContext(
             completed: [
                 makeCompleted("squats", muscleGroup: .lower),
@@ -275,6 +276,18 @@ struct DailyLoadAdvisorTests {
         #expect(result.lookbackPenaltyActive == true)
     }
 
+    @Test(.tags(.loadAdvisor))
+    func lookbackPenaltyRequiresAtLeastTwoHighCostExercises() throws {
+        // Only one high-cost exercise yesterday — should NOT trigger the penalty
+        let context = makeContext(
+            completed: [makeCompleted("push_ups", muscleGroup: .upperPush)],
+            pending: [makePending("sit_ups", muscleGroup: .coreFlexion)],
+            yesterday: [makeCompleted("squats", muscleGroup: .lower)]
+        )
+        let result = try #require(advisor.recommend(context: context))
+        #expect(result.lookbackPenaltyActive == false)
+    }
+
     // MARK: - Overloaded and caution groups
 
     @Test(.tags(.loadAdvisor))
@@ -348,7 +361,7 @@ struct DailyLoadAdvisorTests {
 
     @Test(.tags(.loadAdvisor))
     func budgetFractionCanExceedOne() throws {
-        // All 6: 3+3+2+2+1+1 = 12 of budget 10 → fraction = 1.2
+        // All 6 with compounding on squats+glute_bridges: 4.5+3.0+3+2+1+1 = 14.5 of budget 10 → fraction = 1.45
         let context = makeContext(
             completed: [
                 makeCompleted("squats", muscleGroup: .lower),
