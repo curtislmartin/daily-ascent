@@ -39,7 +39,7 @@ struct RestDayView: View {
         }
         let formatted = date.formatted(
             .relative(presentation: .named, unitsStyle: .wide)
-        )
+        ).lowercased()
         if nextTrainingCount == 1 {
             return "Next training \(formatted) — 1 exercise"
         } else {

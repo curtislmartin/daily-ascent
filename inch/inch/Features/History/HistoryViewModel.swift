@@ -73,18 +73,18 @@ final class HistoryViewModel {
 
         let byExercise = Dictionary(grouping: sets, by: \.exerciseId)
         let exerciseStats = byExercise.compactMap { exerciseId, exerciseSets -> ExerciseStat? in
-            guard let first = exerciseSets.first,
-                  let def = first.enrolment?.exerciseDefinition else { return nil }
+            guard let first = exerciseSets.first else { return nil }
+            let def = first.enrolment?.exerciseDefinition
             let enrolment = enrolments.first { $0.exerciseDefinition?.exerciseId == exerciseId }
-            let level = enrolment?.currentLevel ?? 1
-            let totalDays = def.levels?.first { $0.level == level }?.days?.count ?? 0
+            let level = enrolment?.currentLevel ?? first.level
+            let totalDays = def?.levels?.first { $0.level == level }?.days?.count ?? 0
             return ExerciseStat(
                 id: exerciseId,
-                name: def.name,
-                color: def.color,
+                name: def?.name ?? exerciseId,
+                color: def?.color ?? "",
                 totalReps: exerciseSets.reduce(0) { $0 + $1.actualReps },
                 currentLevel: level,
-                currentDay: enrolment?.currentDay ?? 1,
+                currentDay: enrolment?.currentDay ?? first.dayNumber,
                 totalDaysInLevel: totalDays,
                 enrolmentId: enrolment?.persistentModelID
             )
@@ -115,13 +115,13 @@ final class HistoryViewModel {
         let allWeeks = byWeek.map { weekStart, weekSets -> WeeklyData in
             let byExercise = Dictionary(grouping: weekSets, by: \.exerciseId)
             let breakdown = byExercise.compactMap { exerciseId, exSets -> ExerciseWeekReps? in
-                guard let first = exSets.first,
-                      let def = first.enrolment?.exerciseDefinition else { return nil }
+                guard let first = exSets.first else { return nil }
+                let def = first.enrolment?.exerciseDefinition
                 return ExerciseWeekReps(
                     id: "\(weekStart.timeIntervalSince1970)-\(exerciseId)",
                     exerciseId: exerciseId,
-                    name: def.name,
-                    color: def.color,
+                    name: def?.name ?? exerciseId,
+                    color: def?.color ?? "",
                     totalReps: exSets.reduce(0) { $0 + $1.actualReps }
                 )
             }

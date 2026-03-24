@@ -55,7 +55,7 @@ xcodebuild -exportArchive \
 echo "🚀 Uploading to TestFlight (build $NEW)..."
 xcrun altool --upload-app \
   --type ios \
-  --file "$EXPORT_PATH/daily-ascent.ipa" \
+  --file "$EXPORT_PATH/inch.ipa" \
   --username "$APPLE_ID" \
   --password "$APP_PASSWORD" \
   2>&1 | grep -v "^$"

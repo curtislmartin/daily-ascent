@@ -79,7 +79,7 @@ struct TestDayView: View {
 
             Spacer()
 
-            RealTimeCountingView(targetReps: testTarget) { actual in
+            RealTimeCountingView(targetReps: testTarget, autoCompleteAtTarget: false) { actual in
                 phase = .counting(reps: actual)
                 finishTest(reps: actual)
             }
@@ -125,7 +125,7 @@ struct TestDayView: View {
                     Text("Next session")
                         .font(.caption)
                         .foregroundStyle(.tertiary)
-                    Text(next.formatted(.relative(presentation: .named)))
+                    Text(next.formatted(.relative(presentation: .named)).lowercased())
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }

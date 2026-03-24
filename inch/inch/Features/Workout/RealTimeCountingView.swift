@@ -2,13 +2,19 @@ import SwiftUI
 
 struct RealTimeCountingView: View {
     let targetReps: Int
+    var autoCompleteAtTarget: Bool = true
     let onComplete: (Int) -> Void
 
     @State private var count: Int = 0
     @State private var showingCompletion: Bool = false
+    @State private var targetReached: Bool = false
 
     private var progress: Double {
         targetReps > 0 ? min(Double(count) / Double(targetReps), 1) : 0
+    }
+
+    private var ringColor: Color {
+        targetReached ? .green : .accentColor
     }
 
     var body: some View {
@@ -18,7 +24,7 @@ struct RealTimeCountingView: View {
                     .stroke(.secondary.opacity(0.2), lineWidth: 8)
                 Circle()
                     .trim(from: 0, to: progress)
-                    .stroke(Color.accentColor, style: StrokeStyle(lineWidth: 8, lineCap: .round))
+                    .stroke(ringColor, style: StrokeStyle(lineWidth: 8, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                     .animation(.spring(duration: 0.2), value: count)
 
@@ -31,9 +37,16 @@ struct RealTimeCountingView: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("\(count) reps")
 
-            Text("target: \(targetReps)")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+            if targetReached {
+                Text("Target reached! Keep going.")
+                    .font(.subheadline)
+                    .foregroundStyle(.green)
+                    .transition(.opacity.combined(with: .scale))
+            } else {
+                Text("target: \(targetReps)")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
 
             Button {
                 tapRep()
@@ -57,13 +70,18 @@ struct RealTimeCountingView: View {
             }
         }
         .animation(.spring(duration: 0.2), value: count)
+        .animation(.easeInOut(duration: 0.3), value: targetReached)
     }
 
     private func tapRep() {
         count += 1
         if count >= targetReps {
-            showingCompletion = true
-            finish(reps: count)
+            if autoCompleteAtTarget {
+                showingCompletion = true
+                finish(reps: count)
+            } else {
+                targetReached = true
+            }
         }
     }
 
