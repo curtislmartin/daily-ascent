@@ -28,7 +28,7 @@ final class DataUploadService {
 
     func handleBGUpload(task: BGProcessingTask, context: ModelContext) async {
         var cancelled = false
-        var uploadTask: Task<Void, Never>?
+        var uploadTask: Task<String, Never>?
         task.expirationHandler = {
             cancelled = true
             uploadTask?.cancel()
@@ -36,7 +36,7 @@ final class DataUploadService {
         uploadTask = Task {
             await uploadPending(context: context)
         }
-        await uploadTask?.value
+        _ = await uploadTask?.value
         task.setTaskCompleted(success: !cancelled)
         scheduleBGUpload()
     }
@@ -44,16 +44,17 @@ final class DataUploadService {
 
     // MARK: - Private
 
-    func uploadPending(context: ModelContext) async {
+    @discardableResult
+    func uploadPending(context: ModelContext) async -> String {
         guard let settings = (try? context.fetch(FetchDescriptor<UserSettings>()))?.first,
               settings.motionDataUploadConsented
-        else { return }
+        else { return "skipped: motion data upload consent not granted" }
 
         guard let plistURL = Bundle.main.url(forResource: "Secrets", withExtension: "plist"),
               let dict = NSDictionary(contentsOf: plistURL) as? [String: Any],
               let supabaseURL = dict["SupabaseURL"] as? String,
               let anonKey = dict["SupabaseAnonKey"] as? String
-        else { return }
+        else { return "skipped: Secrets.plist missing or keys invalid" }
 
         let config = SupabaseConfig(
             supabaseURL: supabaseURL,
@@ -64,19 +65,20 @@ final class DataUploadService {
             activityLevel: settings.activityLevel
         )
 
-        let pendingStatus = UploadStatus.pending
-        let descriptor = FetchDescriptor<SensorRecording>(
-            predicate: #Predicate { $0.uploadStatus == pendingStatus }
-        )
-        let pending = (try? context.fetch(descriptor)) ?? []
+        let all = (try? context.fetch(FetchDescriptor<SensorRecording>())) ?? []
+        let pending = all.filter { $0.uploadStatus == .pending }
+        var succeeded = 0
+        var failed = 0
         for recording in pending {
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled else { break }
             do {
                 try await uploadRecording(recording, config: config, context: context)
+                succeeded += 1
             } catch {
-                // Leave as .pending for next BGTask run
+                failed += 1
             }
         }
+        return "uploaded: \(succeeded), failed: \(failed), total attempted: \(pending.count)"
     }
 
     private func uploadRecording(_ recording: SensorRecording, config: SupabaseConfig, context: ModelContext) async throws {
