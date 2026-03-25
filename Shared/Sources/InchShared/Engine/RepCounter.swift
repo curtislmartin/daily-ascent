@@ -32,19 +32,19 @@ public struct RepCountingConfig: Sendable {
 
 /// Counts reps from a live accelerometer stream using low-pass filtering and peak detection.
 ///
-/// `processSample` is designed to be called from a serial `OperationQueue` (same queue used by
-/// `CMMotionManager`). Internal mutable state is `nonisolated(unsafe)` — safe because it is only
-/// ever mutated from that single serial queue. `count` is incremented via a main-queue dispatch so
-/// SwiftUI observation works correctly.
+/// `processSample` must be called exclusively from a single serial `OperationQueue` (the same
+/// queue used by `CMMotionManager`). All internal mutable state is only ever written from that
+/// queue. `count` is written on the same queue; callers reading `count` on the main actor will
+/// always see a consistent value since `Int` writes are atomic on supported platforms and the
+/// serial queue prevents concurrent writes.
 @Observable
 public final class RepCounter {
-    // Accessed only from the serial sensor OperationQueue — not a data race.
-    nonisolated(unsafe) private var smoothed: Double = 0
-    nonisolated(unsafe) private var previous: Double = 0
-    nonisolated(unsafe) private var lastRepTime: Date = .distantPast
+    // Mutated only from the serial sensor OperationQueue.
+    private var smoothed: Double = 0
+    private var previous: Double = 0
+    private var lastRepTime: Date = .distantPast
 
-    // Written only from the main queue via DispatchQueue.main.async — safe.
-    nonisolated(unsafe) public var count: Int = 0
+    public var count: Int = 0
 
     private let config: RepCountingConfig
 
@@ -54,11 +54,6 @@ public final class RepCounter {
 
     /// Call once per `CMDeviceMotion` sample from the sensor OperationQueue.
     /// Uses `userAcceleration` components (gravity already removed by Core Motion).
-    ///
-    /// `count` is `nonisolated(unsafe)` and written only from the serial sensor
-    /// OperationQueue, so there is no data race. SwiftUI views observing `count`
-    /// should read it on the main actor; since the sensor queue is serial and
-    /// `count` writes are not concurrent, the value is always consistent when read.
     nonisolated public func processSample(ax: Double, ay: Double, az: Double) {
         let mag = (ax * ax + ay * ay + az * az).squareRoot()
         smoothed = config.smoothingAlpha * mag + (1.0 - config.smoothingAlpha) * smoothed
