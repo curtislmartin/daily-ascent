@@ -13,6 +13,11 @@ final class MotionRecordingService {
     // stopRecording), so there is no actual data race. nonisolated(unsafe) is required to satisfy
     // Swift's strict concurrency checker, following the same pattern as motionManager above.
     nonisolated(unsafe) private var flushAndClose: (() -> Void)?
+    // Called on the sensor OperationQueue for every sample while recording.
+    // Assign before startRecording; stopRecording clears it automatically.
+    // nonisolated(unsafe) — only ever set on @MainActor (between sets) and read
+    // on the serial sensor OperationQueue (during recording). Same pattern as flushAndClose.
+    nonisolated(unsafe) var onSample: ((Double, Double, Double) -> Void)?
     private var sensorQueue: OperationQueue?
     private(set) var currentRecordingURL: URL?
     private(set) var currentSessionId: String = ""
@@ -76,6 +81,7 @@ final class MotionRecordingService {
         motionManager.stopDeviceMotionUpdates()
         flushAndClose?()
         flushAndClose = nil
+        onSample = nil
         sensorQueue = nil
         isRecording = false
         let url = currentRecordingURL
@@ -100,6 +106,9 @@ final class MotionRecordingService {
             let ax = Float32(data.userAcceleration.x)
             let ay = Float32(data.userAcceleration.y)
             let az = Float32(data.userAcceleration.z)
+            self.onSample?(Double(data.userAcceleration.x),
+                           Double(data.userAcceleration.y),
+                           Double(data.userAcceleration.z))
             let gx = Float32(data.rotationRate.x)
             let gy = Float32(data.rotationRate.y)
             let gz = Float32(data.rotationRate.z)
