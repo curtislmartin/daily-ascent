@@ -3,11 +3,20 @@ import BackgroundTasks
 import SwiftData
 import InchShared
 
-enum UploadError: Error {
+enum UploadError: Error, CustomStringConvertible {
     case configurationMissing
     case fileNotFound
     case fileUploadFailed(Int)
     case metadataInsertFailed(Int)
+
+    var description: String {
+        switch self {
+        case .configurationMissing: "config missing"
+        case .fileNotFound: "file not found"
+        case .fileUploadFailed(let code): "storage HTTP \(code)"
+        case .metadataInsertFailed(let code): "metadata HTTP \(code)"
+        }
+    }
 }
 
 /// Uploads pending SensorRecordings to Supabase in the background via BGProcessingTask.
@@ -69,6 +78,7 @@ final class DataUploadService {
         let pending = all.filter { $0.uploadStatus == .pending }
         var succeeded = 0
         var failed = 0
+        var sampleErrors: [String] = []
         for recording in pending {
             guard !Task.isCancelled else { break }
             do {
@@ -76,9 +86,14 @@ final class DataUploadService {
                 succeeded += 1
             } catch {
                 failed += 1
+                if sampleErrors.count < 3 {
+                    sampleErrors.append(error is UploadError ? "\(error)" : error.localizedDescription)
+                }
             }
         }
-        return "uploaded: \(succeeded), failed: \(failed), total attempted: \(pending.count)"
+        var result = "uploaded: \(succeeded), failed: \(failed), total attempted: \(pending.count)"
+        if !sampleErrors.isEmpty { result += "\n\nErrors: \(sampleErrors.joined(separator: ", "))" }
+        return result
     }
 
     private func uploadRecording(_ recording: SensorRecording, config: SupabaseConfig, context: ModelContext) async throws {

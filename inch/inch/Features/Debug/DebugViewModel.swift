@@ -61,6 +61,9 @@ final class DebugViewModel {
         for e in enrolments { e.nextScheduledDate = Date.now }
         try? context.save()
         markDone(.schedDueToday)
+        alertTitle = "Done"
+        alertMessage = "\(enrolments.count) exercise(s) scheduled for today"
+        showAlert = true
     }
 
     func forceRestDay(context: ModelContext) {
@@ -365,13 +368,16 @@ final class DebugViewModel {
         }
         try? context.save()
         markDone(.uploadSeedPending)
+        alertTitle = "Seeded"
+        alertMessage = "3 stub SensorRecording rows created with status .pending"
+        showAlert = true
     }
 
     func triggerForegroundUpload(context: ModelContext, dataUpload: DataUploadService) {
         Task {
-            await dataUpload.uploadPending(context: context)
-            alertTitle = "Upload Complete"
-            alertMessage = "uploadPending() finished."
+            let result = await dataUpload.uploadPending(context: context)
+            alertTitle = "Upload Finished"
+            alertMessage = result
             showAlert = true
             markDone(.uploadTrigger)
         }
