@@ -19,6 +19,10 @@ struct WatchWorkoutView: View {
     @State private var elapsed: Int = 0
     @State private var hasAlerted: Bool = false
     @State private var inboundSessionId: String = ""
+    @State private var repCounter: RepCounter? = nil
+
+    /// Only sit_ups uses watch wrist signal for auto-counting.
+    private static let watchAutoCountedExercises: Set<String> = ["sit_ups"]
 
     init(session: WatchSession, settings: WatchSettings, onStartNext: ((WatchSession) -> Void)? = nil) {
         self.session = session
@@ -40,7 +44,8 @@ struct WatchWorkoutView: View {
                     WatchRealTimeCountingView(
                         targetReps: viewModel.targetReps,
                         setNumber: viewModel.currentSet,
-                        totalSets: viewModel.totalSets
+                        totalSets: viewModel.totalSets,
+                        repCounter: repCounter
                     ) { count in
                         viewModel.endSetRealTime(count: count)
                     }
@@ -96,6 +101,10 @@ struct WatchWorkoutView: View {
         .background(.background)
         .ignoresSafeArea()
         .task {
+            if Self.watchAutoCountedExercises.contains(session.exerciseId),
+               let config = RepCountingConfig.config(for: session.exerciseId) {
+                repCounter = RepCounter(config: config)
+            }
             for await trigger in watchConnectivity.recordingTriggers {
                 switch trigger {
                 case .start(let exerciseId, let setNumber, let sessionId):
@@ -137,6 +146,12 @@ struct WatchWorkoutView: View {
                     setNumber: viewModel.currentSet,
                     sessionId: sid
                 )
+                if session.countingMode == "real_time" {
+                    repCounter?.reset()
+                    motionRecording.onSample = { [repCounter] ax, ay, az in
+                        repCounter?.processSample(ax: ax, ay: ay, az: az)
+                    }
+                }
             case .confirming:
                 if motionRecording.isRecording,
                    case .confirming(let targetReps, let duration) = newPhase {
