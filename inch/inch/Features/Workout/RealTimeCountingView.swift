@@ -1,13 +1,19 @@
 import SwiftUI
+import InchShared
 
 struct RealTimeCountingView: View {
     let targetReps: Int
     var autoCompleteAtTarget: Bool = true
+    var repCounter: RepCounter? = nil
     let onComplete: (Int) -> Void
 
-    @State private var count: Int = 0
+    @State private var manualCount: Int = 0
     @State private var showingCompletion: Bool = false
     @State private var targetReached: Bool = false
+
+    private var count: Int {
+        repCounter?.count ?? manualCount
+    }
 
     private var progress: Double {
         targetReps > 0 ? min(Double(count) / Double(targetReps), 1) : 0
@@ -28,14 +34,21 @@ struct RealTimeCountingView: View {
                     .rotationEffect(.degrees(-90))
                     .animation(.spring(duration: 0.2), value: count)
 
-                Text("\(count)")
-                    .font(.system(size: 64, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                    .contentTransition(.numericText())
+                VStack(spacing: 2) {
+                    Text("\(count)")
+                        .font(.system(size: 64, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                        .contentTransition(.numericText())
+                    if repCounter != nil {
+                        Text("auto")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
             }
             .frame(width: 200, height: 200)
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("\(count) reps")
+            .accessibilityLabel("\(count) reps\(repCounter != nil ? ", auto counted" : "")")
 
             if targetReached {
                 Text("Target reached! Keep going.")
@@ -48,41 +61,78 @@ struct RealTimeCountingView: View {
                     .foregroundStyle(.secondary)
             }
 
-            Button {
-                tapRep()
-            } label: {
-                Text("Tap Each Rep")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 24)
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-            .disabled(showingCompletion)
-            .accessibilityHint("Double-tap to count one rep")
+            if repCounter != nil {
+                HStack(spacing: 20) {
+                    Button {
+                        adjustCount(by: -1)
+                    } label: {
+                        Image(systemName: "minus.circle.fill")
+                            .font(.title)
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Remove rep")
 
-            if count > 0 {
+                    Button {
+                        adjustCount(by: 1)
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title)
+                            .foregroundStyle(Color.accentColor)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Add rep")
+                }
+
                 Button("Done — \(count) reps") {
                     finish(reps: count)
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.regular)
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .disabled(count == 0 || showingCompletion)
+            } else {
+                Button {
+                    tapRep()
+                } label: {
+                    Text("Tap Each Rep")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 24)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .disabled(showingCompletion)
+                .accessibilityHint("Double-tap to count one rep")
+
+                if count > 0 {
+                    Button("Done — \(count) reps") {
+                        finish(reps: count)
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.regular)
+                }
             }
         }
         .animation(.spring(duration: 0.2), value: count)
         .animation(.easeInOut(duration: 0.3), value: targetReached)
+        .onChange(of: count) { _, newValue in
+            if newValue >= targetReps && !targetReached {
+                targetReached = true
+                if autoCompleteAtTarget && repCounter == nil {
+                    showingCompletion = true
+                    finish(reps: newValue)
+                }
+            }
+        }
     }
 
     private func tapRep() {
-        count += 1
-        if count >= targetReps {
-            if autoCompleteAtTarget {
-                showingCompletion = true
-                finish(reps: count)
-            } else {
-                targetReached = true
-            }
-        }
+        manualCount += 1
+    }
+
+    private func adjustCount(by delta: Int) {
+        guard let counter = repCounter else { return }
+        counter.count = max(0, counter.count + delta)
     }
 
     private func finish(reps: Int) {
