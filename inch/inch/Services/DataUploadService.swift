@@ -124,6 +124,7 @@ final class DataUploadService {
         var uploadRequest = URLRequest(url: storageURL)
         uploadRequest.httpMethod = "POST"
         uploadRequest.setValue(config.anonKey, forHTTPHeaderField: "apikey")
+        uploadRequest.setValue("Bearer \(config.anonKey)", forHTTPHeaderField: "Authorization")
         uploadRequest.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
         uploadRequest.setValue("deflate", forHTTPHeaderField: "Content-Encoding")
         uploadRequest.httpBody = compressedData
@@ -160,6 +161,7 @@ final class DataUploadService {
         var metadataRequest = URLRequest(url: metadataURL)
         metadataRequest.httpMethod = "POST"
         metadataRequest.setValue(config.anonKey, forHTTPHeaderField: "apikey")
+        metadataRequest.setValue("Bearer \(config.anonKey)", forHTTPHeaderField: "Authorization")
         metadataRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         metadataRequest.setValue("return=minimal", forHTTPHeaderField: "Prefer")
         metadataRequest.httpBody = try JSONEncoder().encode(payload)
