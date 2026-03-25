@@ -1,13 +1,19 @@
 import SwiftUI
+import InchShared
 
 struct WatchRealTimeCountingView: View {
     let targetReps: Int
     let setNumber: Int
     let totalSets: Int
+    var repCounter: RepCounter? = nil
     let onComplete: (Int) -> Void
 
-    @State private var count: Int = 0
+    @State private var manualCount: Int = 0
     @State private var crownValue: Double = 0
+
+    private var count: Int {
+        repCounter?.count ?? manualCount
+    }
 
     var body: some View {
         VStack(spacing: 4) {
@@ -19,10 +25,17 @@ struct WatchRealTimeCountingView: View {
 
             Spacer(minLength: 2)
 
-            Text("\(count)")
-                .font(.system(size: 44, weight: .bold, design: .rounded))
-                .monospacedDigit()
-                .contentTransition(.numericText())
+            VStack(spacing: 1) {
+                Text("\(count)")
+                    .font(.system(size: 44, weight: .bold, design: .rounded))
+                    .monospacedDigit()
+                    .contentTransition(.numericText())
+                if repCounter != nil {
+                    Text("auto")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
 
             Text("/ \(targetReps) target")
                 .font(.caption2)
@@ -30,22 +43,30 @@ struct WatchRealTimeCountingView: View {
 
             Spacer(minLength: 2)
 
-            Button {
-                tapRep()
-            } label: {
-                Text("Tap to Count")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
-
-            if count > 0 {
+            if repCounter != nil {
                 Button("Done (\(count))") {
                     onComplete(count)
                 }
-                .buttonStyle(.bordered)
-                .font(.caption)
-                .frame(maxWidth: .infinity)
+                .buttonStyle(.borderedProminent)
+                .disabled(count == 0)
+            } else {
+                Button {
+                    tapRep()
+                } label: {
+                    Text("Tap to Count")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+
+                if count > 0 {
+                    Button("Done (\(count))") {
+                        onComplete(count)
+                    }
+                    .buttonStyle(.bordered)
+                    .font(.caption)
+                    .frame(maxWidth: .infinity)
+                }
             }
         }
         .padding(.horizontal)
@@ -63,13 +84,23 @@ struct WatchRealTimeCountingView: View {
         )
         .onChange(of: crownValue) { _, newValue in
             let clamped = max(0, Int(newValue.rounded()))
-            if clamped != count { count = clamped }
+            if let counter = repCounter {
+                if clamped != counter.count { counter.count = clamped }
+            } else {
+                if clamped != manualCount { manualCount = clamped }
+            }
+        }
+        .onChange(of: count) { _, newValue in
+            // Keep crown value in sync when auto count changes
+            if abs(crownValue - Double(newValue)) > 0.5 {
+                crownValue = Double(newValue)
+            }
         }
     }
 
     private func tapRep() {
-        count += 1
-        crownValue = Double(count)
+        manualCount += 1
+        crownValue = Double(manualCount)
     }
 
     private var progressDots: some View {
