@@ -41,7 +41,12 @@ struct WorkoutSessionView: View {
     }
 
     @State private var viewModel: WorkoutViewModel
+    @State private var repCounter: RepCounter? = nil
     @State private var pendingRecordingURL: URL?
+
+    private static let phoneAutoCountedExercises: Set<String> = [
+        "push_ups", "pull_ups", "squats", "glute_bridges"
+    ]
     @State private var realTimeSetStartDate: Date?
     @State private var showingQuitConfirm = false
     @State private var sessionId: String = ""
@@ -116,6 +121,11 @@ struct WorkoutSessionView: View {
         .task {
             sessionId = UUID().uuidString
             viewModel.load(context: modelContext)
+            let id = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
+            if Self.phoneAutoCountedExercises.contains(id),
+               let config = RepCountingConfig.config(for: id) {
+                repCounter = RepCounter(config: config)
+            }
             await healthKit.requestAuthorization()
         }
         .onChange(of: viewModel.phase) { _, newPhase in
@@ -224,7 +234,8 @@ struct WorkoutSessionView: View {
 
             if viewModel.countingMode == .realTime {
                 RealTimeCountingView(
-                    targetReps: viewModel.currentTargetReps
+                    targetReps: viewModel.currentTargetReps,
+                    repCounter: repCounter
                 ) { actual in
                     let url = sensorConsented ? motionRecording.stopRecording() : nil
                     if dualRecordingEnabled {
@@ -249,6 +260,10 @@ struct WorkoutSessionView: View {
                             sessionId: sessionId,
                             context: modelContext
                         )
+                        repCounter?.reset()
+                        motionRecording.onSample = { [repCounter] ax, ay, az in
+                            repCounter?.processSample(ax: ax, ay: ay, az: az)
+                        }
                         if dualRecordingEnabled {
                             watchConnectivity.sendRecordingStart(
                                 exerciseId: exerciseId,
