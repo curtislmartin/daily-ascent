@@ -126,7 +126,6 @@ final class DataUploadService {
         uploadRequest.setValue(config.anonKey, forHTTPHeaderField: "apikey")
         uploadRequest.setValue("Bearer \(config.anonKey)", forHTTPHeaderField: "Authorization")
         uploadRequest.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
-        uploadRequest.setValue("deflate", forHTTPHeaderField: "Content-Encoding")
         uploadRequest.setValue("true", forHTTPHeaderField: "x-upsert")
         uploadRequest.httpBody = compressedData
 
