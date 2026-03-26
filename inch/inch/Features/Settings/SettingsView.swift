@@ -81,6 +81,11 @@ struct SettingsView: View {
             NavigationLink("Counting Method") {
                 TrackingMethodView(viewModel: viewModel)
             }
+            if let settings = viewModel.settings {
+                NavigationLink("Timed Exercises") {
+                    TimedExerciseSettingsView(settings: settings)
+                }
+            }
         }
     }
 
