@@ -2050,7 +2050,7 @@
       "muscleGroup": "lower_posterior",
       "color": "#8B5CF6",
       "countingMode": "post_set_confirmation",
-      "defaultRestSeconds": 60,
+      "defaultRestSeconds": 75,
       "levels": [
         {
           "level": 1,
@@ -2155,7 +2155,10 @@
             },
             {
               "day": 10,
-              "sets": []
+              "sets": [
+                30
+              ],
+              "isTest": true
             }
           ]
         },
@@ -2262,7 +2265,10 @@
             },
             {
               "day": 10,
-              "sets": []
+              "sets": [
+                20
+              ],
+              "isTest": true
             }
           ]
         },
@@ -2369,7 +2375,10 @@
             },
             {
               "day": 10,
-              "sets": []
+              "sets": [
+                20
+              ],
+              "isTest": true
             }
           ]
         }
@@ -2486,7 +2495,10 @@
             },
             {
               "day": 10,
-              "sets": []
+              "sets": [
+                20
+              ],
+              "isTest": true
             }
           ]
         },
@@ -2593,13 +2605,16 @@
             },
             {
               "day": 10,
-              "sets": []
+              "sets": [
+                20
+              ],
+              "isTest": true
             }
           ]
         },
         {
           "level": 3,
-          "variationName": "Slow Back Extension",
+          "variationName": "Y Superman",
           "restDayPattern": [
             2,
             2,
@@ -2700,7 +2715,10 @@
             },
             {
               "day": 10,
-              "sets": []
+              "sets": [
+                20
+              ],
+              "isTest": true
             }
           ]
         }
@@ -3005,7 +3023,7 @@
             2,
             3
           ],
-          "testTarget": 20,
+          "testTarget": 15,
           "totalDays": 10,
           "days": [
             {
@@ -3100,7 +3118,10 @@
             },
             {
               "day": 10,
-              "sets": []
+              "sets": [
+                15
+              ],
+              "isTest": true
             }
           ]
         },
@@ -3207,7 +3228,10 @@
             },
             {
               "day": 10,
-              "sets": []
+              "sets": [
+                20
+              ],
+              "isTest": true
             }
           ]
         },
@@ -3219,7 +3243,7 @@
             2,
             3
           ],
-          "testTarget": 15,
+          "testTarget": 12,
           "totalDays": 10,
           "days": [
             {
@@ -3314,7 +3338,10 @@
             },
             {
               "day": 10,
-              "sets": []
+              "sets": [
+                12
+              ],
+              "isTest": true
             }
           ]
         }
@@ -3431,19 +3458,22 @@
             },
             {
               "day": 10,
-              "sets": []
+              "sets": [
+                20
+              ],
+              "isTest": true
             }
           ]
         },
         {
           "level": 2,
-          "variationName": "Chair Dip",
+          "variationName": "Elevated Bench Dip",
           "restDayPattern": [
             2,
             2,
             3
           ],
-          "testTarget": 20,
+          "testTarget": 15,
           "totalDays": 10,
           "days": [
             {
@@ -3538,7 +3568,10 @@
             },
             {
               "day": 10,
-              "sets": []
+              "sets": [
+                15
+              ],
+              "isTest": true
             }
           ]
         },
@@ -3550,7 +3583,7 @@
             2,
             3
           ],
-          "testTarget": 15,
+          "testTarget": 10,
           "totalDays": 10,
           "days": [
             {
@@ -3645,7 +3678,10 @@
             },
             {
               "day": 10,
-              "sets": []
+              "sets": [
+                10
+              ],
+              "isTest": true
             }
           ]
         }
