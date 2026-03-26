@@ -6,7 +6,7 @@ struct RepCounterTests {
     // MARK: - Config
 
     @Test func configExistsForSupportedExercises() {
-        for id in ["push_ups", "pull_ups", "squats", "glute_bridges", "sit_ups"] {
+        for id in ["push_ups", "pull_ups", "squats", "hip_hinge"] {
             #expect(RepCountingConfig.config(for: id) != nil, "Missing config for \(id)")
         }
     }

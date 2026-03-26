@@ -63,18 +63,18 @@ struct DailyLoadAdvisorTests {
 
     @Test(.tags(.loadAdvisor))
     func freshDayWithCoreOnlySessionHasHighHeadroom() throws {
-        // sit_ups (cost 1) + dead_bugs (cost 1) = 2 consumed of 10
+        // spinal_extension (cost 1) + dead_bugs (cost 1) = 2 consumed of 10
         // 4 pending: avg cost 2.5 → floor(8/2.5) = floor(3.2) = 3, capped at 4 → total 5
         let context = makeContext(
             completed: [
-                makeCompleted("sit_ups", muscleGroup: .coreFlexion),
+                makeCompleted("spinal_extension", muscleGroup: .coreFlexion),
                 makeCompleted("dead_bugs", muscleGroup: .coreStability)
             ],
             pending: [
                 makePending("push_ups", muscleGroup: .upperPush),
                 makePending("squats", muscleGroup: .lower),
                 makePending("pull_ups", muscleGroup: .upperPull),
-                makePending("glute_bridges", muscleGroup: .lowerPosterior)
+                makePending("hip_hinge", muscleGroup: .lowerPosterior)
             ]
         )
         let result = advisor.recommend(context: context)
@@ -153,17 +153,17 @@ struct DailyLoadAdvisorTests {
     // MARK: - Same-group compounding (×1.5 on second exercise)
 
     @Test(.tags(.loadAdvisor))
-    func squatsAndGluteBridgesBothCountedWithCompounding() {
-        // squats (3 × 1.5 = 4.5) + glute_bridges (2 × 1.5 = 3.0) = 7.5 consumed
+    func squatsAndHipHingeBothCountedWithCompounding() {
+        // squats (3 × 1.5 = 4.5) + hip_hinge (2 × 1.5 = 3.0) = 7.5 consumed
         // Both get the ×1.5 multiplier for order-independence (see DailyLoadAdvisor)
         // 2 pending core at cost 1 → floor(2.5/1) = 2, capped at 2 → total 4
         let context = makeContext(
             completed: [
                 makeCompleted("squats", muscleGroup: .lower),
-                makeCompleted("glute_bridges", muscleGroup: .lowerPosterior)
+                makeCompleted("hip_hinge", muscleGroup: .lowerPosterior)
             ],
             pending: [
-                makePending("sit_ups", muscleGroup: .coreFlexion),
+                makePending("spinal_extension", muscleGroup: .coreFlexion),
                 makePending("dead_bugs", muscleGroup: .coreStability)
             ]
         )
