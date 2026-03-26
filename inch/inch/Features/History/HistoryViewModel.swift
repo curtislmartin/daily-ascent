@@ -34,6 +34,10 @@ final class HistoryViewModel {
         let byExercise = Dictionary(grouping: sets, by: \.exerciseId)
         let summaries = byExercise.values.compactMap { exerciseSets -> ExerciseSummary? in
             guard let first = exerciseSets.first else { return nil }
+            let isTimed = first.countingMode == .timed
+            let totalDuration = isTimed
+                ? exerciseSets.compactMap(\.setDurationSeconds).reduce(0, +)
+                : nil
             return ExerciseSummary(
                 id: first.exerciseId,
                 exerciseName: first.enrolment?.exerciseDefinition?.name ?? first.exerciseId,
@@ -45,7 +49,10 @@ final class HistoryViewModel {
                 targetReps: exerciseSets.reduce(0) { $0 + $1.targetReps },
                 isTest: first.isTest,
                 testPassed: first.testPassed,
-                enrolmentId: first.enrolment?.persistentModelID
+                enrolmentId: first.enrolment?.persistentModelID,
+                countingMode: first.countingMode,
+                totalDurationSeconds: totalDuration,
+                targetDurationSeconds: first.targetDurationSeconds
             )
         }.sorted { $0.exerciseName < $1.exerciseName }
 
@@ -160,6 +167,9 @@ final class HistoryViewModel {
         let isTest: Bool
         let testPassed: Bool?
         let enrolmentId: PersistentIdentifier?
+        let countingMode: CountingMode
+        let totalDurationSeconds: Double?
+        let targetDurationSeconds: Int?
     }
 
     struct HistoryStats {
