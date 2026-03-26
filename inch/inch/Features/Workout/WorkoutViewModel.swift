@@ -37,6 +37,12 @@ final class WorkoutViewModel {
     var isTimedExercise: Bool { countingMode == .timed }
     var totalSets: Int { prescription?.sets.count ?? 0 }
     var isTestDay: Bool { prescription?.isTest ?? false }
+    var variationName: String? {
+        enrolment?.exerciseDefinition?
+            .levels?
+            .first(where: { $0.level == (enrolment?.currentLevel ?? 0) })?
+            .variationName
+    }
 
     init(enrolmentId: PersistentIdentifier) {
         self.enrolmentId = enrolmentId
