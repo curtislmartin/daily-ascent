@@ -21,6 +21,7 @@ public final class UserSettings {
     public var streakProtectionMinute: Int = 0
     public var showConflictWarnings: Bool = true
     public var dualDeviceRecordingEnabled: Bool = true
+    public var timedPrepCountdownSeconds: Int = 5
 
     public var appearanceMode: String = "system"
 
@@ -54,6 +55,7 @@ public final class UserSettings {
         streakProtectionMinute: Int = 0,
         showConflictWarnings: Bool = true,
         dualDeviceRecordingEnabled: Bool = true,
+        timedPrepCountdownSeconds: Int = 5,
         motionDataUploadConsented: Bool = false,
         consentDate: Date? = nil,
         ageRange: String? = nil,
@@ -77,6 +79,7 @@ public final class UserSettings {
         self.streakProtectionMinute = streakProtectionMinute
         self.showConflictWarnings = showConflictWarnings
         self.dualDeviceRecordingEnabled = dualDeviceRecordingEnabled
+        self.timedPrepCountdownSeconds = timedPrepCountdownSeconds
         self.motionDataUploadConsented = motionDataUploadConsented
         self.consentDate = consentDate
         self.ageRange = ageRange

@@ -16,6 +16,7 @@ public final class CompletedSet {
 
     public var countingMode: CountingMode = CountingMode.postSetConfirmation
     public var setDurationSeconds: Double? = nil
+    public var targetDurationSeconds: Int? = nil  // prescribed hold duration (nil for rep-based sets)
 
     public var enrolment: ExerciseEnrolment?
 
@@ -34,7 +35,8 @@ public final class CompletedSet {
         isTest: Bool = false,
         testPassed: Bool? = nil,
         countingMode: CountingMode = .postSetConfirmation,
-        setDurationSeconds: Double? = nil
+        setDurationSeconds: Double? = nil,
+        targetDurationSeconds: Int? = nil
     ) {
         self.completedAt = completedAt
         self.sessionDate = sessionDate
@@ -48,5 +50,6 @@ public final class CompletedSet {
         self.testPassed = testPassed
         self.countingMode = countingMode
         self.setDurationSeconds = setDurationSeconds
+        self.targetDurationSeconds = targetDurationSeconds
     }
 }
