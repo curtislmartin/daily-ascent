@@ -5,14 +5,14 @@ import SwiftData
 
 struct ExerciseDataLoaderTests {
     @Test(.tags(.dataLoader))
-    func loadsAllSixExercises() throws {
+    func loadsAllNineExercises() throws {
         let container = try ModelContainerFactory.makeContainer(inMemory: true)
         let context = ModelContext(container)
         let loader = ExerciseDataLoader()
         try loader.seedIfNeeded(context: context)
 
         let exercises = try context.fetch(FetchDescriptor<ExerciseDefinition>())
-        #expect(exercises.count == 6)
+        #expect(exercises.count == 9)
     }
 
     @Test(.tags(.dataLoader))
@@ -46,7 +46,7 @@ struct ExerciseDataLoaderTests {
         try loader.seedIfNeeded(context: context)
 
         let exercises = try context.fetch(FetchDescriptor<ExerciseDefinition>())
-        #expect(exercises.count == 6)
+        #expect(exercises.count == 9)
     }
 
     @Test(.tags(.dataLoader))
@@ -76,7 +76,7 @@ struct ExerciseDataLoaderTests {
         let exercises = try context.fetch(FetchDescriptor<ExerciseDefinition>())
             .sorted { $0.sortOrder < $1.sortOrder }
         let sortOrders = exercises.map(\.sortOrder)
-        #expect(sortOrders == Array(0..<6))
+        #expect(sortOrders == Array(0..<9))
     }
 
     @Test(.tags(.dataLoader))
