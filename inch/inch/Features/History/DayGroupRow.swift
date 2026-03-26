@@ -1,4 +1,5 @@
 import SwiftUI
+import InchShared
 
 struct DayGroupRow: View {
     let day: HistoryViewModel.DayGroup
@@ -94,12 +95,20 @@ struct DayGroupRow: View {
                         .fontWeight(.medium)
                 }
                 let outcome: String = {
+                    let resultLabel: String
+                    if exercise.countingMode == .timed {
+                        let held = exercise.totalDurationSeconds.map { String(format: "%.0fs", $0) } ?? "—"
+                        let target = exercise.targetDurationSeconds.map { "\($0)s" } ?? "—"
+                        resultLabel = "\(held) / \(target)"
+                    } else {
+                        resultLabel = "\(exercise.actualReps) / \(exercise.targetReps)"
+                    }
                     if let passed = exercise.testPassed {
                         return passed
-                            ? "Level \(exercise.level) Final — \(exercise.actualReps) / \(exercise.targetReps) — PASSED"
-                            : "Level \(exercise.level) Final — \(exercise.actualReps) / \(exercise.targetReps) — Retry next"
+                            ? "Level \(exercise.level) Final — \(resultLabel) — PASSED"
+                            : "Level \(exercise.level) Final — \(resultLabel) — Retry next"
                     }
-                    return "Level \(exercise.level) Final — \(exercise.actualReps) / \(exercise.targetReps)"
+                    return "Level \(exercise.level) Final — \(resultLabel)"
                 }()
                 Text(outcome)
                     .font(.caption)
