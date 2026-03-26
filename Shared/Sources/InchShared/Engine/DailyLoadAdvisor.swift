@@ -18,11 +18,15 @@ public struct DailyLoadAdvisor: Sendable {
     /// and recovery research. Squats/pull-ups: 72h recovery (High=3).
     /// Push-ups/glute-bridges: 48h (Medium=2). Core: 24h (Low=1).
     private static let baseCosts: [String: Double] = [
-        "squats":        3,
-        "pull_ups":      3,
-        "push_ups":      2,
-        "hip_hinge":     2,
-        "dead_bugs":     1
+        "squats":           3,
+        "pull_ups":         3,
+        "rows":             3,
+        "push_ups":         2,
+        "dips":             2,
+        "hip_hinge":        2,
+        "dead_bugs":        1,
+        "spinal_extension": 1,
+        "plank":            1
     ]
 
     /// Default cost for an unknown exercise (medium tier).
