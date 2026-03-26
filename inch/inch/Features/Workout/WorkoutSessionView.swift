@@ -87,6 +87,10 @@ struct WorkoutSessionView: View {
                 ) {
                     viewModel.finishRest()
                 }
+            case .preparingTimedSet:
+                ProgressView()
+            case .inTimedSet:
+                ProgressView()
             case .complete:
                 ExerciseCompleteView(
                     exerciseName: viewModel.exerciseName,
