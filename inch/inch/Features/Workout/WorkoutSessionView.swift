@@ -51,6 +51,7 @@ struct WorkoutSessionView: View {
     @State private var showingQuitConfirm = false
     @State private var sessionId: String = ""
     @State private var showHoldPhoneHint = true
+    @State private var setStartOrientation: String = ""
 
     init(enrolmentId: PersistentIdentifier) {
         self.enrolmentId = enrolmentId
@@ -59,9 +60,12 @@ struct WorkoutSessionView: View {
 
     private var shouldWarnOnBack: Bool {
         switch viewModel.phase {
-        case .loading, .complete: false
-        case .inSet: true
-        default: viewModel.currentSetIndex > 0
+        case .loading, .complete:
+            false
+        case .inSet, .preparingTimedSet, .inTimedSet:
+            true
+        default:
+            viewModel.currentSetIndex > 0
         }
     }
 
@@ -83,14 +87,36 @@ struct WorkoutSessionView: View {
             case .resting(let seconds):
                 RestTimerView(
                     totalSeconds: seconds,
-                    nextSetReps: viewModel.prescription?.sets[safe: viewModel.currentSetIndex]
+                    nextSetReps: viewModel.isTimedExercise ? nil : viewModel.prescription?.sets[safe: viewModel.currentSetIndex],
+                    nextSetDuration: viewModel.isTimedExercise ? viewModel.currentTargetReps : nil
                 ) {
                     viewModel.finishRest()
                 }
-            case .preparingTimedSet:
-                ProgressView()
-            case .inTimedSet:
-                ProgressView()
+            case .preparingTimedSet(let targetSeconds):
+                PreSetCountdownView(
+                    countdownSeconds: settings?.timedPrepCountdownSeconds ?? 5,
+                    holdDurationSeconds: targetSeconds,
+                    onStart: {
+                        viewModel.countdownComplete()
+                    }
+                )
+            case .inTimedSet(let targetSeconds):
+                TimedSetView(targetSeconds: targetSeconds) { actualDuration in
+                    let url = sensorConsented ? motionRecording.stopRecording() : nil
+                    if dualRecordingEnabled {
+                        let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
+                        watchConnectivity.sendRecordingStop(
+                            exerciseId: exerciseId,
+                            setNumber: viewModel.currentSetIndex + 1
+                        )
+                    }
+                    viewModel.completeTimedSet(
+                        actualDuration: actualDuration,
+                        context: modelContext,
+                        recordingURL: url
+                    )
+                }
+                .id(viewModel.currentSetIndex)
             case .complete:
                 ExerciseCompleteView(
                     exerciseName: viewModel.exerciseName,
@@ -135,6 +161,24 @@ struct WorkoutSessionView: View {
         .onChange(of: viewModel.phase) { _, newPhase in
             switch newPhase {
             case .inSet:
+                showHoldPhoneHint = false
+                if sensorConsented {
+                    let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
+                    motionRecording.startRecording(
+                        exerciseId: exerciseId,
+                        setNumber: viewModel.currentSetIndex + 1,
+                        sessionId: sessionId,
+                        context: modelContext
+                    )
+                    if dualRecordingEnabled {
+                        watchConnectivity.sendRecordingStart(
+                            exerciseId: exerciseId,
+                            setNumber: viewModel.currentSetIndex + 1,
+                            sessionId: sessionId
+                        )
+                    }
+                }
+            case .inTimedSet:
                 showHoldPhoneHint = false
                 if sensorConsented {
                     let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
@@ -277,6 +321,13 @@ struct WorkoutSessionView: View {
                         }
                     }
                 }
+            } else if viewModel.isTimedExercise {
+                Button("Start Hold \(viewModel.currentSetIndex + 1)") {
+                    setStartOrientation = UIDevice.current.orientation.stringValue
+                    viewModel.startTimedSet()
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
             } else {
                 Button("Start Set \(viewModel.currentSetIndex + 1)") {
                     viewModel.startSet()
@@ -335,5 +386,19 @@ struct WorkoutSessionView: View {
 private extension Array {
     subscript(safe index: Int) -> Element? {
         indices.contains(index) ? self[index] : nil
+    }
+}
+
+private extension UIDeviceOrientation {
+    var stringValue: String {
+        switch self {
+        case .portrait: "portrait"
+        case .portraitUpsideDown: "portraitUpsideDown"
+        case .landscapeLeft: "landscapeLeft"
+        case .landscapeRight: "landscapeRight"
+        case .faceUp: "faceUp"
+        case .faceDown: "faceDown"
+        default: "unknown"
+        }
     }
 }

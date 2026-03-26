@@ -3,13 +3,15 @@ import SwiftUI
 struct RestTimerView: View {
     let totalSeconds: Int
     let nextSetReps: Int?
+    var nextSetDuration: Int? = nil
     let onComplete: () -> Void
 
     @State private var remaining: Int
 
-    init(totalSeconds: Int, nextSetReps: Int? = nil, onComplete: @escaping () -> Void) {
+    init(totalSeconds: Int, nextSetReps: Int? = nil, nextSetDuration: Int? = nil, onComplete: @escaping () -> Void) {
         self.totalSeconds = totalSeconds
         self.nextSetReps = nextSetReps
+        self.nextSetDuration = nextSetDuration
         self.onComplete = onComplete
         _remaining = State(initialValue: totalSeconds)
     }
@@ -43,7 +45,11 @@ struct RestTimerView: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Rest timer, \(remaining) second\(remaining == 1 ? "" : "s") remaining")
 
-            if let nextSetReps {
+            if let nextSetDuration {
+                Text("Next: \(nextSetDuration)s hold")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            } else if let nextSetReps {
                 Text("Next: \(nextSetReps) reps")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
