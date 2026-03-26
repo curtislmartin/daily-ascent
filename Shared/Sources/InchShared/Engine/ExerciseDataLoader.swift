@@ -34,7 +34,8 @@ public struct ExerciseDataLoader: Sendable {
                     restDayPattern: levelDTO.restDayPattern,
                     testTarget: levelDTO.testTarget,
                     extraRestBeforeTest: levelDTO.extraRestBeforeTest,
-                    totalDays: levelDTO.totalDays
+                    totalDays: levelDTO.totalDays,
+                    variationName: levelDTO.variationName
                 )
                 levelDef.exercise = exercise
                 context.insert(levelDef)
@@ -59,13 +60,13 @@ public enum ExerciseDataError: Error {
     case jsonNotFound
 }
 
-// MARK: - Private decoding types
+// MARK: - Decoding types (internal for testability)
 
-private struct ExerciseDataRoot: Decodable {
+struct ExerciseDataRoot: Decodable {
     let exercises: [ExerciseDTO]
 }
 
-private struct ExerciseDTO: Decodable {
+struct ExerciseDTO: Decodable {
     let id: String
     let name: String
     let muscleGroup: String
@@ -75,16 +76,17 @@ private struct ExerciseDTO: Decodable {
     let levels: [LevelDTO]
 }
 
-private struct LevelDTO: Decodable {
+struct LevelDTO: Decodable {
     let level: Int
     let restDayPattern: [Int]
     let testTarget: Int
     let extraRestBeforeTest: Int?
     let totalDays: Int
+    let variationName: String?
     let days: [DayDTO]
 }
 
-private struct DayDTO: Decodable {
+struct DayDTO: Decodable {
     let day: Int
     let sets: [Int]
 }
