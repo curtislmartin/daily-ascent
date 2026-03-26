@@ -12,6 +12,7 @@ public struct WatchSession: Codable, Sendable, Identifiable, Equatable {
     public let testTarget: Int?
     public let restSeconds: Int
     public let countingMode: String
+    public let variationName: String?
 
     public init(
         exerciseId: String,
@@ -23,7 +24,8 @@ public struct WatchSession: Codable, Sendable, Identifiable, Equatable {
         isTest: Bool,
         testTarget: Int?,
         restSeconds: Int,
-        countingMode: String
+        countingMode: String,
+        variationName: String? = nil
     ) {
         self.exerciseId = exerciseId
         self.exerciseName = exerciseName
@@ -35,5 +37,6 @@ public struct WatchSession: Codable, Sendable, Identifiable, Equatable {
         self.testTarget = testTarget
         self.restSeconds = restSeconds
         self.countingMode = countingMode
+        self.variationName = variationName
     }
 }
