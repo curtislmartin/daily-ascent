@@ -26,8 +26,10 @@ final class WatchWorkoutViewModel {
     var currentSet: Int { currentSetIndex + 1 }
     var totalSets: Int { session.sets.count }
     var targetReps: Int { session.sets[safe: currentSetIndex] ?? 0 }
+    var currentSetTarget: Int { session.sets[safe: currentSetIndex] ?? 0 }
     var isLastSet: Bool { currentSetIndex >= session.sets.count - 1 }
     var totalReps: Int { completedSets.reduce(0) { $0 + $1.actualReps } }
+    var isTimed: Bool { session.countingMode == "timed" }
 
     // Accessors for settings — used by the view without exposing full settings object
     var heartRateAlertBPM: Int { settings.heartRateAlertBPM }
@@ -56,6 +58,23 @@ final class WatchWorkoutViewModel {
     func endSetRealTime(count: Int) {
         pendingRealTimeCount = count
         endSet()
+    }
+
+    func endSetTimed(duration: Double) {
+        let target = session.sets[safe: currentSetIndex] ?? 0
+        completedSets.append(WatchSetResult(
+            setNumber: currentSet,
+            targetReps: target,
+            actualReps: 0,
+            durationSeconds: duration
+        ))
+
+        if isLastSet {
+            phase = .complete
+        } else {
+            currentSetIndex += 1
+            phase = .resting(seconds: session.restSeconds)
+        }
     }
 
     func clearPendingRealTimeCount() {
