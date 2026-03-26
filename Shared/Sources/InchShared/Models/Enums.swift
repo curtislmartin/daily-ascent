@@ -33,6 +33,7 @@ public enum MuscleGroup: String, Codable, Sendable, CaseIterable {
 public enum CountingMode: String, Codable, Sendable {
     case realTime = "real_time"
     case postSetConfirmation = "post_set_confirmation"
+    case timed = "timed"
 }
 
 public enum SensorDevice: String, Codable, Sendable {
