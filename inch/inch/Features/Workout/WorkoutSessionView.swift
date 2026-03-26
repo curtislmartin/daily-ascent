@@ -24,9 +24,9 @@ struct WorkoutSessionView: View {
 
     private var phoneHint: (message: String, icon: String)? {
         switch exerciseId {
-        case "sit_ups", "dead_bugs", "squats":
+        case "dead_bugs", "squats":
             return ("Hold your phone for better tracking", "hand.raised.fill")
-        case "pull_ups", "push_ups", "glute_bridges":
+        case "pull_ups", "push_ups", "hip_hinge", "dips", "rows":
             return ("Put your phone in your pocket for better tracking", "iphone")
         default:
             return nil
@@ -45,7 +45,7 @@ struct WorkoutSessionView: View {
     @State private var pendingRecordingURL: URL?
 
     private static let phoneAutoCountedExercises: Set<String> = [
-        "push_ups", "pull_ups", "squats", "glute_bridges"
+        "push_ups", "pull_ups", "squats", "hip_hinge", "dead_bugs"
     ]
     @State private var realTimeSetStartDate: Date?
     @State private var showingQuitConfirm = false
