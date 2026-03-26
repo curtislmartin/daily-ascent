@@ -368,6 +368,11 @@ struct WorkoutSessionView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Set \(viewModel.currentSetIndex + 1) of \(viewModel.totalSets)")
                     .font(.headline)
+                if let variation = viewModel.variationName {
+                    Text(variation)
+                        .font(.caption)
+                        .foregroundStyle(Color.accentColor)
+                }
                 Text("Day \(viewModel.enrolment?.currentDay ?? 0) · Level \(viewModel.enrolment?.currentLevel ?? 0)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
