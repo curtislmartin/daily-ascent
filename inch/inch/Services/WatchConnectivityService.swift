@@ -74,7 +74,8 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
                 isTest: prescription.isTest,
                 testTarget: prescription.isTest ? prescription.sets.first : nil,
                 restSeconds: restSeconds,
-                countingMode: modeString
+                countingMode: modeString,
+                variationName: levelDef.variationName
             ))
         }
 
