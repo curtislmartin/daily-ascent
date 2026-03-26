@@ -83,7 +83,8 @@ struct ExerciseDetailView: View {
                     DayRow(
                         day: day,
                         status: dayStatus(day: day, enrolment: enrolment),
-                        scheduledDate: scheduled
+                        scheduledDate: scheduled,
+                        countingMode: def?.countingMode ?? .postSetConfirmation
                     ) {
                         if day.dayNumber != enrolment.currentDay {
                             pendingDay = day.dayNumber
@@ -103,10 +104,12 @@ struct ExerciseDetailView: View {
     }
 
     private func levelProgressSection(enrolment: ExerciseEnrolment) -> some View {
-        Section {
+        let def = enrolment.exerciseDefinition
+        return Section {
             HStack(spacing: 0) {
                 ForEach(1...3, id: \.self) { level in
-                    levelSegment(level: level, currentLevel: enrolment.currentLevel, isActive: enrolment.isActive)
+                    let variationName = def?.levels?.first(where: { $0.level == level })?.variationName
+                    levelSegment(level: level, currentLevel: enrolment.currentLevel, isActive: enrolment.isActive, variationName: variationName)
                     if level < 3 {
                         Image(systemName: "chevron.right")
                             .font(.caption2)
@@ -130,7 +133,7 @@ struct ExerciseDetailView: View {
         }
     }
 
-    private func levelSegment(level: Int, currentLevel: Int, isActive: Bool) -> some View {
+    private func levelSegment(level: Int, currentLevel: Int, isActive: Bool, variationName: String?) -> some View {
         let isCurrent = level == currentLevel
         let isPast = level < currentLevel || !isActive
 
@@ -141,10 +144,15 @@ struct ExerciseDetailView: View {
                 Circle()
                     .fill(isPast ? Color.green : isCurrent ? Color.accentColor : Color.secondary.opacity(0.3))
                     .frame(width: 10, height: 10)
-                Text("L\(level)")
-                    .font(.caption2)
-                    .fontWeight(isCurrent ? .bold : .regular)
-                    .foregroundStyle(isCurrent ? .primary : .secondary)
+                VStack(alignment: .leading) {
+                    Text("Level \(level)")
+                        .font(.headline)
+                    if let variation = variationName {
+                        Text(variation)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
             }
             .frame(maxWidth: .infinity)
         }
@@ -199,6 +207,7 @@ private struct DayRow: View {
     let day: DayPrescription
     let status: DayStatus
     var scheduledDate: Date? = nil
+    var countingMode: CountingMode = .postSetConfirmation
     let onTap: () -> Void
 
     var body: some View {
@@ -220,10 +229,16 @@ private struct DayRow: View {
                                 .foregroundStyle(.orange)
                         }
                     }
-                    if !day.sets.isEmpty, !day.isTest {
-                        Text(setSummary(day.sets))
-                            .font(.caption)
-                            .foregroundStyle(.tertiary)
+                    if !day.sets.isEmpty {
+                        if day.isTest, countingMode == .timed {
+                            Text("Test — hold as long as you can")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                        } else if !day.isTest {
+                            Text(setSummary(day))
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                        }
                     }
                 }
                 Spacer()
@@ -252,7 +267,11 @@ private struct DayRow: View {
         .font(.body)
     }
 
-    private func setSummary(_ sets: [Int]) -> String {
-        "\(sets.count) sets · \(sets.map(String.init).joined(separator: "-")) reps"
+    private func setSummary(_ day: DayPrescription) -> String {
+        if countingMode == .timed {
+            let targetSeconds = day.sets.first ?? 0
+            return "\(day.sets.count) sets · \(targetSeconds)s hold"
+        }
+        return "\(day.sets.count) sets · \(day.sets.map(String.init).joined(separator: "-")) reps"
     }
 }
