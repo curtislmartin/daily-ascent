@@ -5,6 +5,8 @@ import InchShared
 enum WorkoutPhase: Equatable {
     case loading
     case ready
+    case preparingTimedSet(targetSeconds: Int)  // pre-set countdown
+    case inTimedSet(targetSeconds: Int)          // active hold (view owns elapsed timer)
     case inSet(startedAt: Date)
     case confirming(targetReps: Int, duration: Double)
     case resting(restSeconds: Int)
@@ -32,6 +34,7 @@ final class WorkoutViewModel {
     var countingMode: CountingMode { enrolment?.exerciseDefinition?.countingMode ?? .postSetConfirmation }
     var restSeconds: Int { enrolment?.exerciseDefinition?.defaultRestSeconds ?? 60 }
     var currentTargetReps: Int { prescription?.sets[safe: currentSetIndex] ?? 0 }
+    var isTimedExercise: Bool { countingMode == .timed }
     var totalSets: Int { prescription?.sets.count ?? 0 }
     var isTestDay: Bool { prescription?.isTest ?? false }
 
@@ -60,6 +63,15 @@ final class WorkoutViewModel {
         phase = .confirming(targetReps: currentTargetReps, duration: duration)
     }
 
+    func startTimedSet() {
+        phase = .preparingTimedSet(targetSeconds: currentTargetReps)
+    }
+
+    func countdownComplete() {
+        guard case .preparingTimedSet(let target) = phase else { return }
+        phase = .inTimedSet(targetSeconds: target)
+    }
+
     func confirmSet(actual: Int, context: ModelContext, recordingURL: URL? = nil, duration: Double = 0) {
         saveSet(actualReps: actual, duration: duration, context: context, recordingURL: recordingURL)
         advanceAfterSet(context: context)
@@ -67,6 +79,12 @@ final class WorkoutViewModel {
 
     func completeRealTimeSet(actual: Int, context: ModelContext, recordingURL: URL? = nil, duration: Double = 0) {
         saveSet(actualReps: actual, duration: duration, context: context, recordingURL: recordingURL)
+        advanceAfterSet(context: context)
+    }
+
+    func completeTimedSet(actualDuration: Double, context: ModelContext, recordingURL: URL? = nil) {
+        guard case .inTimedSet(let target) = phase else { return }
+        saveTimedSet(targetDuration: target, actualDuration: actualDuration, context: context, recordingURL: recordingURL)
         advanceAfterSet(context: context)
     }
 
@@ -84,6 +102,54 @@ final class WorkoutViewModel {
             currentSetIndex = nextIndex
             phase = .resting(restSeconds: restSeconds)
         }
+    }
+
+    private func saveTimedSet(targetDuration: Int, actualDuration: Double, context: ModelContext, recordingURL: URL? = nil) {
+        guard let enrolment, let prescription, let def = enrolment.exerciseDefinition else { return }
+
+        let todayStart = Calendar.current.startOfDay(for: Date.now)
+        let allSets = (try? context.fetch(FetchDescriptor<CompletedSet>())) ?? []
+        let totalSetsToday = allSets.filter { $0.completedAt >= todayStart }.count
+
+        let completedSet = CompletedSet(
+            sessionDate: sessionDate,
+            exerciseId: def.exerciseId,
+            level: enrolment.currentLevel,
+            dayNumber: enrolment.currentDay,
+            setNumber: currentSetIndex + 1,
+            targetReps: 0,
+            actualReps: 0,
+            isTest: prescription.isTest,
+            countingMode: .timed,
+            setDurationSeconds: actualDuration,
+            targetDurationSeconds: targetDuration
+        )
+        completedSet.enrolment = enrolment
+        context.insert(completedSet)
+
+        if let recordingURL {
+            let attrs = try? FileManager.default.attributesOfItem(atPath: recordingURL.path)
+            let fileSize = (attrs?[.size] as? Int) ?? 0
+
+            let recording = SensorRecording(
+                device: .iPhone,
+                exerciseId: def.exerciseId,
+                level: enrolment.currentLevel,
+                dayNumber: enrolment.currentDay,
+                setNumber: currentSetIndex + 1,
+                confirmedReps: 0,
+                sampleRateHz: 100,
+                durationSeconds: actualDuration,
+                countingMode: CountingMode.timed.rawValue,
+                filePath: recordingURL.path,
+                fileSizeBytes: fileSize
+            )
+            recording.completedSet = completedSet
+            context.insert(recording)
+        }
+
+        sessionTotalReps += 0
+        try? context.save()
     }
 
     private func saveSet(actualReps: Int, duration: Double = 0, context: ModelContext, recordingURL: URL? = nil) {
