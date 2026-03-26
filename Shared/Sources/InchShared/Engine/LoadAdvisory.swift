@@ -14,7 +14,7 @@ public struct LoadAdvisory: Sendable {
 
     /// Muscle groups not yet worked today that would trigger the same-group compounding
     /// multiplier (×1.5) if exercised now, because their partner group has already been worked.
-    /// Example: if squats (.lower) are done → .lowerPosterior (glute_bridges) is in cautionGroups.
+    /// Example: if squats (.lower) are done → .lowerPosterior (hip_hinge) is in cautionGroups.
     public let cautionGroups: [MuscleGroup]
 
     /// True if any active exercise has a test day scheduled within the next 48 hours.

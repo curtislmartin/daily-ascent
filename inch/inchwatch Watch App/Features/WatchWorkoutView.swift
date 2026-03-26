@@ -21,8 +21,8 @@ struct WatchWorkoutView: View {
     @State private var inboundSessionId: String = ""
     @State private var repCounter: RepCounter? = nil
 
-    /// Only sit_ups uses watch wrist signal for auto-counting.
-    private static let watchAutoCountedExercises: Set<String> = ["sit_ups"]
+    /// Exercises that use the watch wrist signal for auto-counting.
+    private static let watchAutoCountedExercises: Set<String> = []
 
     init(session: WatchSession, settings: WatchSettings, onStartNext: ((WatchSession) -> Void)? = nil) {
         self.session = session

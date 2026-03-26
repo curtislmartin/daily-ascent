@@ -54,9 +54,8 @@ struct WatchTodayView: View {
         switch exerciseId {
         case "push_ups": return "figure.strengthtraining.traditional"
         case "squats": return "figure.gymnastics"
-        case "sit_ups": return "figure.core.training"
         case "pull_ups": return "figure.highintensity.intervaltraining"
-        case "glute_bridges": return "figure.flexibility"
+        case "hip_hinge": return "figure.flexibility"
         case "dead_bugs": return "figure.cooldown"
         default: return "figure.strengthtraining.functional"
         }

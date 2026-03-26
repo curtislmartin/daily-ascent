@@ -114,7 +114,7 @@ final class DebugViewModel {
             squats.currentDay = totalDays
             squats.nextScheduledDate = Date.now
         }
-        if let glutes = enrolments.first(where: { $0.exerciseDefinition?.exerciseId == "glute_bridges" }) {
+        if let glutes = enrolments.first(where: { $0.exerciseDefinition?.exerciseId == "hip_hinge" }) {
             glutes.currentDay = 1
             glutes.nextScheduledDate = Date.now
         }
@@ -255,9 +255,9 @@ final class DebugViewModel {
 
     func seedHistory(weeks: Int, withGaps: Bool, key: DebugCheckKey, context: ModelContext) {
         let exercises: [(id: String, reps: Int)] = [
-            (id: "push_ups", reps: 10),
-            (id: "squats",   reps: 12),
-            (id: "sit_ups",  reps: 10),
+            (id: "push_ups",  reps: 10),
+            (id: "squats",    reps: 12),
+            (id: "dead_bugs", reps: 10),
         ]
         var dayNumbers = [String: Int]()
         exercises.forEach { dayNumbers[$0.id] = 1 }

@@ -21,8 +21,7 @@ public struct DailyLoadAdvisor: Sendable {
         "squats":        3,
         "pull_ups":      3,
         "push_ups":      2,
-        "glute_bridges": 2,
-        "sit_ups":       1,
+        "hip_hinge":     2,
         "dead_bugs":     1
     ]
 
@@ -63,7 +62,7 @@ public struct DailyLoadAdvisor: Sendable {
         // completedMuscleGroups is built from the full list upfront so both exercises
         // in a compounding pair receive the ×1.5 multiplier. This is intentional —
         // it makes the result order-independent when the pair has different base costs
-        // (squats=3, glute_bridges=2). Using an incremental set would produce different
+        // (squats=3, hip_hinge=2). Using an incremental set would produce different
         // totals depending on which exercise was processed first.
         let completedMuscleGroups = Set(context.completedToday.map(\.muscleGroup))
         var costByGroup: [MuscleGroup: Double] = [:]

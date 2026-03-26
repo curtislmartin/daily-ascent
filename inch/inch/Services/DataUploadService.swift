@@ -25,7 +25,8 @@ final class DataUploadService {
     static let taskIdentifier = "com.dailyascent.bodyweight.sensor-upload"
 
     private static let validExerciseIds: Set<String> = [
-        "push_ups", "squats", "sit_ups", "pull_ups", "glute_bridges", "dead_bugs"
+        "push_ups", "squats", "dead_bugs", "pull_ups", "hip_hinge",
+        "spinal_extension", "plank", "rows", "dips"
     ]
 
     func scheduleBGUpload() {

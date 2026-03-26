@@ -20,10 +20,8 @@ public struct RepCountingConfig: Sendable {
             return RepCountingConfig(threshold: 0.30, minIntervalSeconds: 1.0, smoothingAlpha: 0.2)
         case "squats":
             return RepCountingConfig(threshold: 0.40, minIntervalSeconds: 0.8, smoothingAlpha: 0.2)
-        case "glute_bridges":
+        case "hip_hinge":
             return RepCountingConfig(threshold: 0.25, minIntervalSeconds: 1.0, smoothingAlpha: 0.2)
-        case "sit_ups":
-            return RepCountingConfig(threshold: 0.25, minIntervalSeconds: 1.2, smoothingAlpha: 0.15)
         default:
             return nil
         }
