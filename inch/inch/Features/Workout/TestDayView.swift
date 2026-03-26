@@ -21,6 +21,7 @@ struct TestDayView: View {
     @State private var enrolment: ExerciseEnrolment?
     @State private var testTarget: Int = 0
     @State private var phase: TestPhase = .ready
+    @State private var isTimed: Bool = false
     private let scheduler = SchedulingEngine()
 
     var body: some View {
@@ -65,23 +66,41 @@ struct TestDayView: View {
                     .font(.largeTitle)
                     .fontWeight(.bold)
 
-                Text("Do as many reps as you can.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                if isTimed {
+                    Text("Hold as long as you can.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    Text("Target to pass: \(testTarget)s")
+                        .font(.headline)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(.orange.opacity(0.12), in: Capsule())
+                        .foregroundStyle(.orange)
+                } else {
+                    Text("Do as many reps as you can.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
 
-                Text("Target to pass: \(testTarget)")
-                    .font(.headline)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 10)
-                    .background(.orange.opacity(0.12), in: Capsule())
-                    .foregroundStyle(.orange)
+                    Text("Target to pass: \(testTarget)")
+                        .font(.headline)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(.orange.opacity(0.12), in: Capsule())
+                        .foregroundStyle(.orange)
+                }
             }
 
             Spacer()
 
-            RealTimeCountingView(targetReps: testTarget, autoCompleteAtTarget: false) { actual in
-                phase = .counting(reps: actual)
-                finishTest(reps: actual)
+            if isTimed {
+                TimedSetView(targetSeconds: 0) { actualDuration in
+                    finishTimedTest(duration: actualDuration)
+                }
+            } else {
+                RealTimeCountingView(targetReps: testTarget, autoCompleteAtTarget: false) { actual in
+                    phase = .counting(reps: actual)
+                    finishTest(reps: actual)
+                }
             }
         }
         .padding()
@@ -108,7 +127,8 @@ struct TestDayView: View {
                     .font(.largeTitle)
                     .fontWeight(.bold)
 
-                Text("\(reps) reps — target was \(testTarget)")
+                Text(isTimed ? "\(reps)s held — target was \(testTarget)s"
+                             : "\(reps) reps — target was \(testTarget)")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 
@@ -152,6 +172,7 @@ struct TestDayView: View {
             .levels?
             .first(where: { $0.level == enrolment.currentLevel })
         testTarget = levelDef?.testTarget ?? 0
+        isTimed = enrolment.exerciseDefinition?.countingMode == .timed
     }
 
     private func finishTest(reps: Int) {
@@ -191,6 +212,48 @@ struct TestDayView: View {
         try? modelContext.save()
 
         phase = .result(reps: reps, passed: passed, nextDate: nextDate)
+    }
+
+    private func finishTimedTest(duration: Double) {
+        guard let enrolment,
+              let def = enrolment.exerciseDefinition,
+              let levelDef = def.levels?.first(where: { $0.level == enrolment.currentLevel })
+        else { return }
+
+        let passed = duration >= Double(testTarget)
+        let sessionDate = Date.now
+
+        let completedSet = CompletedSet(
+            sessionDate: sessionDate,
+            exerciseId: def.exerciseId,
+            level: enrolment.currentLevel,
+            dayNumber: enrolment.currentDay,
+            setNumber: 1,
+            targetReps: 0,
+            actualReps: 0,
+            isTest: true,
+            testPassed: passed,
+            countingMode: .timed,
+            setDurationSeconds: duration,
+            targetDurationSeconds: testTarget
+        )
+        completedSet.enrolment = enrolment
+        modelContext.insert(completedSet)
+
+        let snapshot = EnrolmentSnapshot(enrolment)
+        let levelSnap = LevelSnapshot(levelDef)
+        let updated = scheduler.applyCompletion(
+            to: snapshot,
+            level: levelSnap,
+            actualDate: sessionDate,
+            totalReps: Int(duration)
+        )
+        let nextDate = scheduler.computeNextDate(enrolment: updated, level: levelSnap)
+        scheduler.writeBack(updated, to: enrolment, nextDate: nextDate)
+        try? modelContext.save()
+
+        let repsForDisplay = Int(duration)
+        phase = .result(reps: repsForDisplay, passed: passed, nextDate: nextDate)
     }
 
     private func fetchEnrolment() -> ExerciseEnrolment? {
