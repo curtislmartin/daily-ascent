@@ -55,6 +55,12 @@ struct WatchWorkoutView: View {
                             currentBPM: healthService.currentBPM
                         )
                     }
+                } else if session.countingMode == "timed" {
+                    WatchTimedSetView(
+                        targetSeconds: viewModel.currentSetTarget
+                    ) { actualDuration in
+                        viewModel.endSetTimed(duration: actualDuration)
+                    }
                 } else {
                     WatchInSetView(
                         session: session,
