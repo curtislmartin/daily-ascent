@@ -78,4 +78,86 @@ struct ExerciseDataLoaderTests {
         let sortOrders = exercises.map(\.sortOrder)
         #expect(sortOrders == Array(0..<6))
     }
+
+    @Test(.tags(.dataLoader))
+    func variationNameParsedForLevels() throws {
+        let json = """
+        {
+          "exercises": [{
+            "id": "hip_hinge",
+            "name": "Hip Hinge",
+            "muscleGroup": "lower_posterior",
+            "color": "#A0522D",
+            "countingMode": "post_set_confirmation",
+            "defaultRestSeconds": 90,
+            "levels": [{
+              "level": 1,
+              "variationName": "Glute Bridge",
+              "restDayPattern": [2, 2, 3],
+              "testTarget": 30,
+              "totalDays": 10,
+              "days": [{"day": 1, "sets": [10, 10, 10]}]
+            }]
+          }]
+        }
+        """
+        let data = try #require(json.data(using: .utf8))
+        let root = try JSONDecoder().decode(ExerciseDataRoot.self, from: data)
+        let level = try #require(root.exercises.first?.levels.first)
+        #expect(level.variationName == "Glute Bridge")
+    }
+
+    @Test(.tags(.dataLoader))
+    func variationNameNilWhenAbsent() throws {
+        let json = """
+        {
+          "exercises": [{
+            "id": "push_ups",
+            "name": "Push-Ups",
+            "muscleGroup": "upper_push",
+            "color": "#E8722A",
+            "countingMode": "post_set_confirmation",
+            "defaultRestSeconds": 60,
+            "levels": [{
+              "level": 1,
+              "restDayPattern": [2, 2, 3],
+              "testTarget": 20,
+              "totalDays": 1,
+              "days": [{"day": 1, "sets": [5, 5, 5]}]
+            }]
+          }]
+        }
+        """
+        let data = try #require(json.data(using: .utf8))
+        let root = try JSONDecoder().decode(ExerciseDataRoot.self, from: data)
+        let level = try #require(root.exercises.first?.levels.first)
+        #expect(level.variationName == nil)
+    }
+
+    @Test(.tags(.dataLoader))
+    func timedExerciseSetsStoredAsSeconds() throws {
+        let json = """
+        {
+          "exercises": [{
+            "id": "plank",
+            "name": "Plank",
+            "muscleGroup": "core_stability",
+            "color": "#5B8A72",
+            "countingMode": "timed",
+            "defaultRestSeconds": 90,
+            "levels": [{
+              "level": 1,
+              "restDayPattern": [2, 2, 3],
+              "testTarget": 60,
+              "totalDays": 1,
+              "days": [{"day": 1, "sets": [20, 20, 20]}]
+            }]
+          }]
+        }
+        """
+        let data = try #require(json.data(using: .utf8))
+        let root = try JSONDecoder().decode(ExerciseDataRoot.self, from: data)
+        let day = try #require(root.exercises.first?.levels.first?.days.first)
+        #expect(day.sets == [20, 20, 20])
+    }
 }
