@@ -160,4 +160,76 @@ struct ExerciseDataLoaderTests {
         let day = try #require(root.exercises.first?.levels.first?.days.first)
         #expect(day.sets == [20, 20, 20])
     }
+
+    @Test(.tags(.dataLoader))
+    func syncFromBundleOnEmptyDBLoadsAllExercises() throws {
+        let container = try ModelContainerFactory.makeContainer(inMemory: true)
+        let context = ModelContext(container)
+        try ExerciseDataLoader().syncFromBundle(context: context)
+
+        let exercises = try context.fetch(FetchDescriptor<ExerciseDefinition>())
+        #expect(exercises.count == 9)
+    }
+
+    @Test(.tags(.dataLoader))
+    func syncFromBundleInsertsNewExercisesIntoExistingDB() throws {
+        let container = try ModelContainerFactory.makeContainer(inMemory: true)
+        let context = ModelContext(container)
+
+        // Simulate existing user who only had push_ups
+        let pushUps = ExerciseDefinition(exerciseId: "push_ups", name: "Push-Ups", sortOrder: 0)
+        context.insert(pushUps)
+        try context.save()
+
+        try ExerciseDataLoader().syncFromBundle(context: context)
+
+        let exercises = try context.fetch(FetchDescriptor<ExerciseDefinition>())
+        #expect(exercises.count == 9)
+        #expect(exercises.contains { $0.exerciseId == "hip_hinge" })
+        #expect(exercises.contains { $0.exerciseId == "rows" })
+        #expect(exercises.contains { $0.exerciseId == "dips" })
+    }
+
+    @Test(.tags(.dataLoader))
+    func syncFromBundleUpdatesChangedExerciseName() throws {
+        let container = try ModelContainerFactory.makeContainer(inMemory: true)
+        let context = ModelContext(container)
+
+        let pushUps = ExerciseDefinition(exerciseId: "push_ups", name: "Old Name", sortOrder: 0)
+        context.insert(pushUps)
+        try context.save()
+
+        try ExerciseDataLoader().syncFromBundle(context: context)
+
+        let all = try context.fetch(FetchDescriptor<ExerciseDefinition>())
+        let updated = try #require(all.first { $0.exerciseId == "push_ups" })
+        #expect(updated.name == "Push-Ups")
+    }
+
+    @Test(.tags(.dataLoader))
+    func syncFromBundleIsIdempotent() throws {
+        let container = try ModelContainerFactory.makeContainer(inMemory: true)
+        let context = ModelContext(container)
+        let loader = ExerciseDataLoader()
+        try loader.syncFromBundle(context: context)
+        try loader.syncFromBundle(context: context)
+
+        let exercises = try context.fetch(FetchDescriptor<ExerciseDefinition>())
+        #expect(exercises.count == 9)
+    }
+
+    @Test(.tags(.dataLoader))
+    func syncFromBundleSetsIsTestFromJSON() throws {
+        let container = try ModelContainerFactory.makeContainer(inMemory: true)
+        let context = ModelContext(container)
+        try ExerciseDataLoader().syncFromBundle(context: context)
+
+        let all = try context.fetch(FetchDescriptor<ExerciseDefinition>())
+        let pushUps = try #require(all.first { $0.exerciseId == "push_ups" })
+        let level1 = try #require(pushUps.levels?.first { $0.level == 1 })
+        let day10 = try #require(level1.days?.first { $0.dayNumber == 10 })
+        #expect(day10.isTest == true)
+        let day1 = try #require(level1.days?.first { $0.dayNumber == 1 })
+        #expect(day1.isTest == false)
+    }
 }
