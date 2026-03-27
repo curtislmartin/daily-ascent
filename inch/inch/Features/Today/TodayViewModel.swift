@@ -70,6 +70,9 @@ final class TodayViewModel {
             conflictWarnings = [:]
         }
         resetStreakForMissedDayIfNeeded(context: context, today: today)
+        if !isRestDay {
+            updateLastDueDateIfNeeded(context: context, today: today)
+        }
         buildAndRunAdvisor(context: context, all: all, todaySets: todaySets, today: today)
     }
 
@@ -116,13 +119,24 @@ final class TodayViewModel {
         let streaks = (try? context.fetch(FetchDescriptor<StreakState>())) ?? []
         guard let streakState = streaks.first, streakState.currentStreak > 0 else { return }
         guard let lastActive = streakState.lastActiveDate else { return }
+        // Without lastDueDate we have no reliable way to distinguish rest days from skipped
+        // training days, so skip the check to avoid false resets on upgrade.
+        guard let lastDue = streakState.lastDueDate else { return }
 
         let lastDay = Calendar.current.startOfDay(for: lastActive)
-        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today) ?? today
-        if lastDay < Calendar.current.startOfDay(for: yesterday) {
+        let referenceDay = Calendar.current.startOfDay(for: lastDue)
+        if lastDay < referenceDay {
             streakState.currentStreak = 0
             try? context.save()
         }
+    }
+
+    private func updateLastDueDateIfNeeded(context: ModelContext, today: Date) {
+        let streaks = (try? context.fetch(FetchDescriptor<StreakState>())) ?? []
+        guard let streakState = streaks.first else { return }
+        guard streakState.lastDueDate.map({ !Calendar.current.isDate($0, inSameDayAs: today) }) ?? true else { return }
+        streakState.lastDueDate = today
+        try? context.save()
     }
 
     func currentPrescription(for enrolment: ExerciseEnrolment) -> DayPrescription? {
