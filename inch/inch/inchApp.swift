@@ -18,7 +18,14 @@ struct InchApp: App {
         do {
             container = try ModelContainerFactory.makeContainer()
         } catch {
-            fatalError("Failed to create ModelContainer: \(error)")
+            // Schema incompatibility from a beta build with a different schema fingerprint.
+            // Wipe the store and start fresh rather than crash.
+            ModelContainerFactory.deleteStore()
+            do {
+                container = try ModelContainerFactory.makeContainer()
+            } catch {
+                fatalError("Failed to create ModelContainer even after store reset: \(error)")
+            }
         }
 
         UNUserNotificationCenter.current().delegate = notificationDelegate
