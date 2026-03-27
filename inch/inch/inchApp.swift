@@ -46,6 +46,10 @@ struct InchApp: App {
                             let context = ModelContext(self.container)
                             await self.watchConnectivity.handleReceivedFiles(context: context)
                         }
+                        group.addTask {
+                            let context = ModelContext(self.container)
+                            try? ExerciseDataLoader().syncFromBundle(context: context)
+                        }
                     }
                 }
         }

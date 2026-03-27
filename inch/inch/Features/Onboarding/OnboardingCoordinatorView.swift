@@ -53,7 +53,7 @@ struct OnboardingCoordinatorView: View {
         .task {
             if definitions.isEmpty {
                 let loader = ExerciseDataLoader()
-                try? loader.seedIfNeeded(context: modelContext)
+                try? loader.syncFromBundle(context: modelContext)
             }
         }
     }
