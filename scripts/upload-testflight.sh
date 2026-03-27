@@ -8,6 +8,13 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# ── Branch guard ──────────────────────────────────────────────────────────────
+CURRENT_BRANCH="$(git -C "$SCRIPT_DIR" rev-parse --abbrev-ref HEAD)"
+if [[ "$CURRENT_BRANCH" != "master" ]]; then
+  echo "❌ Must be on master branch to upload. Currently on: $CURRENT_BRANCH"
+  exit 1
+fi
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 ARCHIVE_PATH=/tmp/daily-ascent.xcarchive
 EXPORT_PATH=/tmp/daily-ascent-export
