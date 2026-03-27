@@ -44,7 +44,7 @@ public struct ExerciseDataLoader: Sendable {
                     let day = DayPrescription(
                         dayNumber: dayDTO.day,
                         sets: dayDTO.sets,
-                        isTest: dayDTO.day == levelDTO.totalDays
+                        isTest: dayDTO.isTest ?? (dayDTO.day == levelDTO.totalDays)
                     )
                     day.level = levelDef
                     context.insert(day)
@@ -53,6 +53,90 @@ public struct ExerciseDataLoader: Sendable {
         }
 
         try context.save()
+    }
+
+    /// Upserts exercise catalogue from the bundled JSON.
+    /// Safe to call on every launch — inserts new exercises and updates changed fields.
+    /// Never touches user enrolments or progress data.
+    public func syncFromBundle(context: ModelContext) throws {
+        guard let url = Bundle.module.url(forResource: "exercise-data", withExtension: "json") else {
+            throw ExerciseDataError.jsonNotFound
+        }
+        let data = try Data(contentsOf: url)
+        let root = try JSONDecoder().decode(ExerciseDataRoot.self, from: data)
+
+        let existing = try context.fetch(FetchDescriptor<ExerciseDefinition>())
+        let exerciseMap = Dictionary(uniqueKeysWithValues: existing.map { ($0.exerciseId, $0) })
+
+        var dirty = false
+
+        for (index, dto) in root.exercises.enumerated() {
+            let exercise: ExerciseDefinition
+            if let found = exerciseMap[dto.id] {
+                exercise = found
+                let mg = MuscleGroup(rawValue: dto.muscleGroup) ?? .upperPush
+                let cm = CountingMode(rawValue: dto.countingMode) ?? .postSetConfirmation
+                if exercise.name != dto.name                             { exercise.name = dto.name; dirty = true }
+                if exercise.color != dto.color                           { exercise.color = dto.color; dirty = true }
+                if exercise.muscleGroup != mg                            { exercise.muscleGroup = mg; dirty = true }
+                if exercise.countingMode != cm                           { exercise.countingMode = cm; dirty = true }
+                if exercise.defaultRestSeconds != dto.defaultRestSeconds { exercise.defaultRestSeconds = dto.defaultRestSeconds; dirty = true }
+                if exercise.sortOrder != index                           { exercise.sortOrder = index; dirty = true }
+            } else {
+                exercise = ExerciseDefinition(
+                    exerciseId: dto.id,
+                    name: dto.name,
+                    muscleGroup: MuscleGroup(rawValue: dto.muscleGroup) ?? .upperPush,
+                    color: dto.color,
+                    countingMode: CountingMode(rawValue: dto.countingMode) ?? .postSetConfirmation,
+                    defaultRestSeconds: dto.defaultRestSeconds,
+                    sortOrder: index
+                )
+                context.insert(exercise)
+                dirty = true
+            }
+
+            let levelMap = Dictionary(uniqueKeysWithValues: (exercise.levels ?? []).map { ($0.level, $0) })
+            for levelDTO in dto.levels {
+                let levelDef: LevelDefinition
+                if let found = levelMap[levelDTO.level] {
+                    levelDef = found
+                    if levelDef.restDayPattern != levelDTO.restDayPattern           { levelDef.restDayPattern = levelDTO.restDayPattern; dirty = true }
+                    if levelDef.testTarget != levelDTO.testTarget                   { levelDef.testTarget = levelDTO.testTarget; dirty = true }
+                    if levelDef.extraRestBeforeTest != levelDTO.extraRestBeforeTest { levelDef.extraRestBeforeTest = levelDTO.extraRestBeforeTest; dirty = true }
+                    if levelDef.totalDays != levelDTO.totalDays                     { levelDef.totalDays = levelDTO.totalDays; dirty = true }
+                    if levelDef.variationName != levelDTO.variationName             { levelDef.variationName = levelDTO.variationName; dirty = true }
+                } else {
+                    levelDef = LevelDefinition(
+                        level: levelDTO.level,
+                        restDayPattern: levelDTO.restDayPattern,
+                        testTarget: levelDTO.testTarget,
+                        extraRestBeforeTest: levelDTO.extraRestBeforeTest,
+                        totalDays: levelDTO.totalDays,
+                        variationName: levelDTO.variationName
+                    )
+                    levelDef.exercise = exercise
+                    context.insert(levelDef)
+                    dirty = true
+                }
+
+                let dayMap = Dictionary(uniqueKeysWithValues: (levelDef.days ?? []).map { ($0.dayNumber, $0) })
+                for dayDTO in levelDTO.days {
+                    let isTest = dayDTO.isTest ?? (dayDTO.day == levelDTO.totalDays)
+                    if let found = dayMap[dayDTO.day] {
+                        if found.sets != dayDTO.sets { found.sets = dayDTO.sets; dirty = true }
+                        if found.isTest != isTest     { found.isTest = isTest; dirty = true }
+                    } else {
+                        let day = DayPrescription(dayNumber: dayDTO.day, sets: dayDTO.sets, isTest: isTest)
+                        day.level = levelDef
+                        context.insert(day)
+                        dirty = true
+                    }
+                }
+            }
+        }
+
+        if dirty { try context.save() }
     }
 }
 
@@ -89,4 +173,5 @@ struct LevelDTO: Decodable {
 struct DayDTO: Decodable {
     let day: Int
     let sets: [Int]
+    let isTest: Bool?
 }
