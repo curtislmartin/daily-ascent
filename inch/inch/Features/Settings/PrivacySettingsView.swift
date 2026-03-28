@@ -15,6 +15,7 @@ struct PrivacySettingsView: View {
     var body: some View {
         List {
             consentSection
+            iCloudSection
             dataSection
             Section("Legal") {
                 Link("Privacy Policy", destination: URL(string: "https://curtislmartin.github.io/daily-ascent/privacy")!)
@@ -45,6 +46,17 @@ struct PrivacySettingsView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("All progress, history, and settings will be permanently deleted. You'll go through onboarding again.")
+        }
+    }
+
+    private var iCloudSection: some View {
+        Section {
+            Label("Syncing via iCloud", systemImage: "icloud")
+                .foregroundStyle(.secondary)
+        } header: {
+            Text("iCloud")
+        } footer: {
+            Text("Your programme progress, workout history, and settings sync automatically across your Apple devices using your private iCloud account. Only you can access this data.")
         }
     }
 
