@@ -209,6 +209,14 @@ struct WorkoutSessionView: View {
                 }
             case .complete:
                 dataUpload.scheduleBGUpload()
+                watchConnectivity.sendHistoryEntry(
+                    exerciseName: viewModel.exerciseName,
+                    level: viewModel.completedLevel,
+                    dayNumber: viewModel.completedDay,
+                    totalReps: viewModel.sessionTotalReps,
+                    setCount: viewModel.totalSets,
+                    completedAt: viewModel.sessionDate
+                )
                 let start = viewModel.sessionDate
                 let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
                 Task {

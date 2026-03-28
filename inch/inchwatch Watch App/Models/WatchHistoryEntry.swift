@@ -9,7 +9,7 @@ struct WatchHistoryEntry: Codable, Identifiable {
     let setCount: Int
     let completedAt: Date
 
-    init(exerciseName: String, level: Int, dayNumber: Int, totalReps: Int, setCount: Int, completedAt: Date) {
+    nonisolated init(exerciseName: String, level: Int, dayNumber: Int, totalReps: Int, setCount: Int, completedAt: Date) {
         self.id = UUID()
         self.exerciseName = exerciseName
         self.level = level

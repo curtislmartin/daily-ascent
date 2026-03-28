@@ -31,6 +31,11 @@ struct inchwatch_Watch_AppApp: App {
                 watchConnectivity.activate()
                 await watchConnectivity.processSessions()
             }
+            .task {
+                for await entry in watchConnectivity.historyEntries {
+                    historyStore.record(entry)
+                }
+            }
         }
     }
 }

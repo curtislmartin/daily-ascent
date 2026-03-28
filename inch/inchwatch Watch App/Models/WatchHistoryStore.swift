@@ -31,6 +31,17 @@ import InchShared
         save()
     }
 
+    func record(_ entry: WatchHistoryEntry) {
+        guard !entries.contains(where: {
+            $0.completedAt == entry.completedAt && $0.exerciseName == entry.exerciseName
+        }) else { return }
+        entries.insert(entry, at: 0)
+        if entries.count > limit {
+            entries = Array(entries.prefix(limit))
+        }
+        save()
+    }
+
     // MARK: - Private
 
     private func load() {
