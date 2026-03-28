@@ -1,0 +1,12 @@
+{"type":"server-started","port":60151,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:60151","screen_dir":"/Users/curtismartin/Work/inch-project/.superpowers/brainstorm/58082-1773652767"}
+{"type":"screen-added","file":"/Users/curtismartin/Work/inch-project/.superpowers/brainstorm/58082-1773652767/onboarding-placement.html"}
+{"source":"user-event","type":"click","text":"A\n    \n      New onboarding step\n      Added after the consent screen. Full screen, skippable with \"Skip for now\". Also editable later in Privacy Settings.","choice":"a","id":null,"timestamp":1773652936875}
+{"type":"screen-added","file":"/Users/curtismartin/Work/inch-project/.superpowers/brainstorm/58082-1773652767/nudge-options.html"}
+{"source":"user-event","type":"click","text":"C\n    \n      Both — badge + banner\n      Badge on the Settings tab and a banner card in the Today view. Banner can be dismissed (hides for the session), badge persists until complete. More visible, slightly more intrusive.","choice":"c","id":null,"timestamp":1773652977342}
+{"type":"screen-added","file":"/Users/curtismartin/Work/inch-project/.superpowers/brainstorm/58082-1773652767/waiting-1.html"}
+{"type":"screen-added","file":"/Users/curtismartin/Work/inch-project/.superpowers/brainstorm/58082-1773652767/completion-trigger.html"}
+{"type":"screen-added","file":"/Users/curtismartin/Work/inch-project/.superpowers/brainstorm/58082-1773652767/waiting-2.html"}
+{"type":"screen-added","file":"/Users/curtismartin/Work/inch-project/.superpowers/brainstorm/58082-1773652767/demographics-screen.html"}
+{"type":"screen-added","file":"/Users/curtismartin/Work/inch-project/.superpowers/brainstorm/58082-1773652767/today-nudge-v2.html"}
+{"type":"screen-added","file":"/Users/curtismartin/Work/inch-project/.superpowers/brainstorm/58082-1773652767/waiting-3.html"}
+{"type":"server-stopped","reason":"idle timeout"}

@@ -1,0 +1,4 @@
+{"type":"server-started","port":56586,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:56586","screen_dir":"/Users/curtismartin/Work/inch-project/.superpowers/brainstorm/56537-1774152120"}
+{"type":"screen-added","file":"/Users/curtismartin/Work/inch-project/.superpowers/brainstorm/56537-1774152120/card-approaches.html"}
+{"type":"screen-added","file":"/Users/curtismartin/Work/inch-project/.superpowers/brainstorm/56537-1774152120/waiting-1.html"}
+{"type":"server-stopped","reason":"idle timeout"}

@@ -1,0 +1,138 @@
+<h2>Debug panel — complete action list</h2>
+<p class="subtitle">All sections with new actions added. Checkmarks stored in UserDefaults, survive app restarts.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Developer — Settings (scrolling)</div>
+  <div class="mockup-body" style="font-size:13px;line-height:1.7">
+
+    <div style="background:#1c1c1e;border-radius:10px;padding:12px 16px;margin-bottom:10px">
+      <div style="color:#8e8e93;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Scheduling &amp; State</div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Set exercises due today</span><br><span style="color:#8e8e93;font-size:11px">Schedule all enrolments for today</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Force rest day</span><br><span style="color:#8e8e93;font-size:11px">Push all exercises to tomorrow → shows RestDayView</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Set exercises due tomorrow</span><br><span style="color:#8e8e93;font-size:11px">RestDayView "next training tomorrow"</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Trigger double-test conflict</span><br><span style="color:#8e8e93;font-size:11px">Two test days on same day → "Two test days scheduled today"</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Trigger same-group conflict</span><br><span style="color:#8e8e93;font-size:11px">Test + training in same muscle group → "Same muscle group as today's test"</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Set exercise to test day</span><br><span style="color:#8e8e93;font-size:11px">Advance one enrolment's currentDay to its test day</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Advance exercise to L2</span><br><span style="color:#8e8e93;font-size:11px">Push-Ups to L2 D1 — tests level badge &amp; progress bar</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Advance exercise to L3</span><br><span style="color:#8e8e93;font-size:11px">Push-Ups to L3 D1 — tests highest level UI</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Show demographics nudge</span><br><span style="color:#8e8e93;font-size:11px">Clear hasDemographics → nudge reappears on Today tab</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Set streak → 0 days</span><br><span style="color:#8e8e93;font-size:11px">No flame badge, no streak card on rest day</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Set streak → 1 day</span><br><span style="color:#8e8e93;font-size:11px">Edge case: "Start building your streak" messaging</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Set streak → 7 days</span><br><span style="color:#8e8e93;font-size:11px">Flame badge, streak card, streak protection messaging</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Set streak → 30 days</span><br><span style="color:#8e8e93;font-size:11px">Tests large number rendering throughout</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+    </div>
+
+    <div style="background:#1c1c1e;border-radius:10px;padding:12px 16px;margin-bottom:10px">
+      <div style="color:#8e8e93;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Notifications</div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Fire daily reminder now</span><br><span style="color:#8e8e93;font-size:11px">Single exercise: "Exercise name"</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Fire daily reminder (multi) now</span><br><span style="color:#8e8e93;font-size:11px">Multiple exercises: "N exercises today — …"</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Fire test-day reminder now</span><br><span style="color:#8e8e93;font-size:11px">"Test day — max reps today"</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Fire streak protection (streak = 0) now</span><br><span style="color:#8e8e93;font-size:11px">"Start building your streak"</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Fire streak protection (streak = 7) now</span><br><span style="color:#8e8e93;font-size:11px">"Don't break your streak — 7-day streak"</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Fire level unlock now</span><br><span style="color:#8e8e93;font-size:11px">"Level 2 unlocked! Push-Ups — Level 2 starts in 2 days"</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Fire schedule adjustment now</span><br><span style="color:#8e8e93;font-size:11px">"Schedule adjusted — Push-Ups moved to tomorrow"</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>List pending notifications</span><br><span style="color:#8e8e93;font-size:11px">Prints all pending IDs to an alert</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+    </div>
+
+    <div style="background:#1c1c1e;border-radius:10px;padding:12px 16px;margin-bottom:10px">
+      <div style="color:#8e8e93;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">History &amp; Charts</div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Seed 4 weeks of history</span><br><span style="color:#8e8e93;font-size:11px">Consistent daily workouts — tests weekly volume chart</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Seed 12 weeks of history</span><br><span style="color:#8e8e93;font-size:11px">Longer range — tests chart scrolling &amp; week grouping</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Seed history with missed days</span><br><span style="color:#8e8e93;font-size:11px">Gaps in schedule → "Pushed to tomorrow" labels &amp; streak resets</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Add test day pass to history</span><br><span style="color:#8e8e93;font-size:11px">🏆 banner row in history log</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Add test day fail to history</span><br><span style="color:#8e8e93;font-size:11px">"Retry next" banner row in history log</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+    </div>
+
+    <div style="background:#1c1c1e;border-radius:10px;padding:12px 16px;margin-bottom:10px">
+      <div style="color:#8e8e93;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Watch &amp; HealthKit</div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Simulate watch completion report</span><br><span style="color:#8e8e93;font-size:11px">Injects a WatchCompletionReport into the stream</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Push today's schedule to watch</span><br><span style="color:#8e8e93;font-size:11px">Calls sendTodaySchedule — verify watch receives it</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Log test HealthKit workout</span><br><span style="color:#8e8e93;font-size:11px">10-min bodyweight workout to Health app</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+    </div>
+
+    <div style="background:#1c1c1e;border-radius:10px;padding:12px 16px;margin-bottom:10px">
+      <div style="color:#8e8e93;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Upload &amp; Sensor Data</div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Seed fake sensor recordings (pending)</span><br><span style="color:#8e8e93;font-size:11px">3 recordings with status = .pending, ready to upload</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Trigger foreground upload now</span><br><span style="color:#8e8e93;font-size:11px">Runs uploadPending() immediately — bypasses BGTask</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+      <div style="padding:7px 0;display:flex;justify-content:space-between;align-items:center">
+        <div><span>Show upload status</span><br><span style="color:#8e8e93;font-size:11px">Alert: counts by status (pending / uploaded / failed / localOnly)</span></div><span style="color:#8e8e93;font-size:13px">—</span>
+      </div>
+    </div>
+
+    <div style="background:#1c1c1e;border-radius:10px;padding:12px 16px;margin-bottom:32px">
+      <div style="color:#8e8e93;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Danger Zone</div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0">
+        <span style="color:#ff453a">Clear all history</span>
+      </div>
+      <div style="border-bottom:1px solid #2c2c2e;padding:7px 0">
+        <span style="color:#ff453a">Reset all enrolments</span>
+      </div>
+      <div style="padding:7px 0">
+        <span style="color:#ff453a">Reset done ✓</span>
+      </div>
+    </div>
+
+  </div>
+</div>

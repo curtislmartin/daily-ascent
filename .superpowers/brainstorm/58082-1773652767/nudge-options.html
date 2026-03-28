@@ -1,0 +1,46 @@
+<h2>How should the nudge work?</h2>
+<p class="subtitle">Users who skip demographics need a persistent reminder to come back</p>
+
+<div class="options">
+
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Badge on Settings tab only</h3>
+      <p>A red dot badge on the Settings tab icon in the tab bar. Disappears once demographics are filled in. Subtle — doesn't interrupt the workout flow.</p>
+      <div style="margin-top:12px; display:flex; gap:8px; justify-content:center;">
+        <div style="display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 16px; background:rgba(0,0,0,0.06); border-radius:10px;">
+          <div style="position:relative; display:inline-block;">
+            <span style="font-size:24px;">⚙️</span>
+            <span style="position:absolute; top:-4px; right:-4px; width:10px; height:10px; background:#FF3B30; border-radius:50%; border:2px solid white;"></span>
+          </div>
+          <span style="font-size:10px; color:#666;">Settings</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Banner card in Today view</h3>
+      <p>A dismissible card at the bottom of the Today screen: "Help improve Daily Ascent — add your profile". Taps into Privacy Settings. Stays until filled in or manually dismissed.</p>
+      <div style="margin-top:12px; padding:10px 14px; background:rgba(0,122,255,0.08); border-radius:10px; border:1px solid rgba(0,122,255,0.2); display:flex; align-items:center; justify-content:space-between; gap:8px;">
+        <div>
+          <div style="font-size:12px; font-weight:600; color:#007AFF;">Complete your profile</div>
+          <div style="font-size:11px; color:#666;">Help improve rep counting accuracy</div>
+        </div>
+        <span style="font-size:12px; color:#007AFF;">→</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Both — badge + banner</h3>
+      <p>Badge on the Settings tab <em>and</em> a banner card in the Today view. Banner can be dismissed (hides for the session), badge persists until complete. More visible, slightly more intrusive.</p>
+    </div>
+  </div>
+
+</div>

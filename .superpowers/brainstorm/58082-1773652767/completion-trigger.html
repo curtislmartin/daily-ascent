@@ -1,0 +1,26 @@
+<h2>What hides the badge and banner?</h2>
+<p class="subtitle">When should the nudge disappear?</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Any field filled in</h3>
+      <p>Badge and banner disappear as soon as the user adds at least one demographic (e.g. just age range).</p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>All four fields filled in</h3>
+      <p>Nudge persists until age range, sex, height range, and activity level are all set.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Explicit "Save" tap</h3>
+      <p>A <code>demographicsCompleted</code> flag on UserSettings. Set when the user taps Save — regardless of how many fields they filled in. Clearest signal of intent.</p>
+    </div>
+  </div>
+</div>

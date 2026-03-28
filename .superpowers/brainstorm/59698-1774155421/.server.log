@@ -1,0 +1,4 @@
+{"type":"server-started","port":52136,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:52136","screen_dir":"/Users/curtismartin/Work/inch-project/.superpowers/brainstorm/59698-1774155421"}
+{"type":"screen-added","file":"/Users/curtismartin/Work/inch-project/.superpowers/brainstorm/59698-1774155421/picker-layouts.html"}
+{"type":"screen-added","file":"/Users/curtismartin/Work/inch-project/.superpowers/brainstorm/59698-1774155421/tap-targets.html"}
+{"type":"server-stopped","reason":"idle timeout"}

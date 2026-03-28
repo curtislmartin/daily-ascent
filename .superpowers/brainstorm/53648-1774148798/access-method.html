@@ -1,0 +1,26 @@
+<h2>How should the debug panel be accessed?</h2>
+<p class="subtitle">This affects how completely it can be hidden from production builds</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Hidden Settings Section</h3>
+      <p>A "Developer" section at the bottom of the Settings tab, compiled out with <code>#if DEBUG</code>. Works within existing navigation — no new UI patterns needed.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Long-Press Gesture</h3>
+      <p>Long-press the Daily Ascent logo in TodayView to reveal the debug sheet. Invisible in production — no UI trace that it exists. Slightly harder to discover during testing.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Separate Debug Tab</h3>
+      <p>A fourth "Debug" tab in the tab bar, compiled out entirely with <code>#if DEBUG</code>. Most visible and easiest to navigate during testing — but changes the tab bar layout while present.</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,86 @@
+<h2>Which complication slots should Daily Ascent support?</h2>
+<p class="subtitle">Each is a different shape/size slot on the watch face. Select the ones you want.</p>
+
+<div style="display:flex;gap:32px;flex-wrap:wrap;margin-bottom:24px">
+
+  <!-- Watch face mockup -->
+  <div style="flex-shrink:0">
+    <div class="label" style="margin-bottom:8px">Watch face (Infograph)</div>
+    <div style="width:220px;height:220px;border-radius:50%;background:#111;border:3px solid #3a3a3c;position:relative;display:flex;align-items:center;justify-content:center;">
+      <!-- Clock -->
+      <div style="text-align:center;z-index:1">
+        <div style="font-size:28px;font-weight:200;color:white;letter-spacing:2px">10:09</div>
+        <div style="font-size:10px;color:#8e8e93;margin-top:2px">MON 16 MAR</div>
+      </div>
+      <!-- Top inline slot -->
+      <div style="position:absolute;top:28px;left:50%;transform:translateX(-50%);background:#1a3a2a;border:1.5px solid #30d158;border-radius:4px;padding:2px 8px;white-space:nowrap;">
+        <span style="font-size:9px;color:#30d158;font-weight:500">D — 4 exercises today</span>
+      </div>
+      <!-- Top-left circular -->
+      <div style="position:absolute;top:42px;left:22px;width:36px;height:36px;border-radius:50%;background:#0a1a3a;border:1.5px solid #0a84ff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;">
+        <span style="font-size:7px;color:#8e8e93">DUE</span>
+        <span style="font-size:11px;font-weight:700;color:white">2/4</span>
+      </div>
+      <!-- Top-right corner gauge -->
+      <div style="position:absolute;top:36px;right:18px;">
+        <svg width="38" height="38" viewBox="0 0 38 38">
+          <circle cx="19" cy="19" r="14" fill="none" stroke="#3a3a3c" stroke-width="4"/>
+          <circle cx="19" cy="19" r="14" fill="none" stroke="#0a84ff" stroke-width="4" stroke-dasharray="44 44" stroke-dashoffset="22" stroke-linecap="round" transform="rotate(-90 19 19)"/>
+          <text x="19" y="23" text-anchor="middle" fill="white" font-size="8" font-weight="700">2/4</text>
+        </svg>
+      </div>
+      <!-- Bottom rectangular -->
+      <div style="position:absolute;bottom:28px;left:50%;transform:translateX(-50%);background:#1c1c1e;border:1.5px solid #ff9f0a;border-radius:6px;padding:4px 8px;width:120px;">
+        <div style="font-size:9px;font-weight:600;color:white;margin-bottom:3px">2 remaining</div>
+        <div style="display:flex;gap:3px;">
+          <div style="width:5px;height:5px;border-radius:50%;background:#0a84ff;"></div>
+          <div style="width:5px;height:5px;border-radius:50%;background:#30d158;"></div>
+          <div style="width:5px;height:5px;border-radius:50%;background:#ff9f0a;"></div>
+          <div style="width:5px;height:5px;border-radius:50%;background:#ff375f;"></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:4px;margin-top:10px">
+      <div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;border-radius:50%;background:#0a84ff"></div><span style="font-size:12px;color:#8e8e93">A — Circular (top-left)</span></div>
+      <div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;border-radius:4px;background:#0a84ff"></div><span style="font-size:12px;color:#8e8e93">B — Corner (top-right)</span></div>
+      <div style="display:flex;align-items:center;gap:6px"><div style="width:20px;height:6px;border-radius:2px;background:#ff9f0a"></div><span style="font-size:12px;color:#8e8e93">C — Rectangular (bottom)</span></div>
+      <div style="display:flex;align-items:center;gap:6px"><div style="width:28px;height:5px;border-radius:2px;background:#30d158"></div><span style="font-size:12px;color:#8e8e93">D — Inline (top text)</span></div>
+    </div>
+  </div>
+
+  <!-- Options -->
+  <div style="flex:1;min-width:220px">
+    <div class="options" data-multiselect>
+      <div class="option" data-choice="circular" onclick="toggleSelect(this)">
+        <div class="letter">A</div>
+        <div class="content">
+          <h3>Circular</h3>
+          <p>Small circle. Shows "2/4" or "REST". Most common slot — works on almost every watch face.</p>
+        </div>
+      </div>
+      <div class="option" data-choice="corner" onclick="toggleSelect(this)">
+        <div class="letter">B</div>
+        <div class="content">
+          <h3>Corner</h3>
+          <p>Arc gauge in the corner. Only on Infograph-style faces. A bit niche.</p>
+        </div>
+      </div>
+      <div class="option" data-choice="rectangular" onclick="toggleSelect(this)">
+        <div class="letter">C</div>
+        <div class="content">
+          <h3>Rectangular</h3>
+          <p>Wider slot with more room. Shows remaining count + coloured dots. Available on Modular and others.</p>
+        </div>
+      </div>
+      <div class="option" data-choice="inline" onclick="toggleSelect(this)">
+        <div class="letter">D</div>
+        <div class="content">
+          <h3>Inline</h3>
+          <p>Single line of text at the top. Very simple — just "4 exercises today" or "Rest day".</p>
+        </div>
+      </div>
+    </div>
+    <p class="subtitle" style="margin-top:12px">Recommended: A + C (Circular + Rectangular) — covers the most popular watch faces.</p>
+  </div>
+
+</div>

@@ -1,0 +1,53 @@
+<h2>Debug panel structure</h2>
+<p class="subtitle">How should the ~30 debug actions be organised?</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">A — Grouped sections (single scrolling view)</div>
+    <div class="mockup-body" style="font-size:13px;line-height:1.7">
+      <div style="background:#1c1c1e;border-radius:10px;padding:12px 16px;margin-bottom:10px">
+        <div style="color:#8e8e93;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Scheduling &amp; State</div>
+        <div style="border-bottom:1px solid #2c2c2e;padding:6px 0">Set today's exercises due</div>
+        <div style="border-bottom:1px solid #2c2c2e;padding:6px 0">Set exercises due tomorrow</div>
+        <div style="border-bottom:1px solid #2c2c2e;padding:6px 0">Trigger conflict warning</div>
+        <div style="border-bottom:1px solid #2c2c2e;padding:6px 0">Simulate test day</div>
+        <div style="padding:6px 0">Set streak → <span style="color:#007aff">tap to pick</span></div>
+      </div>
+      <div style="background:#1c1c1e;border-radius:10px;padding:12px 16px;margin-bottom:10px">
+        <div style="color:#8e8e93;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Notifications</div>
+        <div style="border-bottom:1px solid #2c2c2e;padding:6px 0">Fire daily reminder now</div>
+        <div style="border-bottom:1px solid #2c2c2e;padding:6px 0">Fire streak protection now</div>
+        <div style="border-bottom:1px solid #2c2c2e;padding:6px 0">Fire level unlock now</div>
+        <div style="padding:6px 0">List pending notifications</div>
+      </div>
+      <div style="background:#1c1c1e;border-radius:10px;padding:12px 16px;margin-bottom:10px">
+        <div style="color:#8e8e93;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">History &amp; Data</div>
+        <div style="border-bottom:1px solid #2c2c2e;padding:6px 0">Seed 4 weeks of workouts</div>
+        <div style="border-bottom:1px solid #2c2c2e;padding:6px 0">Seed 12 weeks of workouts</div>
+        <div style="border-bottom:1px solid #2c2c2e;padding:6px 0">Add test day pass</div>
+        <div style="padding:6px 0">Clear all history</div>
+      </div>
+      <div style="background:#1c1c1e;border-radius:10px;padding:12px 16px">
+        <div style="color:#8e8e93;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Services</div>
+        <div style="border-bottom:1px solid #2c2c2e;padding:6px 0">Trigger foreground upload</div>
+        <div style="border-bottom:1px solid #2c2c2e;padding:6px 0">Simulate watch completion</div>
+        <div style="padding:6px 0">Log HealthKit workout</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">B — Category drill-down (two levels)</div>
+    <div class="mockup-body" style="font-size:13px;line-height:1.7">
+      <div style="background:#1c1c1e;border-radius:10px;padding:0 16px;margin-bottom:10px">
+        <div style="border-bottom:1px solid #2c2c2e;padding:12px 0;display:flex;justify-content:space-between"><span>📅  Scheduling &amp; State</span><span style="color:#8e8e93">›</span></div>
+        <div style="border-bottom:1px solid #2c2c2e;padding:12px 0;display:flex;justify-content:space-between"><span>🔔  Notifications</span><span style="color:#8e8e93">›</span></div>
+        <div style="border-bottom:1px solid #2c2c2e;padding:12px 0;display:flex;justify-content:space-between"><span>📊  History &amp; Charts</span><span style="color:#8e8e93">›</span></div>
+        <div style="border-bottom:1px solid #2c2c2e;padding:12px 0;display:flex;justify-content:space-between"><span>⌚  Watch &amp; HealthKit</span><span style="color:#8e8e93">›</span></div>
+        <div style="border-bottom:1px solid #2c2c2e;padding:12px 0;display:flex;justify-content:space-between"><span>☁️  Upload &amp; Sensor Data</span><span style="color:#8e8e93">›</span></div>
+        <div style="padding:12px 0;display:flex;justify-content:space-between"><span>🗑  Reset &amp; Nuke</span><span style="color:#8e8e93">›</span></div>
+      </div>
+      <div style="color:#8e8e93;font-size:12px;padding:0 4px">Each row navigates to a detail view with the actions for that category</div>
+    </div>
+  </div>
+</div>

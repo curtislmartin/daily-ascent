@@ -1,0 +1,79 @@
+<h2>How should the advisory surface in the session card?</h2>
+<p class="subtitle">The card currently shows a progress bar + generic copy. Here are three approaches for wiring in the advisor's signals.</p>
+
+<div class="cards">
+
+  <!-- Option A -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px; background: #1c1c1e; border-radius: 10px; font-family: -apple-system, sans-serif;">
+      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
+        <span style="font-size:13px; font-weight:600; color:#fff;">Today's session</span>
+        <span style="font-size:13px; color:#8e8e93;">2 of 4 done</span>
+      </div>
+      <div style="display:flex; gap:4px; margin-bottom:8px;">
+        <div style="flex:1; height:5px; background:#0a84ff; border-radius:3px;"></div>
+        <div style="flex:1; height:5px; background:#0a84ff; border-radius:3px;"></div>
+        <div style="flex:1; height:5px; background:#3a3a3c; border-radius:3px;"></div>
+        <div style="flex:1; height:5px; background:#3a3a3c; border-radius:3px;"></div>
+      </div>
+      <span style="font-size:12px; color:#8e8e93;">Test day tomorrow — keep today's volume light.</span>
+    </div>
+    <div class="card-body">
+      <h3>A — Smarter copy only</h3>
+      <p>Same visual structure, same progress bar. The one-liner below the bar becomes advisory-driven: taper, lookback penalty, overloaded groups, or a positive "you're good to continue." No new UI elements.</p>
+    </div>
+  </div>
+
+  <!-- Option B -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px; background: #1c1c1e; border-radius: 10px; font-family: -apple-system, sans-serif;">
+      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
+        <span style="font-size:13px; font-weight:600; color:#fff;">Today's session</span>
+        <span style="font-size:13px; color:#8e8e93;">2 of 4 done</span>
+      </div>
+      <div style="display:flex; gap:4px; margin-bottom:8px;">
+        <div style="flex:1; height:5px; background:#0a84ff; border-radius:3px;"></div>
+        <div style="flex:1; height:5px; background:#0a84ff; border-radius:3px;"></div>
+        <div style="flex:1; height:5px; background:#3a3a3c; border-radius:3px;"></div>
+        <div style="flex:1; height:5px; background:#3a3a3c; border-radius:3px;"></div>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+        <div style="flex:1; height:4px; background:#3a3a3c; border-radius:2px; overflow:hidden;">
+          <div style="width:55%; height:100%; background:#ff9f0a; border-radius:2px;"></div>
+        </div>
+        <span style="font-size:11px; color:#ff9f0a; white-space:nowrap;">55% load</span>
+      </div>
+      <span style="font-size:12px; color:#8e8e93;">Lower body is carrying most of today's load.</span>
+    </div>
+    <div class="card-body">
+      <h3>B — Load bar + copy</h3>
+      <p>Adds a thin secondary bar showing budgetFraction (0–100%+), colour-coded green/amber/red. Copy below reflects the dominant advisory signal. Two tracks: completion progress vs load consumed.</p>
+    </div>
+  </div>
+
+  <!-- Option C -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px; background: #1c1c1e; border-radius: 10px; font-family: -apple-system, sans-serif;">
+      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
+        <span style="font-size:13px; font-weight:600; color:#fff;">Today's session</span>
+        <span style="font-size:13px; color:#8e8e93;">2 of 4 done</span>
+      </div>
+      <div style="display:flex; gap:4px; margin-bottom:10px;">
+        <div style="flex:1; height:5px; background:#0a84ff; border-radius:3px;"></div>
+        <div style="flex:1; height:5px; background:#0a84ff; border-radius:3px;"></div>
+        <div style="flex:1; height:5px; background:#3a3a3c; border-radius:3px;"></div>
+        <div style="flex:1; height:5px; background:#3a3a3c; border-radius:3px;"></div>
+      </div>
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px;">
+        <span style="font-size:11px; background:#ff453a22; color:#ff453a; padding:2px 8px; border-radius:10px;">⚠ Lower body loaded</span>
+        <span style="font-size:11px; background:#ff9f0a22; color:#ff9f0a; padding:2px 8px; border-radius:10px;">🗓 Test day in 48h</span>
+      </div>
+      <span style="font-size:12px; color:#8e8e93;">Consider stopping here today.</span>
+    </div>
+    <div class="card-body">
+      <h3>C — Signal chips + copy</h3>
+      <p>Active advisory signals surface as small chips (overloaded group, taper active, lookback penalty). Copy below summarises the net recommendation. More scannable at a glance, but adds visual density.</p>
+    </div>
+  </div>
+
+</div>

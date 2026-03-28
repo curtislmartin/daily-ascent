@@ -1,0 +1,77 @@
+<h2>Watch Complication Families</h2>
+<p class="subtitle">The spec defines 4 families. Select the ones you want to build — or keep all 4.</p>
+
+<div class="options" data-multiselect>
+  <div class="option" data-choice="circular" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Circular <span style="font-size:11px;font-weight:normal;opacity:0.6">accessoryCircular</span></h3>
+      <div style="display:flex;gap:20px;align-items:center;margin:12px 0">
+        <div style="width:60px;height:60px;border-radius:50%;background:#1c1c1e;border:1px solid #3a3a3c;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;">
+          <span style="font-size:9px;color:#8e8e93;letter-spacing:0.5px">DUE</span>
+          <span style="font-size:20px;font-weight:700;color:white;font-variant-numeric:tabular-nums">2/4</span>
+        </div>
+        <div style="width:60px;height:60px;border-radius:50%;background:#1c1c1e;border:1px solid #3a3a3c;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;">
+          <span style="font-size:16px;color:#30d158">REST</span>
+          <span style="font-size:9px;color:#8e8e93">DAY</span>
+        </div>
+      </div>
+      <p style="font-size:13px;opacity:0.7">Small circle on watch face. Shows completed/due count or REST DAY.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="corner" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Corner <span style="font-size:11px;font-weight:normal;opacity:0.6">accessoryCorner</span></h3>
+      <div style="display:flex;gap:20px;align-items:center;margin:12px 0">
+        <div style="width:64px;height:64px;position:relative;background:#1c1c1e;border-radius:12px;border:1px solid #3a3a3c;display:flex;align-items:center;justify-content:center;">
+          <svg width="56" height="56" viewBox="0 0 56 56">
+            <circle cx="28" cy="28" r="22" fill="none" stroke="#3a3a3c" stroke-width="5"/>
+            <circle cx="28" cy="28" r="22" fill="none" stroke="#0a84ff" stroke-width="5" stroke-dasharray="69 69" stroke-dashoffset="35" stroke-linecap="round" transform="rotate(-90 28 28)"/>
+            <text x="28" y="32" text-anchor="middle" fill="white" font-size="12" font-weight="700">2/4</text>
+          </svg>
+        </div>
+      </div>
+      <p style="font-size:13px;opacity:0.7">Corner gauge with arc showing exercises done vs due.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="rectangular" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Rectangular <span style="font-size:11px;font-weight:normal;opacity:0.6">accessoryRectangular</span></h3>
+      <div style="margin:12px 0">
+        <div style="background:#1c1c1e;border-radius:10px;border:1px solid #3a3a3c;padding:8px 12px;width:180px;">
+          <div style="font-size:13px;font-weight:600;color:white;margin-bottom:5px;">2 exercises remaining</div>
+          <div style="display:flex;gap:4px;">
+            <div style="width:7px;height:7px;border-radius:50%;background:#0a84ff;"></div>
+            <div style="width:7px;height:7px;border-radius:50%;background:#30d158;"></div>
+            <div style="width:7px;height:7px;border-radius:50%;background:#ff9f0a;"></div>
+            <div style="width:7px;height:7px;border-radius:50%;background:#ff375f;"></div>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:13px;opacity:0.7">Medium rectangle. Shows remaining count + coloured dots per exercise.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="inline" onclick="toggleSelect(this)">
+    <div class="letter">D</div>
+    <div class="content">
+      <h3>Inline <span style="font-size:11px;font-weight:normal;opacity:0.6">accessoryInline</span></h3>
+      <div style="margin:12px 0">
+        <div style="background:#1c1c1e;border-radius:8px;border:1px solid #3a3a3c;padding:6px 12px;display:inline-block;">
+          <span style="font-size:13px;color:white;font-weight:500">4 exercises today</span>
+        </div>
+        <div style="height:6px"></div>
+        <div style="background:#1c1c1e;border-radius:8px;border:1px solid #3a3a3c;padding:6px 12px;display:inline-block;">
+          <span style="font-size:13px;color:#30d158;font-weight:500">Rest day</span>
+        </div>
+      </div>
+      <p style="font-size:13px;opacity:0.7">Single line of text in the watch face header area.</p>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:16px">You can select multiple — these are independent to implement. All 4 is fine.</p>
