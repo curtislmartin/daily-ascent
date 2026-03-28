@@ -27,6 +27,8 @@ final class WorkoutViewModel {
     private(set) var previousSessionReps: Int? = nil
     private(set) var didAdvanceLevel: Bool = false
     private(set) var newLevel: Int = 0
+    private(set) var completedLevel: Int = 0
+    private(set) var completedDay: Int = 0
     private let scheduler = SchedulingEngine()
 
     var exerciseName: String { enrolment?.exerciseDefinition?.name ?? "" }
@@ -212,6 +214,8 @@ final class WorkoutViewModel {
             actualDate: sessionDate,
             totalReps: sessionTotalReps
         )
+        completedLevel = snapshot.currentLevel
+        completedDay = snapshot.currentDay
         didAdvanceLevel = updated.currentLevel > snapshot.currentLevel
         newLevel = updated.currentLevel
         let nextDate = scheduler.computeNextDate(enrolment: updated, level: levelSnap)

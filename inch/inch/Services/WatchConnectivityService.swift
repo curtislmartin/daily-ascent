@@ -83,6 +83,26 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
         sendSchedule(sessions)
     }
 
+    func sendHistoryEntry(
+        exerciseName: String,
+        level: Int,
+        dayNumber: Int,
+        totalReps: Int,
+        setCount: Int,
+        completedAt: Date
+    ) {
+        guard let wcSession, wcSession.activationState == .activated else { return }
+        wcSession.transferUserInfo([
+            "type": "historyEntry",
+            "exerciseName": exerciseName,
+            "level": level,
+            "dayNumber": dayNumber,
+            "totalReps": totalReps,
+            "setCount": setCount,
+            "completedAt": completedAt.timeIntervalSince1970
+        ])
+    }
+
     func sendRecordingStart(exerciseId: String, setNumber: Int, sessionId: String) {
         guard let wcSession, wcSession.isReachable else { return }
         wcSession.sendMessage(
