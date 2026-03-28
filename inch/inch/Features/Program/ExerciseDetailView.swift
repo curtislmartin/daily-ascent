@@ -11,6 +11,7 @@ struct ExerciseDetailView: View {
     @State private var enrolment: ExerciseEnrolment?
     @State private var detailViewModel = ExerciseDetailViewModel()
     @State private var showingUnenrolConfirm = false
+    @State private var showingResetLevelConfirm = false
     @State private var pendingLevel: Int?
     @State private var pendingDay: Int?
 
@@ -44,6 +45,15 @@ struct ExerciseDetailView: View {
             Button("Cancel", role: .cancel) { pendingDay = nil }
         } message: {
             Text("Your next session will be Day \(pendingDay ?? 0).")
+        }
+        .alert(
+            "Reset to Day 1?",
+            isPresented: $showingResetLevelConfirm
+        ) {
+            Button("Reset", role: .destructive) { resetCurrentLevel() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Your current level stays the same, but you'll restart from Day 1.")
         }
         .alert(
             "Unenrol from this exercise?",
@@ -94,6 +104,9 @@ struct ExerciseDetailView: View {
             }
 
             Section {
+                Button("Reset to Day 1") {
+                    showingResetLevelConfirm = true
+                }
                 Button("Unenrol", role: .destructive) {
                     showingUnenrolConfirm = true
                 }
@@ -192,6 +205,14 @@ struct ExerciseDetailView: View {
         enrolment.nextScheduledDate = .now
         try? modelContext.save()
         pendingDay = nil
+    }
+
+    private func resetCurrentLevel() {
+        guard let enrolment else { return }
+        enrolment.currentDay = 1
+        enrolment.nextScheduledDate = .now
+        enrolment.restPatternIndex = 0
+        try? modelContext.save()
     }
 
     private func unenrol() {
