@@ -111,6 +111,7 @@ struct WatchWorkoutView: View {
                let config = RepCountingConfig.config(for: session.exerciseId) {
                 repCounter = RepCounter(config: config)
             }
+            await healthService.startWorkout()
             for await trigger in watchConnectivity.recordingTriggers {
                 switch trigger {
                 case .start(let exerciseId, let setNumber, let sessionId):
