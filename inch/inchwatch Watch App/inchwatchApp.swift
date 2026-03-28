@@ -1,5 +1,6 @@
 import SwiftUI
 import InchShared
+import WidgetKit
 
 @main
 struct inchwatch_Watch_AppApp: App {
@@ -34,8 +35,19 @@ struct inchwatch_Watch_AppApp: App {
             .task {
                 for await entry in watchConnectivity.historyEntries {
                     historyStore.record(entry)
+                    writeComplicationData()
                 }
             }
+            .onChange(of: watchConnectivity.sessions) { _, _ in writeComplicationData() }
         }
+    }
+
+    private func writeComplicationData() {
+        let todayStart = Calendar.current.startOfDay(for: .now)
+        let completedToday = historyStore.entries.filter { $0.completedAt >= todayStart }.count
+        UserDefaults.standard.set(watchConnectivity.sessions.count, forKey: "watch.complication.dueCount")
+        UserDefaults.standard.set(completedToday, forKey: "watch.complication.completedToday")
+        UserDefaults.standard.set(watchConnectivity.sessions.first?.exerciseName, forKey: "watch.complication.nextExerciseName")
+        WidgetCenter.shared.reloadAllTimelines()
     }
 }
