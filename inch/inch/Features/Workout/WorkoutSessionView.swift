@@ -353,10 +353,14 @@ struct WorkoutSessionView: View {
 
             Spacer()
 
-            VStack(spacing: 8) {
-                Text("Set in progress…")
-                    .font(.title2)
-                    .fontWeight(.semibold)
+            VStack(spacing: 16) {
+                VStack(spacing: 8) {
+                    Text("\(viewModel.currentTargetReps)")
+                        .font(.system(size: 80, weight: .bold, design: .rounded))
+                    Text("target reps")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
                 ElapsedTimerView()
             }
 
@@ -372,22 +376,21 @@ struct WorkoutSessionView: View {
     }
 
     private var setProgressHeader: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Set \(viewModel.currentSetIndex + 1) of \(viewModel.totalSets)")
-                    .font(.headline)
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 2) {
                 if let variation = viewModel.variationName {
                     Text(variation)
-                        .font(.caption)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
                         .foregroundStyle(Color.accentColor)
                 }
-                Text("Day \(viewModel.enrolment?.currentDay ?? 0) · Level \(viewModel.enrolment?.currentLevel ?? 0)")
+                Text("Set \(viewModel.currentSetIndex + 1) of \(viewModel.totalSets)  ·  Day \(viewModel.enrolment?.currentDay ?? 0)  ·  Level \(viewModel.enrolment?.currentLevel ?? 0)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
             Spacer()
             if let next = viewModel.prescription?.sets[safe: viewModel.currentSetIndex + 1] {
-                Text("Next: \(next) reps")
+                Text("Next: \(next)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

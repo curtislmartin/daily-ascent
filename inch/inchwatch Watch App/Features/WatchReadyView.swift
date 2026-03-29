@@ -10,12 +10,21 @@ struct WatchReadyView: View {
     @ScaledMetric private var repsFontSize: CGFloat = 28
 
     var body: some View {
-        VStack(spacing: 8) {
-            Text(session.exerciseName)
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
+        VStack(spacing: 4) {
+            if let variation = session.variationName {
+                Text(variation)
+                    .font(.footnote)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(Color.accentColor)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            } else {
+                Text(session.exerciseName)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
             Text("Set \(viewModel.currentSet) of \(viewModel.totalSets)")
                 .font(.caption)
                 .foregroundStyle(.secondary)

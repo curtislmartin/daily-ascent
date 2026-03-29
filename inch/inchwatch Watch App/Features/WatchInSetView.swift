@@ -14,11 +14,20 @@ struct WatchInSetView: View {
     var body: some View {
         VStack(spacing: 6) {
             WatchHRBadge(showHeartRate: showHeartRate, currentBPM: currentBPM)
-            Text(session.exerciseName)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
+            if let variation = session.variationName {
+                Text(variation)
+                    .font(.caption2)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(Color.accentColor)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            } else {
+                Text(session.exerciseName)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
             Text("Set \(viewModel.currentSet) of \(viewModel.totalSets)")
                 .font(.caption)
                 .foregroundStyle(.secondary)
