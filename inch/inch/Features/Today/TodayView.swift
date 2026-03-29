@@ -10,6 +10,8 @@ struct TodayView: View {
 
     @State private var viewModel = TodayViewModel()
     @State private var nudgeDismissed = false
+    @Environment(NotificationService.self) private var notifications
+    @State private var streakRecoveryDismissed = false
 
     private var settings: UserSettings? { allSettings.first }
 
@@ -21,6 +23,7 @@ struct TodayView: View {
     private var showConflictWarnings: Bool { allSettings.first?.showConflictWarnings ?? true }
 
     private var streak: Int { streakStates.first?.currentStreak ?? 0 }
+    private var longestStreak: Int { streakStates.first?.longestStreak ?? 0 }
 
     private var completedTodayCount: Int {
         viewModel.dueExercises.filter {
@@ -57,6 +60,9 @@ struct TodayView: View {
         .withTodayDestinations()
         .task {
             viewModel.loadToday(context: modelContext, showWarnings: showConflictWarnings)
+            if viewModel.streakWasJustReset, let nextDate = viewModel.nextTrainingDate {
+                notifications.scheduleStreakRecovery(nextTrainingDate: nextDate)
+            }
             watchConnectivity.sendTodaySchedule(
                 enrolments: viewModel.dueExercises,
                 settings: settings
@@ -64,6 +70,9 @@ struct TodayView: View {
         }
         .onAppear {
             viewModel.loadToday(context: modelContext, showWarnings: showConflictWarnings)
+            if viewModel.streakWasJustReset, let nextDate = viewModel.nextTrainingDate {
+                notifications.scheduleStreakRecovery(nextTrainingDate: nextDate)
+            }
         }
     }
 
@@ -76,6 +85,11 @@ struct TodayView: View {
                     totalCount: viewModel.dueExercises.count,
                     advisory: viewModel.advisory
                 )
+                if streak == 0 && longestStreak > 0 && !viewModel.isRestDay && !streakRecoveryDismissed {
+                    StreakRecoveryBanner {
+                        streakRecoveryDismissed = true
+                    }
+                }
                 if showDemographicsNudge {
                     TodayDemographicsNudge {
                         nudgeDismissed = true
