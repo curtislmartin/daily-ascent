@@ -136,6 +136,13 @@ public struct ExerciseDataLoader: Sendable {
             }
         }
 
+        // Remove exercises that are no longer in the JSON catalogue.
+        let catalogueIds = Set(root.exercises.map { $0.id })
+        for exercise in existing where !catalogueIds.contains(exercise.exerciseId) {
+            context.delete(exercise)
+            dirty = true
+        }
+
         if dirty { try context.save() }
     }
 }
