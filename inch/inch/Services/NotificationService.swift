@@ -37,7 +37,11 @@ final class NotificationService {
         let pending = await center.pendingNotificationRequests()
         let idsToRemove = pending
             .map(\.identifier)
-            .filter { $0.hasPrefix("daily-reminder-") || $0.hasPrefix("streak-protection-") }
+            .filter {
+                $0.hasPrefix("daily-reminder-") ||
+                $0.hasPrefix("streak-protection-") ||
+                $0 == "streak-recovery"
+            }
         center.removePendingNotificationRequests(withIdentifiers: idsToRemove)
 
         let enrolments = fetchActiveEnrolments(context: context)
@@ -72,6 +76,28 @@ final class NotificationService {
         let today = Calendar.current.startOfDay(for: .now)
         let id = "streak-protection-\(today.timeIntervalSince1970)"
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id])
+    }
+
+    /// Schedules a gentle recovery notification for 8am on the next training day.
+    /// Uses a fixed identifier so re-scheduling always replaces the previous one.
+    /// Safe to call repeatedly — at most one pending "streak-recovery" notification exists.
+    func scheduleStreakRecovery(nextTrainingDate: Date) {
+        let content = UNMutableNotificationContent()
+        content.title = "Time to get back to it"
+        content.body = "Everyone misses a day. Your exercises are ready — no streak needed to start."
+        content.sound = .default
+
+        var components = Calendar.current.dateComponents([.year, .month, .day], from: nextTrainingDate)
+        components.hour = 8
+        components.minute = 0
+
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+        let request = UNNotificationRequest(
+            identifier: "streak-recovery",
+            content: content,
+            trigger: trigger
+        )
+        UNUserNotificationCenter.current().add(request)
     }
 
     // MARK: - Immediate Posts
