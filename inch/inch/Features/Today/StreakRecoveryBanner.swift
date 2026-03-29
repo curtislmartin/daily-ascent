@@ -9,6 +9,7 @@ struct StreakRecoveryBanner: View {
                 .font(.title3)
                 .foregroundStyle(.secondary)
                 .padding(.top, 2)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("Everyone misses a day.")
@@ -27,12 +28,12 @@ struct StreakRecoveryBanner: View {
                     .foregroundStyle(.tertiary)
             }
             .buttonStyle(.plain)
-            .padding(.top, 2)
+            .frame(width: 44, height: 44)
+            .contentShape(Rectangle())
+            .accessibilityLabel("Dismiss")
         }
         .padding(14)
         .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14))
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Everyone misses a day. Your streak starts fresh today. Dismiss button.")
     }
 }
 
