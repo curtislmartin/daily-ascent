@@ -10,6 +10,9 @@ final class TodayViewModel {
     var conflictWarnings: [String: String] = [:]
     var nextTrainingDate: Date? = nil
     var nextTrainingCount: Int = 0
+    /// Set to true on the load cycle where resetStreakForMissedDayIfNeeded resets the streak.
+    /// Consumed by TodayView to schedule a recovery notification.
+    private(set) var streakWasJustReset: Bool = false
     /// Advisor recommendation for today's training load. Nil until the first exercise is completed.
     var advisory: LoadAdvisory? = nil
     private let detector = ConflictDetector()
@@ -18,6 +21,7 @@ final class TodayViewModel {
     private var rescheduledExerciseIds: Set<String> = []
 
     func loadToday(context: ModelContext, showWarnings: Bool = true) {
+        streakWasJustReset = false
         let today = Calendar.current.startOfDay(for: .now)
         let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today) ?? today
         let descriptor = FetchDescriptor<ExerciseEnrolment>(
@@ -60,9 +64,7 @@ final class TodayViewModel {
         dueExercises = dueToday + completedEnrolments
         isRestDay = dueExercises.isEmpty
 
-        if isRestDay {
-            computeNextTraining(from: all, after: today)
-        }
+        computeNextTraining(from: all, after: today)
 
         if showWarnings {
             detectConflictsForToday()
@@ -127,6 +129,7 @@ final class TodayViewModel {
         let referenceDay = Calendar.current.startOfDay(for: lastDue)
         if lastDay < referenceDay {
             streakState.currentStreak = 0
+            streakWasJustReset = true
             try? context.save()
         }
     }
