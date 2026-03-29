@@ -82,6 +82,7 @@ final class NotificationService {
     /// Uses a fixed identifier so re-scheduling always replaces the previous one.
     /// Safe to call repeatedly — at most one pending "streak-recovery" notification exists.
     func scheduleStreakRecovery(nextTrainingDate: Date) {
+        guard isAuthorized else { return }
         let content = UNMutableNotificationContent()
         content.title = "Time to get back to it"
         content.body = "Everyone misses a day. Your exercises are ready — no streak needed to start."
