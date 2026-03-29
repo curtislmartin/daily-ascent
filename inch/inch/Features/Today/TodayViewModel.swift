@@ -79,6 +79,8 @@ final class TodayViewModel {
     }
 
     private func computeNextTraining(from all: [ExerciseEnrolment], after today: Date) {
+        nextTrainingDate = nil
+        nextTrainingCount = 0
         let futureDates = all.compactMap(\.nextScheduledDate)
             .map { Calendar.current.startOfDay(for: $0) }
             .filter { $0 > today }
