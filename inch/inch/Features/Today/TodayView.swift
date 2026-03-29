@@ -60,9 +60,6 @@ struct TodayView: View {
         .withTodayDestinations()
         .task {
             viewModel.loadToday(context: modelContext, showWarnings: showConflictWarnings)
-            if viewModel.streakWasJustReset, let nextDate = viewModel.nextTrainingDate {
-                notifications.scheduleStreakRecovery(nextTrainingDate: nextDate)
-            }
             watchConnectivity.sendTodaySchedule(
                 enrolments: viewModel.dueExercises,
                 settings: settings

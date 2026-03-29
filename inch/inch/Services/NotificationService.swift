@@ -92,6 +92,8 @@ final class NotificationService {
         components.hour = 8
         components.minute = 0
 
+        guard let fireDate = Calendar.current.date(from: components), fireDate > .now else { return }
+
         let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
         let request = UNNotificationRequest(
             identifier: "streak-recovery",
