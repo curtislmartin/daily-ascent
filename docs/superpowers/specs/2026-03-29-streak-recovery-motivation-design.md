@@ -20,6 +20,7 @@ No new SwiftData fields required. The streak-break condition is derived from exi
 - **Condition:** `currentStreak == 0 && longestStreak > 0 && !isRestDay`
 - `currentStreak` and `longestStreak` come from `StreakState` (already queried in `TodayView`)
 - `isRestDay` comes from `TodayViewModel`
+- The `longestStreak > 0` guard is intentional: it ensures recovery messaging is never shown to users who have not yet established a streak. Without it, a brand-new user with `currentStreak == 0` would immediately see the banner.
 
 Streak reset already happens in `TodayViewModel.resetStreakForMissedDayIfNeeded()`. This is the trigger point for scheduling the notification.
 
@@ -33,7 +34,9 @@ Streak reset already happens in `TodayViewModel.resetStreakForMissedDayIfNeeded(
 Between `TodaySessionBanner` and the exercise cards in `TodayView.exerciseList`.
 
 ### Dismiss behaviour
-Stored in `@State var streakRecoveryDismissed: Bool` in `TodayView`. Resets each time the view is initialised (no persistence). The banner disappears naturally once a workout completes (streak > 0 again). Showing it again on re-open is acceptable — it is gentle, not nagging.
+Stored in `@State var streakRecoveryDismissed: Bool` in `TodayView`. Resets each time the view is initialised (no persistence). The banner disappears naturally once a workout completes (streak > 0 again).
+
+**Stated product decision:** The banner reappears on every app open while the streak is zero. This is intentional. The copy is gentle rather than urgent, and the banner has a dismiss button, so it does not constitute nagging. If the user ignores the app for several days in a row the banner will keep appearing — this is acceptable and consistent with the low-pressure tone.
 
 ### Copy
 - **Headline:** "Everyone misses a day."
@@ -48,23 +51,34 @@ Stored in `@State var streakRecoveryDismissed: Bool` in `TodayView`. Resets each
 ## Push Notification
 
 ### Trigger
-Called from `TodayViewModel.resetStreakForMissedDayIfNeeded()` immediately after setting `currentStreak = 0`. Only fires if `nextTrainingDate` is non-nil (derived from `viewModel.nextTrainingDate`, already computed in `loadToday`).
+Called from `TodayViewModel.resetStreakForMissedDayIfNeeded()` immediately after setting `currentStreak = 0`. Only scheduled if `nextTrainingDate` is non-nil.
+
+`nextTrainingDate` is the `viewModel.nextTrainingDate` value, which is the earliest future date on which any active enrolment has a session due. Because the scheduling engine always advances `nextScheduledDate` to a future training day (never a calendar rest day), `nextTrainingDate` is always a non-rest day when non-nil.
+
+If `nextTrainingDate` is nil (the user has no upcoming sessions — e.g. they have completed all programme days or have no active enrolments), no notification is scheduled. This is expected and correct.
 
 ### New method
 `NotificationService.scheduleStreakRecovery(nextTrainingDate: Date)`
 
 Schedules a `UNCalendarNotificationTrigger` for **8:00am** on `nextTrainingDate`.
 
+**Re-scheduling behaviour:** The fixed identifier `"streak-recovery"` means any existing pending notification is replaced when this method is called. If the user opens the app on multiple consecutive zero-streak days, `scheduleStreakRecovery` is called each time but the delivery date is always `nextTrainingDate` — which is stable across opens for the same set of enrolments. At most one `"streak-recovery"` notification is ever pending. This is intentional.
+
 ### Notification content
 - **Title:** "Time to get back to it"
 - **Body:** "Everyone misses a day. Your exercises are ready — no streak needed to start."
-- **Identifier:** `"streak-recovery"` (fixed — re-scheduling replaces the previous one)
+- **Identifier:** `"streak-recovery"`
 - **Sound:** default
 
 ### Cancellation
-Cancelled in `NotificationService.cancelTodayStreakProtection()` alongside the streak-protection notification, since both are irrelevant once a workout completes. No separate cancel method needed.
 
-Wait — actually, the streak-recovery notification is for the *next* training day, not today. It should be cancelled when a workout completes on that next training day (i.e., when the streak is restored). The safest approach: cancel `"streak-recovery"` inside `NotificationService.refresh()`, which is already called after every workout completion. Add `"streak-recovery"` to the list of identifiers removed during refresh.
+The `"streak-recovery"` identifier is added to the list of notifications removed inside `NotificationService.refresh()`. `refresh()` is called both on app launch (via `TodayView.task`) and after every workout completion (via `WorkoutSessionView`). This means:
+
+- If the user completes a workout the same day the streak resets (before the notification fires), `refresh()` cancels the pending notification at workout completion.
+- If the user restores their streak on the next training day (the notification's scheduled day), `refresh()` cancels it when the app is opened that morning before the 8am trigger.
+- On any subsequent launch where the streak is restored, `refresh()` removes the notification as a safety net.
+
+No separate cancel method is needed.
 
 ## Files to Change
 
@@ -77,6 +91,6 @@ Wait — actually, the streak-recovery notification is for the *next* training d
 
 ## Out of Scope
 
-- Persistent dismiss (banner reappears on next open — acceptable)
-- Streak recovery progress (e.g., "you need 3 days to beat your best") — future
+- Persistent dismiss state across calendar days
+- Streak recovery progress (e.g. "you need 3 days to beat your best") — future
 - Watch notification — uses same APNs delivery, no extra work needed
