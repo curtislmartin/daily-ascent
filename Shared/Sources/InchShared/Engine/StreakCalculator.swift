@@ -68,7 +68,7 @@ public struct StreakCalculator: Sendable {
             lastActiveDate: streakState.lastActiveDate
         )
         update(state: &dto, today: today, hadDueExercises: hadDueExercises, completedAny: completedAny,
-               previousDueDate: streakState.lastDueDate)
+               previousDueDate: streakState.previousLastDueDate)
         streakState.currentStreak = dto.currentStreak
         streakState.longestStreak = dto.longestStreak
         streakState.lastActiveDate = dto.lastActiveDate

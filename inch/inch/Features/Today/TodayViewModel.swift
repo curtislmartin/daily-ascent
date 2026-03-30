@@ -140,6 +140,11 @@ final class TodayViewModel {
         let streaks = (try? context.fetch(FetchDescriptor<StreakState>())) ?? []
         guard let streakState = streaks.first else { return }
         guard streakState.lastDueDate.map({ !Calendar.current.isDate($0, inSameDayAs: today) }) ?? true else { return }
+        // Preserve the old lastDueDate as previousLastDueDate so the streak calculator
+        // can use it as the true "previous training day" reference. Without this,
+        // lastDueDate equals today by the time a workout completes, and consecutive-day
+        // streak increments silently fail.
+        streakState.previousLastDueDate = streakState.lastDueDate
         streakState.lastDueDate = today
         try? context.save()
     }
