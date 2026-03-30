@@ -157,6 +157,30 @@ final class DebugViewModel {
         markDone(.showDemoNudge)
     }
 
+    func showStreakState(context: ModelContext) {
+        let streaks = (try? context.fetch(FetchDescriptor<StreakState>())) ?? []
+        guard let s = streaks.first else {
+            alertTitle = "Streak State"
+            alertMessage = "No StreakState record found in database."
+            showAlert = true
+            return
+        }
+        let fmt = DateFormatter()
+        fmt.dateFormat = "yyyy-MM-dd"
+        let active = s.lastActiveDate.map { fmt.string(from: $0) } ?? "nil"
+        let due = s.lastDueDate.map { fmt.string(from: $0) } ?? "nil"
+        let prevDue = s.previousLastDueDate.map { fmt.string(from: $0) } ?? "nil"
+        alertTitle = "Streak State"
+        alertMessage = """
+            currentStreak: \(s.currentStreak)
+            longestStreak: \(s.longestStreak)
+            lastActiveDate: \(active)
+            lastDueDate: \(due)
+            previousLastDueDate: \(prevDue)
+            """
+        showAlert = true
+    }
+
     func setStreak(_ value: Int, key: DebugCheckKey, context: ModelContext) {
         let desc = FetchDescriptor<StreakState>()
         let existing = (try? context.fetch(desc))?.first

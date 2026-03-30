@@ -67,6 +67,9 @@ extension SettingsView {
                      key: .showDemoNudge) {
                 debugViewModel.showDemographicsNudge(context: modelContext)
             }
+            Button("Show streak state") {
+                debugViewModel.showStreakState(context: modelContext)
+            }
             debugRow("Set streak → 0 days",
                      sub: "No flame badge, no streak card on rest day",
                      key: .streak0) {
