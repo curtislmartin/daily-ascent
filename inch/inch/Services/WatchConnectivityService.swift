@@ -210,7 +210,25 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
         let nextDate = engine.computeNextDate(enrolment: updated, level: levelSnap)
         engine.writeBack(updated, to: enrolment, nextDate: nextDate)
 
+        updateStreak(completedAt: report.completedAt, context: context)
         try? context.save()
+    }
+
+    private func updateStreak(completedAt: Date, context: ModelContext) {
+        let streaks = (try? context.fetch(FetchDescriptor<StreakState>())) ?? []
+        let streakState: StreakState
+        if let existing = streaks.first {
+            streakState = existing
+        } else {
+            streakState = StreakState()
+            context.insert(streakState)
+        }
+        StreakCalculator().updateStreakState(
+            streakState,
+            today: completedAt,
+            hadDueExercises: true,
+            completedAny: true
+        )
     }
 
     // MARK: - WCSessionDelegate
