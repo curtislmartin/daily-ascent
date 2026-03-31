@@ -10,6 +10,8 @@ final class TodayViewModel {
     var conflictWarnings: [String: String] = [:]
     var nextTrainingDate: Date? = nil
     var nextTrainingCount: Int = 0
+    private(set) var nextTrainingDayExercises: [(exerciseName: String, level: Int, dayNumber: Int)] = []
+    private(set) var hasTrainedBefore: Bool = false
     /// Set to true on the load cycle where resetStreakForMissedDayIfNeeded resets the streak.
     /// Consumed by TodayView to schedule a recovery notification.
     private(set) var streakWasJustReset: Bool = false
@@ -28,6 +30,9 @@ final class TodayViewModel {
             predicate: #Predicate { $0.isActive }
         )
         let all = (try? context.fetch(descriptor)) ?? []
+
+        let hasAnySets = (try? context.fetch(FetchDescriptor<CompletedSet>()))?.isEmpty == false
+        hasTrainedBefore = hasAnySets
 
         // Exercises due today (scheduled today or overdue)
         let dueToday = all.filter { enrolment in
@@ -81,6 +86,7 @@ final class TodayViewModel {
     private func computeNextTraining(from all: [ExerciseEnrolment], after today: Date) {
         nextTrainingDate = nil
         nextTrainingCount = 0
+        nextTrainingDayExercises = []
         let futureDates = all.compactMap(\.nextScheduledDate)
             .map { Calendar.current.startOfDay(for: $0) }
             .filter { $0 > today }
@@ -90,6 +96,17 @@ final class TodayViewModel {
             guard let d = enrolment.nextScheduledDate else { return false }
             return Calendar.current.startOfDay(for: d) == nearest
         }.count
+        // Populate exercise list for rest day upcoming session card
+        nextTrainingDayExercises = all
+            .filter { enrolment in
+                guard let date = enrolment.nextScheduledDate else { return false }
+                return Calendar.current.isDate(date, inSameDayAs: nearest)
+            }
+            .compactMap { enrolment -> (exerciseName: String, level: Int, dayNumber: Int)? in
+                guard let name = enrolment.exerciseDefinition?.name else { return nil }
+                return (exerciseName: name, level: enrolment.currentLevel, dayNumber: enrolment.currentDay)
+            }
+            .sorted { $0.exerciseName < $1.exerciseName }
     }
 
     private func detectConflictsForToday() {
