@@ -51,6 +51,8 @@ struct WorkoutSessionView: View {
     @State private var showingQuitConfirm = false
     @State private var sessionId: String = ""
     @State private var showHoldPhoneHint = true
+    @State private var showNudge = false
+    @State private var showTier3Intro = false
     @State private var setStartOrientation: String = ""
 
     init(enrolmentId: PersistentIdentifier) {
@@ -148,9 +150,31 @@ struct WorkoutSessionView: View {
         } message: {
             Text("Your progress so far won't be saved.")
         }
+        .sheet(isPresented: $showTier3Intro, onDismiss: markExerciseSeen) {
+            NavigationStack {
+                ExerciseInfoSheet(
+                    exerciseId: exerciseId,
+                    exerciseName: viewModel.exerciseName,
+                    level: viewModel.enrolment?.currentLevel ?? 1
+                )
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Got it") { showTier3Intro = false }
+                    }
+                }
+            }
+        }
         .task {
             sessionId = UUID().uuidString
             viewModel.load(context: modelContext)
+            let tier3Exercises = ["dead_bugs", "glute_bridges"]
+            if tier3Exercises.contains(exerciseId),
+               let s = settings,
+               !s.seenExerciseInfo.contains(exerciseId) {
+                showTier3Intro = true
+            } else if let s = settings, !s.seenExerciseInfo.contains(exerciseId) {
+                showNudge = true
+            }
             let id = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
             if Self.phoneAutoCountedExercises.contains(id),
                let config = RepCountingConfig.config(for: id) {
@@ -274,6 +298,12 @@ struct WorkoutSessionView: View {
                 .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 10))
             }
 
+            if showNudge && viewModel.currentSetIndex == 0 {
+                ExerciseNudgeBanner(exerciseName: viewModel.exerciseName) {
+                    dismissNudge()
+                }
+            }
+
             setProgressHeader
 
             Spacer()
@@ -338,6 +368,7 @@ struct WorkoutSessionView: View {
                 .controlSize(.large)
             } else {
                 Button("Start Set \(viewModel.currentSetIndex + 1)") {
+                    showNudge = false
                     viewModel.startSet()
                 }
                 .buttonStyle(.borderedProminent)
@@ -387,6 +418,11 @@ struct WorkoutSessionView: View {
                 Text("Set \(viewModel.currentSetIndex + 1) of \(viewModel.totalSets)  ·  Day \(viewModel.enrolment?.currentDay ?? 0)  ·  Level \(viewModel.enrolment?.currentLevel ?? 0)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                ExerciseInfoButton(
+                    exerciseId: exerciseId,
+                    exerciseName: viewModel.exerciseName,
+                    level: viewModel.enrolment?.currentLevel ?? 1
+                )
             }
             Spacer()
             if let next = viewModel.prescription?.sets[safe: viewModel.currentSetIndex + 1] {
@@ -396,6 +432,18 @@ struct WorkoutSessionView: View {
             }
         }
         .accessibilityElement(children: .combine)
+    }
+
+    private func dismissNudge() {
+        showNudge = false
+        markExerciseSeen()
+    }
+
+    private func markExerciseSeen() {
+        guard let s = settings,
+              !s.seenExerciseInfo.contains(exerciseId) else { return }
+        s.seenExerciseInfo.append(exerciseId)
+        try? modelContext.save()
     }
 }
 
