@@ -3,61 +3,77 @@ import SwiftUI
 struct RestDayView: View {
     let streak: Int
     let nextTrainingDate: Date?
-    let nextTrainingCount: Int
+    let nextTrainingDayExercises: [(exerciseName: String, level: Int, dayNumber: Int)]
+    let hasTrainedBefore: Bool
 
     var body: some View {
-        VStack(spacing: 32) {
-            Spacer()
+        ScrollView {
+            VStack(spacing: 20) {
+                // Header
+                VStack(spacing: 8) {
+                    Image(systemName: "moon.stars.fill")
+                        .font(.system(size: 48))
+                        .foregroundStyle(.indigo)
+                    Text("Recovery Day")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                }
+                .padding(.top)
 
-            VStack(spacing: 16) {
-                Image(systemName: "moon.zzz.fill")
-                    .font(.system(size: 56))
-                    .foregroundStyle(.secondary)
+                // Streak safety card
+                streakCard
 
-                Text("Rest Day")
-                    .font(.title)
-                    .fontWeight(.bold)
+                // Upcoming session card
+                if let nextDate = nextTrainingDate {
+                    UpcomingSessionCard(
+                        nextDate: nextDate,
+                        exercises: nextTrainingDayExercises
+                    )
+                }
 
-                Text(nextTrainingMessage)
+                // Recovery tip
+                RecoveryTipView()
+
+                Spacer(minLength: 40)
+            }
+            .padding(.horizontal)
+        }
+    }
+
+    @ViewBuilder
+    private var streakCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if streak > 0 {
+                HStack {
+                    Text("\(streak)")
+                        .font(.system(size: 48, weight: .bold, design: .rounded))
+                        .foregroundStyle(.orange)
+                    VStack(alignment: .leading) {
+                        Text("day streak")
+                            .font(.headline)
+                        Text("is safe.")
+                            .font(.headline)
+                    }
+                }
+                Text("Scheduled rest days protect your streak. You're on track.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
+            } else if hasTrainedBefore {
+                Text("Your streak resets here — start again tomorrow.")
+                    .font(.headline)
+                Text("Complete your next workout to begin a new streak.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            } else {
+                Text("Start your first streak today.")
+                    .font(.headline)
+                Text("Complete a workout to begin building your streak.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
             }
-
-            if streak > 0 {
-                streakView
-            }
-
-            Spacer()
         }
-        .padding(.horizontal, 32)
-    }
-
-    private var nextTrainingMessage: String {
-        guard let date = nextTrainingDate else {
-            return "No upcoming sessions scheduled."
-        }
-        let formatted = date.formatted(
-            .relative(presentation: .named, unitsStyle: .wide)
-        ).lowercased()
-        if nextTrainingCount == 1 {
-            return "Next training \(formatted) — 1 exercise"
-        } else {
-            return "Next training \(formatted) — \(nextTrainingCount) exercises"
-        }
-    }
-
-    private var streakView: some View {
-        VStack(spacing: 6) {
-            Label("\(streak)-day streak", systemImage: "flame.fill")
-                .font(.headline)
-                .foregroundStyle(.orange)
-            Text("Keep it up — rest days are part of the program.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .padding(20)
-        .background(.orange.opacity(0.08), in: RoundedRectangle(cornerRadius: 14))
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
     }
 }

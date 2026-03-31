@@ -37,7 +37,8 @@ struct TodayView: View {
                 RestDayView(
                     streak: streak,
                     nextTrainingDate: viewModel.nextTrainingDate,
-                    nextTrainingCount: viewModel.nextTrainingCount
+                    nextTrainingDayExercises: viewModel.nextTrainingDayExercises,
+                    hasTrainedBefore: viewModel.hasTrainedBefore
                 )
             } else {
                 exerciseList
