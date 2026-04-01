@@ -200,6 +200,10 @@ final class TodayViewModel {
         // Without lastDueDate we have no reliable way to distinguish rest days from skipped
         // training days, so skip the check to avoid false resets on upgrade.
         guard let lastDue = streakState.lastDueDate else { return }
+        // If lastDue is already today, updateLastDueDateIfNeeded has already advanced it this
+        // session (loadToday is called from both .task and .onAppear). The user hasn't had a
+        // chance to work out yet today — don't penalise them for the double-call.
+        guard !Calendar.current.isDate(lastDue, inSameDayAs: today) else { return }
 
         let lastDay = Calendar.current.startOfDay(for: lastActive)
         let referenceDay = Calendar.current.startOfDay(for: lastDue)
