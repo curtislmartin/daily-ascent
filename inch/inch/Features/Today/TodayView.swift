@@ -48,9 +48,9 @@ struct TodayView: View {
         }
         .navigationTitle("Today")
         .navigationBarTitleDisplayMode(.large)
-        .overlay {
+        .toolbar {
             if completedTodayCount >= 1 && streak > 0 {
-                GeometryReader { proxy in
+                ToolbarItem(placement: .topBarTrailing) {
                     HStack(spacing: 4) {
                         Image(systemName: "flame.fill")
                         Text("\(streak)")
@@ -58,14 +58,8 @@ struct TodayView: View {
                     .font(.subheadline)
                     .fontWeight(.semibold)
                     .foregroundStyle(.orange)
-                    .fixedSize()
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-                    .padding(.trailing, 16)
-                    .frame(height: 44)
-                    .offset(y: proxy.safeAreaInsets.top - 44)
+                    .allowsHitTesting(false)
                 }
-                .ignoresSafeArea()
-                .allowsHitTesting(false)
             }
         }
         .withWorkoutDestinations()
