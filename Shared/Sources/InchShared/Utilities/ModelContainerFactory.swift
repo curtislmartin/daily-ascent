@@ -12,7 +12,6 @@ public enum ModelContainerFactory {
         )
         return try ModelContainer(
             for: schema,
-            migrationPlan: BodyweightMigrationPlan.self,
             configurations: [config]
         )
     }
