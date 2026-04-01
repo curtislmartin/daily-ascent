@@ -31,6 +31,7 @@ final class WorkoutViewModel {
     private(set) var newLevel: Int = 0
     private(set) var completedLevel: Int = 0
     private(set) var completedDay: Int = 0
+    var pendingAchievements: [Achievement] = []
     private let scheduler = SchedulingEngine()
 
     var exerciseName: String { enrolment?.exerciseDefinition?.name ?? "" }
@@ -240,6 +241,48 @@ final class WorkoutViewModel {
         updateStreak(context: context)
         try? context.save()
         phase = .complete
+
+        // Achievement check — capture values before analytics
+        let achChecker = AchievementChecker()
+        let achExerciseId = def.exerciseId
+        let achLevel = completedLevel
+        let achReps = sessionTotalReps
+        let achDidAdvance = didAdvanceLevel
+        let achIsTestDay = isTestDay
+        let achSessionDate = sessionDate
+
+        var newAchievements = achChecker.check(
+            after: .workoutCompleted(
+                exerciseId: achExerciseId,
+                totalReps: achReps,
+                level: achLevel,
+                sessionDate: achSessionDate
+            ),
+            in: context
+        )
+
+        if achIsTestDay && achDidAdvance {
+            newAchievements += achChecker.check(
+                after: .testPassed(
+                    exerciseId: achExerciseId,
+                    level: achLevel,
+                    sessionDate: achSessionDate
+                ),
+                in: context
+            )
+        }
+
+        for achievement in newAchievements {
+            if achievement.category == "performance",
+               let existingAch = (try? context.fetch(FetchDescriptor<Achievement>()))?.first(where: { $0.id == achievement.id }) {
+                existingAch.numericValue = achievement.numericValue
+                existingAch.unlockedAt = .now
+            } else {
+                context.insert(achievement)
+            }
+        }
+        try? context.save()
+        pendingAchievements = newAchievements
 
         let exerciseId = def.exerciseId
         let duration = Int(Date.now.timeIntervalSince(sessionStartDate))
