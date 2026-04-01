@@ -48,17 +48,23 @@ struct TodayView: View {
         }
         .navigationTitle("Today")
         .navigationBarTitleDisplayMode(.large)
-        .overlay(alignment: .topTrailing) {
+        .overlay {
             if completedTodayCount >= 1 && streak > 0 {
-                HStack(spacing: 4) {
-                    Image(systemName: "flame.fill")
-                    Text("\(streak)")
+                GeometryReader { proxy in
+                    HStack(spacing: 4) {
+                        Image(systemName: "flame.fill")
+                        Text("\(streak)")
+                    }
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.orange)
+                    .fixedSize()
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .padding(.trailing, 16)
+                    .frame(height: 44)
+                    .offset(y: proxy.safeAreaInsets.top - 44)
                 }
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundStyle(.orange)
-                .padding(.trailing, 16)
-                .padding(.top, 8)
+                .ignoresSafeArea()
                 .allowsHitTesting(false)
             }
         }
