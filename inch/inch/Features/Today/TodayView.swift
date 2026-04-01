@@ -5,6 +5,7 @@ import InchShared
 struct TodayView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(WatchConnectivityService.self) private var watchConnectivity
+    @Environment(AnalyticsService.self) private var analytics
     @Query private var streakStates: [StreakState]
     @Query private var allSettings: [UserSettings]
 
@@ -60,6 +61,7 @@ struct TodayView: View {
         .withWorkoutDestinations()
         .withTodayDestinations()
         .task {
+            viewModel.configure(analytics: analytics)
             viewModel.loadToday(context: modelContext, showWarnings: showConflictWarnings)
             watchConnectivity.sendTodaySchedule(
                 enrolments: viewModel.dueExercises,
@@ -67,6 +69,7 @@ struct TodayView: View {
             )
         }
         .onAppear {
+            viewModel.configure(analytics: analytics)
             viewModel.loadToday(context: modelContext, showWarnings: showConflictWarnings)
             if viewModel.streakWasJustReset, let nextDate = viewModel.nextTrainingDate {
                 notifications.scheduleStreakRecovery(nextTrainingDate: nextDate)

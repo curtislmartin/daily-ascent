@@ -16,6 +16,8 @@ enum WorkoutPhase: Equatable {
 @Observable
 final class WorkoutViewModel {
     private let enrolmentId: PersistentIdentifier
+    private var analytics: AnalyticsService?
+    private var sessionStartDate: Date = .now
 
     var phase: WorkoutPhase = .loading
     var currentSetIndex: Int = 0
@@ -50,6 +52,10 @@ final class WorkoutViewModel {
         self.enrolmentId = enrolmentId
     }
 
+    func configure(analytics: AnalyticsService) {
+        self.analytics = analytics
+    }
+
     func load(context: ModelContext) {
         let enrolment: ExerciseEnrolment? = context.registeredModel(for: enrolmentId)
             ?? fetchEnrolment(context: context)
@@ -59,6 +65,16 @@ final class WorkoutViewModel {
         loadPreviousSession(exerciseId: enrolment.exerciseDefinition?.exerciseId, context: context)
         sessionDate = .now
         phase = .ready
+        guard let def = enrolment.exerciseDefinition else { return }
+        sessionStartDate = .now
+        analytics?.record(AnalyticsEvent(
+            name: "workout_started",
+            properties: .workoutStarted(
+                exerciseId: def.exerciseId,
+                level: enrolment.currentLevel,
+                dayNumber: enrolment.currentDay
+            )
+        ))
     }
 
     func startSet() {
@@ -224,6 +240,50 @@ final class WorkoutViewModel {
         updateStreak(context: context)
         try? context.save()
         phase = .complete
+
+        let exerciseId = def.exerciseId
+        let duration = Int(Date.now.timeIntervalSince(sessionStartDate))
+        let wasTestDay = isTestDay
+        let didAdvance = didAdvanceLevel
+        let advancedToLevel = newLevel
+        let capturedTotalReps = sessionTotalReps
+        let capturedTotalSets = totalSets
+        let capturedCompletedLevel = completedLevel
+        let capturedCompletedDay = completedDay
+        let capturedCountingMode = countingMode.rawValue
+
+        analytics?.record(AnalyticsEvent(
+            name: "workout_completed",
+            properties: .workoutCompleted(
+                exerciseId: exerciseId,
+                level: capturedCompletedLevel,
+                dayNumber: capturedCompletedDay,
+                totalSets: capturedTotalSets,
+                totalReps: capturedTotalReps,
+                durationSeconds: duration,
+                countingMode: capturedCountingMode
+            )
+        ))
+        if wasTestDay {
+            analytics?.record(AnalyticsEvent(
+                name: "level_test_attempted",
+                properties: .levelTestAttempted(
+                    exerciseId: exerciseId,
+                    currentLevel: capturedCompletedLevel
+                )
+            ))
+        }
+        if didAdvance {
+            analytics?.record(AnalyticsEvent(
+                name: "level_advanced",
+                properties: .levelAdvanced(
+                    exerciseId: exerciseId,
+                    fromLevel: capturedCompletedLevel,
+                    toLevel: advancedToLevel,
+                    maxRepsAchieved: capturedTotalReps
+                )
+            ))
+        }
     }
 
     /// Runs the conflict detect → resolve loop (up to maxIterations) after any schedule change,
