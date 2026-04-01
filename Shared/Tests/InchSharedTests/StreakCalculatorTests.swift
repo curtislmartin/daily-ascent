@@ -97,6 +97,62 @@ struct StreakCalculatorTests {
         #expect(state.longestStreak == 10, "longestStreak should not change on reset")
     }
 
+    // MARK: - recalculateStreak
+
+    @Test(.tags(.streak))
+    func recalculate_consecutiveDays_returnsCorrectCount() {
+        // Worked out March 30, 31, April 1 — streak should be 3
+        let dates = [makeDate(2026, 3, 30), makeDate(2026, 3, 31), makeDate(2026, 4, 1)]
+        #expect(calc.recalculateStreak(from: dates, today: makeDate(2026, 4, 1)) == 3)
+    }
+
+    @Test(.tags(.streak))
+    func recalculate_withRestDayGap_countsCorrectly() {
+        // Trained Monday + Wednesday (one rest day between) — streak 2
+        let dates = [makeDate(2026, 3, 30), makeDate(2026, 4, 1)]
+        #expect(calc.recalculateStreak(from: dates, today: makeDate(2026, 4, 1)) == 2)
+    }
+
+    @Test(.tags(.streak))
+    func recalculate_withTwoRestDayGap_countsCorrectly() {
+        // Max scheduled gap is 3 days — still one streak
+        let dates = [makeDate(2026, 3, 29), makeDate(2026, 4, 1)]
+        #expect(calc.recalculateStreak(from: dates, today: makeDate(2026, 4, 1)) == 2)
+    }
+
+    @Test(.tags(.streak))
+    func recalculate_gapTooLarge_breaksStreak() {
+        // Gap of 4 days — streak resets to 1
+        let dates = [makeDate(2026, 3, 28), makeDate(2026, 4, 1)]
+        #expect(calc.recalculateStreak(from: dates, today: makeDate(2026, 4, 1)) == 1)
+    }
+
+    @Test(.tags(.streak))
+    func recalculate_noWorkoutTodayOrYesterday_returnsZero() {
+        // Last workout was 3 days ago — streak is no longer active
+        let dates = [makeDate(2026, 3, 29)]
+        #expect(calc.recalculateStreak(from: dates, today: makeDate(2026, 4, 1)) == 0)
+    }
+
+    @Test(.tags(.streak))
+    func recalculate_noHistory_returnsZero() {
+        #expect(calc.recalculateStreak(from: [], today: makeDate(2026, 4, 1)) == 0)
+    }
+
+    @Test(.tags(.streak))
+    func recalculate_duplicateDatesFromMultipleSets_countedOnce() {
+        // Same day, multiple sets for different exercises — should count as 1 day
+        let dates = [makeDate(2026, 3, 31), makeDate(2026, 3, 31),
+                     makeDate(2026, 4, 1),  makeDate(2026, 4, 1)]
+        #expect(calc.recalculateStreak(from: dates, today: makeDate(2026, 4, 1)) == 2)
+    }
+
+    @Test(.tags(.streak))
+    func recalculate_workedOutYesterdayNotToday_stillActive() {
+        let dates = [makeDate(2026, 3, 31)]
+        #expect(calc.recalculateStreak(from: dates, today: makeDate(2026, 4, 1)) == 1)
+    }
+
     // MARK: - shouldBreakStreak
 
     @Test(.tags(.streak))

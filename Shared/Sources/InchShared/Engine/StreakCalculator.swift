@@ -55,6 +55,40 @@ public struct StreakCalculator: Sendable {
         }
     }
 
+    /// Pure function. Derives the current streak purely from workout completion history.
+    ///
+    /// Walks unique training days backwards from today, counting consecutive days where
+    /// the gap between adjacent sessions is ≤ 3 calendar days (matching the maximum
+    /// scheduled rest gap). Stops at the first gap larger than that.
+    ///
+    /// This is used to self-heal the streak when the persisted value is lower than what
+    /// history shows — e.g. after a false reset caused by a double `loadToday` call.
+    public func recalculateStreak(from completionDates: [Date], today: Date) -> Int {
+        let cal = Calendar.current
+        let todayStart = cal.startOfDay(for: today)
+
+        let trainingDays = Array(
+            Set(completionDates.map { cal.startOfDay(for: $0) })
+        ).sorted(by: >)
+
+        guard let mostRecent = trainingDays.first else { return 0 }
+
+        // Streak is only active if the user trained today or yesterday
+        let yesterday = cal.date(byAdding: .day, value: -1, to: todayStart)!
+        guard mostRecent >= yesterday else { return 0 }
+
+        var streak = 1
+        for i in 1..<trainingDays.count {
+            let gap = cal.dateComponents([.day], from: trainingDays[i], to: trainingDays[i - 1]).day ?? 0
+            if gap <= 3 {
+                streak += 1
+            } else {
+                break
+            }
+        }
+        return streak
+    }
+
     /// Pure function. Returns true if a streak should be broken because the user missed a
     /// scheduled training day.
     ///

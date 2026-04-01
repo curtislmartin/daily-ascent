@@ -104,6 +104,7 @@ final class TodayViewModel {
         if !isRestDay {
             updateLastDueDateIfNeeded(context: context, today: today)
         }
+        healStreakFromHistoryIfNeeded(context: context, today: today)
         buildAndRunAdvisor(context: context, all: all, todaySets: todaySets, today: today)
 
         let uncelebrated = (try? context.fetch(
@@ -223,6 +224,20 @@ final class TodayViewModel {
         // streak increments silently fail.
         streakState.previousLastDueDate = streakState.lastDueDate
         streakState.lastDueDate = today
+        try? context.save()
+    }
+
+    private func healStreakFromHistoryIfNeeded(context: ModelContext, today: Date) {
+        let streaks = (try? context.fetch(FetchDescriptor<StreakState>())) ?? []
+        guard let streakState = streaks.first else { return }
+        let allSets = (try? context.fetch(FetchDescriptor<CompletedSet>())) ?? []
+        let historical = StreakCalculator().recalculateStreak(
+            from: allSets.map { $0.sessionDate },
+            today: today
+        )
+        guard historical > streakState.currentStreak else { return }
+        streakState.currentStreak = historical
+        streakState.longestStreak = max(streakState.longestStreak, historical)
         try? context.save()
     }
 
