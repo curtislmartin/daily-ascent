@@ -5,6 +5,7 @@ import WatchConnectivity
 
 struct PrivacySettingsView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(AnalyticsService.self) private var analytics
     var viewModel: SettingsViewModel
 
     @State private var showingDeleteHistoryConfirm = false
@@ -15,6 +16,7 @@ struct PrivacySettingsView: View {
     var body: some View {
         List {
             consentSection
+            analyticsSection
             iCloudSection
             dataSection
             Section("Legal") {
@@ -46,6 +48,28 @@ struct PrivacySettingsView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("All progress, history, and settings will be permanently deleted. You'll go through onboarding again.")
+        }
+    }
+
+    private var analyticsSection: some View {
+        Section {
+            Toggle(isOn: Binding(
+                get: { settings?.analyticsEnabled ?? true },
+                set: { newValue in
+                    settings?.analyticsEnabled = newValue
+                    try? modelContext.save()
+                    analytics.setEnabled(newValue)
+                }
+            )) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Share anonymous usage analytics")
+                    Text("Helps improve the app. No personal data is collected. Cannot be linked to you.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        } header: {
+            Text("Analytics")
         }
     }
 

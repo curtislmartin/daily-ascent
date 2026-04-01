@@ -18,9 +18,14 @@ final class TodayViewModel {
     /// Advisor recommendation for today's training load. Nil until the first exercise is completed.
     var advisory: LoadAdvisory? = nil
     private let detector = ConflictDetector()
+    private var analytics: AnalyticsService?
     /// Exercise IDs whose nextScheduledDate was before today when loadToday() ran.
     /// Captured each load call so rescheduled status is always current.
     private var rescheduledExerciseIds: Set<String> = []
+
+    func configure(analytics: AnalyticsService) {
+        self.analytics = analytics
+    }
 
     func loadToday(context: ModelContext, showWarnings: Bool = true) {
         streakWasJustReset = false
@@ -30,6 +35,23 @@ final class TodayViewModel {
             predicate: #Predicate { $0.isActive }
         )
         let all = (try? context.fetch(descriptor)) ?? []
+
+        let todayStart = Calendar.current.startOfDay(for: .now)
+        for enrolment in all {
+            guard let scheduled = enrolment.nextScheduledDate,
+                  Calendar.current.startOfDay(for: scheduled) < todayStart,
+                  let def = enrolment.exerciseDefinition else { continue }
+            let skips = max(1, Calendar.current.dateComponents([.day], from: scheduled, to: todayStart).day ?? 1)
+            analytics?.record(AnalyticsEvent(
+                name: "scheduled_session_skipped",
+                properties: .scheduledSessionSkipped(
+                    exerciseId: def.exerciseId,
+                    level: enrolment.currentLevel,
+                    dayNumber: enrolment.currentDay,
+                    consecutiveSkips: skips
+                )
+            ))
+        }
 
         let hasAnySets = (try? context.fetch(FetchDescriptor<CompletedSet>()))?.isEmpty == false
         hasTrainedBefore = hasAnySets
@@ -147,8 +169,13 @@ final class TodayViewModel {
         let lastDay = Calendar.current.startOfDay(for: lastActive)
         let referenceDay = Calendar.current.startOfDay(for: lastDue)
         if lastDay < referenceDay {
+            let brokenStreak = streakState.currentStreak
             streakState.currentStreak = 0
             streakWasJustReset = true
+            analytics?.record(AnalyticsEvent(
+                name: "streak_broken",
+                properties: .streakBroken(streakLengthAtBreak: brokenStreak)
+            ))
             try? context.save()
         }
     }

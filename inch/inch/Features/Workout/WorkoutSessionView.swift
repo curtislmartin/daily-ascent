@@ -7,6 +7,7 @@ struct WorkoutSessionView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(AnalyticsService.self) private var analytics
     @Environment(HealthKitService.self) private var healthKit
     @Environment(MotionRecordingService.self) private var motionRecording
     @Environment(DataUploadService.self) private var dataUpload
@@ -145,7 +146,19 @@ struct WorkoutSessionView: View {
             }
         }
         .alert("Quit workout?", isPresented: $showingQuitConfirm) {
-            Button("Quit Workout", role: .destructive) { dismiss() }
+            Button("Quit Workout", role: .destructive) {
+                analytics.record(AnalyticsEvent(
+                    name: "workout_abandoned",
+                    properties: .workoutAbandoned(
+                        exerciseId: viewModel.enrolment?.exerciseDefinition?.exerciseId ?? "",
+                        level: viewModel.enrolment?.currentLevel ?? 0,
+                        dayNumber: viewModel.enrolment?.currentDay ?? 0,
+                        setsCompleted: viewModel.currentSetIndex,
+                        setsTotal: viewModel.totalSets
+                    )
+                ))
+                dismiss()
+            }
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("Your progress so far won't be saved.")
@@ -166,6 +179,7 @@ struct WorkoutSessionView: View {
         }
         .task {
             sessionId = UUID().uuidString
+            viewModel.configure(analytics: analytics)
             viewModel.load(context: modelContext)
             let tier3Exercises = ["dead_bugs", "glute_bridges"]
             if tier3Exercises.contains(exerciseId),

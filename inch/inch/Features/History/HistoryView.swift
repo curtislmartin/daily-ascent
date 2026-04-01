@@ -3,6 +3,8 @@ import SwiftData
 import InchShared
 
 struct HistoryView: View {
+    @Environment(AnalyticsService.self) private var analytics
+
     @Query(sort: \CompletedSet.completedAt, order: .reverse)
     private var allSets: [CompletedSet]
     @Query private var allEnrolments: [ExerciseEnrolment]
@@ -45,6 +47,12 @@ struct HistoryView: View {
                     streakState: streakState
                 )
             }
+        }
+        .onAppear {
+            analytics.record(AnalyticsEvent(
+                name: "progress_viewed",
+                properties: .progressViewed
+            ))
         }
         .navigationTitle("History")
         .navigationBarTitleDisplayMode(.large)
