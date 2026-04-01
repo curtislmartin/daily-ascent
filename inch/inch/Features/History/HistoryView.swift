@@ -12,7 +12,7 @@ struct HistoryView: View {
     @Query private var allSettings: [UserSettings]
 
     @State private var viewModel = HistoryViewModel()
-    @State private var selectedSegment: Segment = .log
+    @State private var selectedSegment: Segment = .stats
     @State private var showingSettings = false
 
     private var showSettingsBadge: Bool {
@@ -21,8 +21,8 @@ struct HistoryView: View {
     }
 
     enum Segment: String, CaseIterable {
-        case log = "Log"
         case stats = "Stats"
+        case log = "Log"
         case achievements = "Achievements"
     }
 
@@ -57,7 +57,7 @@ struct HistoryView: View {
                 properties: .progressViewed
             ))
         }
-        .navigationTitle("History")
+        .navigationTitle("Me")
         .navigationBarTitleDisplayMode(.large)
         .withHistoryDestinations()
         .toolbar {

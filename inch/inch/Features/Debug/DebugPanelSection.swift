@@ -70,6 +70,12 @@ extension SettingsView {
             Button("Show streak state") {
                 debugViewModel.showStreakState(context: modelContext)
             }
+            Button("Force update streak now") {
+                debugViewModel.forceUpdateStreakNow(context: modelContext)
+            }
+            Button("Dedup streak records") {
+                debugViewModel.deduplicateStreakRecords(context: modelContext)
+            }
             debugRow("Set streak → 0 days",
                      sub: "No flame badge, no streak card on rest day",
                      key: .streak0) {
@@ -220,6 +226,16 @@ extension SettingsView {
 
     var debugDangerSection: some View {
         Section("Danger Zone") {
+            Button("Remove retired exercise history") {
+                debugViewModel.confirmDanger(
+                    title: "Remove sit_ups & glute_bridges history?",
+                    message: "Deletes all CompletedSet records for sit_ups and glute_bridges. Cannot be undone."
+                ) {
+                    debugViewModel.removeRetiredExerciseHistory(context: modelContext)
+                }
+            }
+            .foregroundStyle(.red)
+
             Button("Clear all history") {
                 debugViewModel.confirmDanger(
                     title: "Clear all history?",

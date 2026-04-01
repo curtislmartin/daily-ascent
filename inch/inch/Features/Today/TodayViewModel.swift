@@ -99,6 +99,7 @@ final class TodayViewModel {
         } else {
             conflictWarnings = [:]
         }
+        deduplicateStreakRecordsIfNeeded(context: context)
         resetStreakForMissedDayIfNeeded(context: context, today: today)
         if !isRestDay {
             updateLastDueDateIfNeeded(context: context, today: today)
@@ -161,6 +162,34 @@ final class TodayViewModel {
                 conflictWarnings[trainingId] = "Same muscle group as today's test"
             }
         }
+    }
+
+    private func deduplicateStreakRecordsIfNeeded(context: ModelContext) {
+        let streaks = (try? context.fetch(FetchDescriptor<StreakState>())) ?? []
+        guard streaks.count > 1 else { return }
+        // Merge all records into the first one by taking the best value from each field,
+        // then delete the rest. Multiple records accumulate when different ModelContexts
+        // each create a new StreakState without seeing records saved by other contexts.
+        let winner = streaks[0]
+        for other in streaks.dropFirst() {
+            if other.currentStreak > winner.currentStreak {
+                winner.currentStreak = other.currentStreak
+            }
+            if other.longestStreak > winner.longestStreak {
+                winner.longestStreak = other.longestStreak
+            }
+            if let d = other.lastActiveDate, d > (winner.lastActiveDate ?? .distantPast) {
+                winner.lastActiveDate = d
+            }
+            if let d = other.lastDueDate, d > (winner.lastDueDate ?? .distantPast) {
+                winner.lastDueDate = d
+            }
+            if let d = other.previousLastDueDate, d > (winner.previousLastDueDate ?? .distantPast) {
+                winner.previousLastDueDate = d
+            }
+            context.delete(other)
+        }
+        try? context.save()
     }
 
     private func resetStreakForMissedDayIfNeeded(context: ModelContext, today: Date) {

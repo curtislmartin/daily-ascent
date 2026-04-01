@@ -36,7 +36,7 @@ struct AppTabView: View {
                         .withProgramDestinations()
                 }
             }
-            Tab("History", systemImage: "clock", value: AppTab.history) {
+            Tab("Me", systemImage: "person", value: AppTab.history) {
                 NavigationStack {
                     HistoryView()
                 }

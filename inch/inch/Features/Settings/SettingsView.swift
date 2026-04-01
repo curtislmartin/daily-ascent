@@ -5,6 +5,7 @@ import InchShared
 struct SettingsView: View {
     // internal (not private) — accessed by DebugPanelSection extension in a separate file
     @Environment(\.modelContext) var modelContext
+    @Environment(\.dismiss) private var dismiss
 
     @State private var viewModel = SettingsViewModel()
 
@@ -38,6 +39,13 @@ struct SettingsView: View {
         .listStyle(.insetGrouped)
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Close", systemImage: "xmark") {
+                    dismiss()
+                }
+            }
+        }
         .task { viewModel.load(context: modelContext) }
         #if DEBUG || TESTFLIGHT
         .alert(debugViewModel.alertTitle, isPresented: $debugViewModel.showAlert) {

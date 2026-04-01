@@ -159,7 +159,7 @@ final class DebugViewModel {
 
     func showStreakState(context: ModelContext) {
         let streaks = (try? context.fetch(FetchDescriptor<StreakState>())) ?? []
-        guard let s = streaks.first else {
+        guard !streaks.isEmpty else {
             alertTitle = "Streak State"
             alertMessage = "No StreakState record found in database."
             showAlert = true
@@ -167,16 +167,86 @@ final class DebugViewModel {
         }
         let fmt = DateFormatter()
         fmt.dateFormat = "yyyy-MM-dd"
-        let active = s.lastActiveDate.map { fmt.string(from: $0) } ?? "nil"
-        let due = s.lastDueDate.map { fmt.string(from: $0) } ?? "nil"
-        let prevDue = s.previousLastDueDate.map { fmt.string(from: $0) } ?? "nil"
+        var lines: [String] = ["Records: \(streaks.count)"]
+        for (i, s) in streaks.enumerated() {
+            let active = s.lastActiveDate.map { fmt.string(from: $0) } ?? "nil"
+            let due = s.lastDueDate.map { fmt.string(from: $0) } ?? "nil"
+            let prevDue = s.previousLastDueDate.map { fmt.string(from: $0) } ?? "nil"
+            lines.append("""
+                --- #\(i + 1) ---
+                currentStreak: \(s.currentStreak)
+                longestStreak: \(s.longestStreak)
+                lastActiveDate: \(active)
+                lastDueDate: \(due)
+                previousLastDueDate: \(prevDue)
+                """)
+        }
         alertTitle = "Streak State"
+        alertMessage = lines.joined(separator: "\n")
+        showAlert = true
+    }
+
+    func deduplicateStreakRecords(context: ModelContext) {
+        let streaks = (try? context.fetch(FetchDescriptor<StreakState>())) ?? []
+        guard streaks.count > 1 else {
+            alertTitle = "Dedup Streak"
+            alertMessage = "Only \(streaks.count) record(s) — nothing to deduplicate."
+            showAlert = true
+            return
+        }
+        let winner = streaks[0]
+        for other in streaks.dropFirst() {
+            if other.currentStreak > winner.currentStreak { winner.currentStreak = other.currentStreak }
+            if other.longestStreak > winner.longestStreak { winner.longestStreak = other.longestStreak }
+            if let d = other.lastActiveDate, d > (winner.lastActiveDate ?? .distantPast) { winner.lastActiveDate = d }
+            if let d = other.lastDueDate, d > (winner.lastDueDate ?? .distantPast) { winner.lastDueDate = d }
+            if let d = other.previousLastDueDate, d > (winner.previousLastDueDate ?? .distantPast) { winner.previousLastDueDate = d }
+            context.delete(other)
+        }
+        do {
+            try context.save()
+            alertTitle = "Dedup Streak"
+            alertMessage = "Merged \(streaks.count) records into 1.\ncurrentStreak: \(winner.currentStreak)\nlongestStreak: \(winner.longestStreak)"
+        } catch {
+            alertTitle = "Dedup Streak"
+            alertMessage = "Save failed: \(error)"
+        }
+        showAlert = true
+    }
+
+    func forceUpdateStreakNow(context: ModelContext) {
+        let streaks = (try? context.fetch(FetchDescriptor<StreakState>())) ?? []
+        let fmt = DateFormatter()
+        fmt.dateFormat = "yyyy-MM-dd"
+        let streakState: StreakState
+        if let existing = streaks.first {
+            streakState = existing
+        } else {
+            streakState = StreakState()
+            context.insert(streakState)
+        }
+        let beforeActive = streakState.lastActiveDate.map { fmt.string(from: $0) } ?? "nil"
+        let beforeStreak = streakState.currentStreak
+        StreakCalculator().updateStreakState(
+            streakState,
+            today: .now,
+            hadDueExercises: true,
+            completedAny: true
+        )
+        let saveError: String
+        do {
+            try context.save()
+            saveError = "save: ok"
+        } catch {
+            saveError = "save error: \(error)"
+        }
+        let afterActive = streakState.lastActiveDate.map { fmt.string(from: $0) } ?? "nil"
+        alertTitle = "Force Streak Update"
         alertMessage = """
-            currentStreak: \(s.currentStreak)
-            longestStreak: \(s.longestStreak)
-            lastActiveDate: \(active)
-            lastDueDate: \(due)
-            previousLastDueDate: \(prevDue)
+            Records found: \(streaks.count)
+            Before: streak=\(beforeStreak) active=\(beforeActive)
+            After:  streak=\(streakState.currentStreak) active=\(afterActive)
+            \(saveError)
             """
         showAlert = true
     }
@@ -422,6 +492,17 @@ final class DebugViewModel {
     func clearAllHistory(context: ModelContext) {
         try? context.delete(model: CompletedSet.self)
         try? context.save()
+    }
+
+    func removeRetiredExerciseHistory(context: ModelContext) {
+        let retired: Set<String> = ["sit_ups", "glute_bridges"]
+        let all = (try? context.fetch(FetchDescriptor<CompletedSet>())) ?? []
+        let toDelete = all.filter { retired.contains($0.exerciseId) }
+        for set in toDelete { context.delete(set) }
+        try? context.save()
+        alertTitle = "Done"
+        alertMessage = "Deleted \(toDelete.count) set(s) for sit_ups and glute_bridges."
+        showAlert = true
     }
 
     func resetAllEnrolments(context: ModelContext) {

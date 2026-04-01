@@ -8,6 +8,7 @@ enum WorkoutPhase: Equatable {
     case preparingTimedSet(targetSeconds: Int)  // pre-set countdown
     case inTimedSet(targetSeconds: Int)          // active hold (view owns elapsed timer)
     case inSet(startedAt: Date)
+    case inRealTimeSet                           // real-time counting active
     case confirming(targetReps: Int, duration: Double)
     case resting(restSeconds: Int)
     case complete
@@ -93,6 +94,10 @@ final class WorkoutViewModel {
 
     func startSet() {
         phase = .inSet(startedAt: .now)
+    }
+
+    func startRealTimeSet() {
+        phase = .inRealTimeSet
     }
 
     func endSet() {

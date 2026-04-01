@@ -65,7 +65,7 @@ struct WorkoutSessionView: View {
         switch viewModel.phase {
         case .loading, .complete:
             false
-        case .inSet, .preparingTimedSet, .inTimedSet:
+        case .inSet, .inRealTimeSet, .preparingTimedSet, .inTimedSet:
             true
         default:
             viewModel.currentSetIndex > 0
@@ -81,6 +81,8 @@ struct WorkoutSessionView: View {
                 readyView
             case .inSet:
                 inSetView
+            case .inRealTimeSet:
+                realTimeSetView
             case .confirming(let targetReps, let duration):
                 PostSetConfirmationView(targetReps: targetReps, duration: duration) { actual in
                     let url = pendingRecordingURL
@@ -207,6 +209,29 @@ struct WorkoutSessionView: View {
         }
         .onChange(of: viewModel.phase) { _, newPhase in
             switch newPhase {
+            case .inRealTimeSet:
+                showHoldPhoneHint = false
+                realTimeSetStartDate = .now
+                if sensorConsented {
+                    let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
+                    motionRecording.startRecording(
+                        exerciseId: exerciseId,
+                        setNumber: viewModel.currentSetIndex + 1,
+                        sessionId: sessionId,
+                        context: modelContext
+                    )
+                    repCounter?.reset()
+                    motionRecording.onSample = { [repCounter] ax, ay, az in
+                        repCounter?.processSample(ax: ax, ay: ay, az: az)
+                    }
+                    if dualRecordingEnabled {
+                        watchConnectivity.sendRecordingStart(
+                            exerciseId: exerciseId,
+                            setNumber: viewModel.currentSetIndex + 1,
+                            sessionId: sessionId
+                        )
+                    }
+                }
             case .inSet:
                 showHoldPhoneHint = false
                 if sensorConsented {
@@ -342,7 +367,7 @@ struct WorkoutSessionView: View {
             VStack(spacing: 16) {
                 Text("\(viewModel.currentTargetReps)")
                     .font(.system(size: 80, weight: .bold, design: .rounded))
-                Text("target reps")
+                Text(viewModel.isTimedExercise ? "seconds" : "target reps")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -350,46 +375,11 @@ struct WorkoutSessionView: View {
             Spacer()
 
             if viewModel.countingMode == .realTime {
-                RealTimeCountingView(
-                    targetReps: viewModel.currentTargetReps,
-                    repCounter: repCounter
-                ) { actual in
-                    let url = sensorConsented ? motionRecording.stopRecording() : nil
-                    if dualRecordingEnabled {
-                        let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
-                        watchConnectivity.sendRecordingStop(
-                            exerciseId: exerciseId,
-                            setNumber: viewModel.currentSetIndex + 1
-                        )
-                    }
-                    let duration = realTimeSetStartDate.map { Date.now.timeIntervalSince($0) } ?? 0
-                    realTimeSetStartDate = nil
-                    viewModel.completeRealTimeSet(actual: actual, context: modelContext, recordingURL: url, duration: duration)
+                Button("Start Set \(viewModel.currentSetIndex + 1)") {
+                    viewModel.startRealTimeSet()
                 }
-                .id(viewModel.currentSetIndex)
-                .onAppear {
-                    if sensorConsented {
-                        realTimeSetStartDate = .now
-                        let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
-                        motionRecording.startRecording(
-                            exerciseId: exerciseId,
-                            setNumber: viewModel.currentSetIndex + 1,
-                            sessionId: sessionId,
-                            context: modelContext
-                        )
-                        repCounter?.reset()
-                        motionRecording.onSample = { [repCounter] ax, ay, az in
-                            repCounter?.processSample(ax: ax, ay: ay, az: az)
-                        }
-                        if dualRecordingEnabled {
-                            watchConnectivity.sendRecordingStart(
-                                exerciseId: exerciseId,
-                                setNumber: viewModel.currentSetIndex + 1,
-                                sessionId: sessionId
-                            )
-                        }
-                    }
-                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
             } else if viewModel.isTimedExercise {
                 Button("Start Hold \(viewModel.currentSetIndex + 1)") {
                     setStartOrientation = UIDevice.current.orientation.stringValue
@@ -433,6 +423,43 @@ struct WorkoutSessionView: View {
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
+        }
+        .padding()
+    }
+
+    private var realTimeSetView: some View {
+        VStack(spacing: 32) {
+            setProgressHeader
+
+            Spacer()
+
+            VStack(spacing: 16) {
+                Text("\(viewModel.currentTargetReps)")
+                    .font(.system(size: 80, weight: .bold, design: .rounded))
+                Text("target reps")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            RealTimeCountingView(
+                targetReps: viewModel.currentTargetReps,
+                repCounter: repCounter
+            ) { actual in
+                let url = sensorConsented ? motionRecording.stopRecording() : nil
+                if dualRecordingEnabled {
+                    let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
+                    watchConnectivity.sendRecordingStop(
+                        exerciseId: exerciseId,
+                        setNumber: viewModel.currentSetIndex + 1
+                    )
+                }
+                let duration = realTimeSetStartDate.map { Date.now.timeIntervalSince($0) } ?? 0
+                realTimeSetStartDate = nil
+                viewModel.completeRealTimeSet(actual: actual, context: modelContext, recordingURL: url, duration: duration)
+            }
+            .id(viewModel.currentSetIndex)
         }
         .padding()
     }

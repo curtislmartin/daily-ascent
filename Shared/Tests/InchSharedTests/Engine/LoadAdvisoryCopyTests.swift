@@ -7,151 +7,146 @@ struct LoadAdvisoryCopyTests {
     // MARK: - Nil fallback
 
     @Test(.tags(.loadAdvisor))
-    func nilAdvisoryCompletedOneReturnsFallback() {
+    func nilAdvisoryCompletedOneReturnsFallbackOnePhrase() {
         let copy = LoadAdvisoryCopy.copy(completedCount: 1, advisory: nil)
-        #expect(copy == "Good start — keep going if you feel up to it.")
+        #expect(LoadAdvisoryCopy.fallbackOnePhrases.contains(copy))
     }
 
     @Test(.tags(.loadAdvisor))
-    func nilAdvisoryCompletedTwoReturnsFallback() {
+    func nilAdvisoryCompletedTwoReturnsFallbackTwoPhrase() {
         let copy = LoadAdvisoryCopy.copy(completedCount: 2, advisory: nil)
-        #expect(copy == "Building momentum — listen to your body.")
+        #expect(LoadAdvisoryCopy.fallbackTwoPhrases.contains(copy))
     }
 
     @Test(.tags(.loadAdvisor))
-    func nilAdvisoryCompletedThreeOrMoreReturnsFallback() {
+    func nilAdvisoryCompletedThreeOrMoreReturnsFallbackManyPhrase() {
         let copy = LoadAdvisoryCopy.copy(completedCount: 3, advisory: nil)
-        #expect(copy == "Solid session — the rest are optional.")
+        #expect(LoadAdvisoryCopy.fallbackManyPhrases.contains(copy))
     }
 
     // MARK: - Taper
 
     @Test(.tags(.loadAdvisor))
-    func taperWithNoRemainingReturnsGoodPlaceToStop() throws {
+    func taperWithNoRemainingReturnsStopPhrase() {
         let advisory = makeAdvisory(recommendedCount: 2, preTestTaperActive: true)
         let copy = LoadAdvisoryCopy.copy(completedCount: 2, advisory: advisory)
-        #expect(copy == "Test day tomorrow — good place to stop.")
+        #expect(LoadAdvisoryCopy.taperStopPhrases.contains(copy))
     }
 
     @Test(.tags(.loadAdvisor))
-    func taperWithNegativeRemainingReturnsGoodPlaceToStop() throws {
+    func taperWithNegativeRemainingReturnsStopPhrase() {
         let advisory = makeAdvisory(recommendedCount: 2, preTestTaperActive: true)
         let copy = LoadAdvisoryCopy.copy(completedCount: 3, advisory: advisory)
-        #expect(copy == "Test day tomorrow — good place to stop.")
+        #expect(LoadAdvisoryCopy.taperStopPhrases.contains(copy))
     }
 
     @Test(.tags(.loadAdvisor))
-    func taperWithOneRemainingReturnsOnMoreIsFine() throws {
+    func taperWithOneRemainingReturnsOneMorePhrase() {
         let advisory = makeAdvisory(recommendedCount: 3, preTestTaperActive: true)
         let copy = LoadAdvisoryCopy.copy(completedCount: 2, advisory: advisory)
-        #expect(copy == "One more is fine — test day tomorrow.")
+        #expect(LoadAdvisoryCopy.taperOneMorePhrases.contains(copy))
     }
 
     @Test(.tags(.loadAdvisor))
-    func taperWithTwoOrMoreRemainingReturnsKeepLight() throws {
+    func taperWithTwoOrMoreRemainingReturnsLightPhrase() {
         let advisory = makeAdvisory(recommendedCount: 4, preTestTaperActive: true)
         let copy = LoadAdvisoryCopy.copy(completedCount: 2, advisory: advisory)
-        #expect(copy == "Test day tomorrow — keep today light.")
+        #expect(LoadAdvisoryCopy.taperLightPhrases.contains(copy))
     }
 
     // MARK: - Taper takes priority over overload and lookback
 
     @Test(.tags(.loadAdvisor))
-    func taperTakesPriorityOverOverloadedGroups() throws {
+    func taperTakesPriorityOverOverloadedGroups() {
         let advisory = makeAdvisory(
             recommendedCount: 2,
             overloadedGroups: [.lower],
             preTestTaperActive: true
         )
         let copy = LoadAdvisoryCopy.copy(completedCount: 2, advisory: advisory)
-        #expect(copy == "Test day tomorrow — good place to stop.")
+        #expect(LoadAdvisoryCopy.taperStopPhrases.contains(copy))
     }
 
     @Test(.tags(.loadAdvisor))
-    func taperTakesPriorityOverLookback() throws {
+    func taperTakesPriorityOverLookback() {
         let advisory = makeAdvisory(
             recommendedCount: 2,
             preTestTaperActive: true,
             lookbackPenaltyActive: true
         )
         let copy = LoadAdvisoryCopy.copy(completedCount: 2, advisory: advisory)
-        #expect(copy == "Test day tomorrow — good place to stop.")
+        #expect(LoadAdvisoryCopy.taperStopPhrases.contains(copy))
     }
 
-    // MARK: - Overloaded groups (all six MuscleGroup cases)
+    // MARK: - Overloaded groups
 
     @Test(.tags(.loadAdvisor), arguments: [
-        (MuscleGroup.lower,          "Your lower body is carrying a lot today."),
-        (MuscleGroup.lowerPosterior, "Your posterior chain is carrying a lot today."),
-        (MuscleGroup.upperPush,      "Your pushing muscles are carrying a lot today."),
-        (MuscleGroup.upperPull,      "Your pulling muscles are carrying a lot today."),
-        (MuscleGroup.coreFlexion,    "Your core is carrying a lot today."),
-        (MuscleGroup.coreStability,  "Your core is carrying a lot today."),
+        MuscleGroup.lower,
+        MuscleGroup.lowerPosterior,
+        MuscleGroup.upperPush,
+        MuscleGroup.upperPull,
+        MuscleGroup.coreFlexion,
+        MuscleGroup.coreStability,
     ])
-    func overloadedGroupCopy(group: MuscleGroup, expected: String) throws {
+    func overloadedGroupReturnsOverloadPhrase(group: MuscleGroup) {
         let advisory = makeAdvisory(recommendedCount: 1, overloadedGroups: [group])
         let copy = LoadAdvisoryCopy.copy(completedCount: 2, advisory: advisory)
-        #expect(copy == expected)
+        #expect(LoadAdvisoryCopy.overloadPhrases.contains(copy))
+    }
+
+    @Test(.tags(.loadAdvisor))
+    func multipleOverloadedGroupsReturnsOverloadPhrase() {
+        let advisory = makeAdvisory(
+            recommendedCount: 1,
+            overloadedGroups: [.coreFlexion, .lower]
+        )
+        let copy = LoadAdvisoryCopy.copy(completedCount: 2, advisory: advisory)
+        #expect(LoadAdvisoryCopy.overloadPhrases.contains(copy))
     }
 
     // MARK: - Overloaded takes priority over lookback
 
     @Test(.tags(.loadAdvisor))
-    func overloadedTakesPriorityOverLookback() throws {
+    func overloadedTakesPriorityOverLookback() {
         let advisory = makeAdvisory(
             recommendedCount: 1,
             overloadedGroups: [.lower],
             lookbackPenaltyActive: true
         )
         let copy = LoadAdvisoryCopy.copy(completedCount: 2, advisory: advisory)
-        #expect(copy == "Your lower body is carrying a lot today.")
+        #expect(LoadAdvisoryCopy.overloadPhrases.contains(copy))
     }
 
     // MARK: - Lookback
 
     @Test(.tags(.loadAdvisor))
-    func lookbackPenaltyReturnsHeavySessionCopy() throws {
+    func lookbackPenaltyReturnsLookbackPhrase() {
         let advisory = makeAdvisory(recommendedCount: 3, lookbackPenaltyActive: true)
         let copy = LoadAdvisoryCopy.copy(completedCount: 1, advisory: advisory)
-        #expect(copy == "Heavy session yesterday — take it easy today.")
+        #expect(LoadAdvisoryCopy.lookbackPhrases.contains(copy))
     }
 
     // MARK: - Count-based defaults
 
     @Test(.tags(.loadAdvisor))
-    func countDefaultHitRecommendedLoad() throws {
+    func countDefaultHitRecommendedLoadReturnsDonePhrase() {
         let advisory = makeAdvisory(recommendedCount: 2)
         let copy = LoadAdvisoryCopy.copy(completedCount: 2, advisory: advisory)
-        #expect(copy == "You've hit today's recommended load.")
+        #expect(LoadAdvisoryCopy.budgetDonePhrases.contains(copy))
     }
 
     @Test(.tags(.loadAdvisor))
-    func countDefaultOneMoreWithinBudget() throws {
+    func countDefaultOneMoreReturnsOneMorePhrase() {
         let advisory = makeAdvisory(recommendedCount: 3)
         let copy = LoadAdvisoryCopy.copy(completedCount: 2, advisory: advisory)
-        #expect(copy == "One more is within your budget.")
+        #expect(LoadAdvisoryCopy.budgetOneMorePhrases.contains(copy))
     }
 
     @Test(.tags(.loadAdvisor))
-    func countDefaultPlentyOfRoom() throws {
+    func countDefaultPlentyReturnsPlentyPhrase() {
         let advisory = makeAdvisory(recommendedCount: 4)
         let copy = LoadAdvisoryCopy.copy(completedCount: 2, advisory: advisory)
-        #expect(copy == "Plenty of room to keep going.")
-    }
-
-    // MARK: - Sort order: first rawValue-sorted group wins
-    // The advisor returns overloadedGroups sorted by rawValue string (e.g. "core_flexion" < "lower").
-    // LoadAdvisoryCopy relies on this contract and uses .first without re-sorting.
-
-    @Test(.tags(.loadAdvisor))
-    func firstRawValueSortedGroupWinsWhenMultipleOverloaded() throws {
-        // Advisor sorts by rawValue: "core_flexion" < "lower", so coreFlexion is first
-        let sortedAdvisory = makeAdvisory(
-            recommendedCount: 1,
-            overloadedGroups: [.coreFlexion, .lower]
-        )
-        let copy = LoadAdvisoryCopy.copy(completedCount: 2, advisory: sortedAdvisory)
-        #expect(copy == "Your core is carrying a lot today.")
+        #expect(LoadAdvisoryCopy.budgetPlentyPhrases.contains(copy))
     }
 
     // MARK: - Helpers
