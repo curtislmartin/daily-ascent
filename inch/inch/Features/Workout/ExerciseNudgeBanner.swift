@@ -22,6 +22,5 @@ struct ExerciseNudgeBanner: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
-        .padding(.horizontal)
     }
 }
