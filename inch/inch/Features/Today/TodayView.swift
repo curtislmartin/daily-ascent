@@ -58,6 +58,12 @@ struct TodayView: View {
                     .font(.subheadline)
                     .fontWeight(.semibold)
                     .foregroundStyle(.orange)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Color(UIColor.systemBackground))
+                    .clipShape(Capsule())
+                    .overlay(Capsule().stroke(Color(UIColor.systemBackground), lineWidth: 2))
+                    .disabled(true)
                     .allowsHitTesting(false)
                 }
             }
