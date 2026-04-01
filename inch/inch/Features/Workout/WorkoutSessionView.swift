@@ -127,7 +127,15 @@ struct WorkoutSessionView: View {
                     previousSessionReps: viewModel.previousSessionReps,
                     nextDate: viewModel.enrolment?.nextScheduledDate,
                     onDone: { dismiss() },
-                    achievements: viewModel.pendingAchievements
+                    achievements: viewModel.pendingAchievements,
+                    adaptationMessage: viewModel.adaptationMessage,
+                    showMoveOnAnyway: viewModel.showMoveOnAnyway,
+                    onRatingSubmitted: viewModel.isTestDay ? nil : { rating in
+                        viewModel.submitDifficultyRating(rating, context: modelContext)
+                    },
+                    onMoveOnAnyway: {
+                        viewModel.moveOnAnyway(context: modelContext)
+                    }
                 )
             }
         }
@@ -317,6 +325,14 @@ struct WorkoutSessionView: View {
                 ExerciseNudgeBanner(exerciseName: viewModel.exerciseName) {
                     dismissNudge()
                 }
+            }
+
+            if viewModel.prescriptionOverrideMultiplier != nil {
+                Text("Lighter session today")
+                    .font(.caption)
+                    .foregroundStyle(.orange)
+                    .padding(.horizontal, 12).padding(.vertical, 4)
+                    .background(.orange.opacity(0.15), in: Capsule())
             }
 
             setProgressHeader

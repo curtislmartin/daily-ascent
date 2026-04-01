@@ -8,10 +8,15 @@ struct ExerciseCompleteView: View {
     let nextDate: Date?
     let onDone: () -> Void
     var achievements: [Achievement] = []
+    var adaptationMessage: String? = nil
+    var showMoveOnAnyway: Bool = false
+    var onRatingSubmitted: ((DifficultyRating) -> Void)? = nil
+    var onMoveOnAnyway: (() -> Void)? = nil
 
     @State private var showBanner = false
     @State private var showSheet = false
     @State private var showCelebration = false
+    @State private var ratingSubmitted = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -81,6 +86,39 @@ struct ExerciseCompleteView: View {
                 }
             }
 
+            if let onRating = onRatingSubmitted, !ratingSubmitted {
+                VStack(spacing: 12) {
+                    Text("How did that feel?")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    HStack(spacing: 12) {
+                        ForEach(DifficultyRating.allCases, id: \.self) { rating in
+                            Button(ratingLabel(rating)) {
+                                ratingSubmitted = true
+                                onRating(rating)
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                        }
+                    }
+                }
+            }
+
+            if let message = adaptationMessage {
+                Text(message)
+                    .font(.subheadline)
+                    .multilineTextAlignment(.center)
+                    .padding()
+                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+                    .padding(.horizontal)
+            }
+
+            if showMoveOnAnyway, let onMoveOn = onMoveOnAnyway {
+                Button("Move on anyway") { onMoveOn() }
+                    .foregroundStyle(.secondary)
+                    .font(.footnote)
+            }
+
             Spacer()
 
             Button("Done") {
@@ -110,6 +148,14 @@ struct ExerciseCompleteView: View {
     private func isTier2(_ a: Achievement) -> Bool {
         let ids = ["streak_7", "streak_14", "sessions_25", "sessions_50", "the_full_set"]
         return ids.contains(a.id)
+    }
+
+    private func ratingLabel(_ rating: DifficultyRating) -> String {
+        switch rating {
+        case .tooEasy: return "Too easy"
+        case .justRight: return "Just right"
+        case .tooHard: return "Too hard"
+        }
     }
 
     private func isTier3(_ a: Achievement) -> Bool {
