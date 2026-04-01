@@ -1,7 +1,11 @@
 import SwiftUI
+import SwiftData
+import InchShared
 
 struct HistoryLogView: View {
     let weekGroups: [HistoryViewModel.WeekGroup]
+
+    @Query private var allAchievements: [Achievement]
 
     var body: some View {
         if weekGroups.isEmpty {
@@ -11,7 +15,13 @@ struct HistoryLogView: View {
                 ForEach(weekGroups) { week in
                     Section {
                         ForEach(week.days) { day in
-                            DayGroupRow(day: day)
+                            DayGroupRow(
+                                day: day,
+                                hasAchievement: allAchievements.contains { achievement in
+                                    guard let aDate = achievement.sessionDate else { return false }
+                                    return Calendar.current.isDate(aDate, inSameDayAs: day.id)
+                                }
+                            )
                         }
                     } header: {
                         VStack(alignment: .leading, spacing: 2) {

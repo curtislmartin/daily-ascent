@@ -23,6 +23,7 @@ struct HistoryView: View {
     enum Segment: String, CaseIterable {
         case log = "Log"
         case stats = "Stats"
+        case achievements = "Achievements"
     }
 
     private var streakState: StreakState? { streakStates.first }
@@ -46,6 +47,8 @@ struct HistoryView: View {
                     stats: viewModel.stats(from: allSets, enrolments: allEnrolments),
                     streakState: streakState
                 )
+            case .achievements:
+                TrophyShelfView()
             }
         }
         .onAppear {

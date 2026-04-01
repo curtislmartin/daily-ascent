@@ -13,6 +13,7 @@ struct TodayView: View {
     @State private var nudgeDismissed = false
     @Environment(NotificationService.self) private var notifications
     @State private var streakRecoveryDismissed = false
+    @State private var showPendingCelebration = false
 
     private var settings: UserSettings? { allSettings.first }
 
@@ -67,6 +68,19 @@ struct TodayView: View {
                 enrolments: viewModel.dueExercises,
                 settings: settings
             )
+            try? await Task.sleep(for: .seconds(1))
+            if !viewModel.pendingCelebrations.isEmpty {
+                showPendingCelebration = true
+            }
+        }
+        .fullScreenCover(isPresented: $showPendingCelebration) {
+            if let achievement = viewModel.pendingCelebrations.first {
+                AchievementCelebrationView(achievement: achievement) {
+                    achievement.wasCelebrated = true
+                    try? modelContext.save()
+                    showPendingCelebration = false
+                }
+            }
         }
         .onAppear {
             viewModel.configure(analytics: analytics)

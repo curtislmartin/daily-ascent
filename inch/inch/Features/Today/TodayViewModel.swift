@@ -17,6 +17,7 @@ final class TodayViewModel {
     private(set) var streakWasJustReset: Bool = false
     /// Advisor recommendation for today's training load. Nil until the first exercise is completed.
     var advisory: LoadAdvisory? = nil
+    private(set) var pendingCelebrations: [Achievement] = []
     private let detector = ConflictDetector()
     private var analytics: AnalyticsService?
     /// Exercise IDs whose nextScheduledDate was before today when loadToday() ran.
@@ -103,6 +104,11 @@ final class TodayViewModel {
             updateLastDueDateIfNeeded(context: context, today: today)
         }
         buildAndRunAdvisor(context: context, all: all, todaySets: todaySets, today: today)
+
+        let uncelebrated = (try? context.fetch(
+            FetchDescriptor<Achievement>(predicate: #Predicate { !$0.wasCelebrated })
+        )) ?? []
+        pendingCelebrations = uncelebrated
     }
 
     private func computeNextTraining(from all: [ExerciseEnrolment], after today: Date) {
