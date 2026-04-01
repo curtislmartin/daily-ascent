@@ -10,20 +10,52 @@ final class TodayViewModel {
     var conflictWarnings: [String: String] = [:]
     var nextTrainingDate: Date? = nil
     var nextTrainingCount: Int = 0
+    private(set) var nextTrainingDayExercises: [(exerciseName: String, level: Int, dayNumber: Int)] = []
+    private(set) var hasTrainedBefore: Bool = false
+    /// Set to true on the load cycle where resetStreakForMissedDayIfNeeded resets the streak.
+    /// Consumed by TodayView to schedule a recovery notification.
+    private(set) var streakWasJustReset: Bool = false
     /// Advisor recommendation for today's training load. Nil until the first exercise is completed.
     var advisory: LoadAdvisory? = nil
+    private(set) var pendingCelebrations: [Achievement] = []
     private let detector = ConflictDetector()
+    private var analytics: AnalyticsService?
     /// Exercise IDs whose nextScheduledDate was before today when loadToday() ran.
     /// Captured each load call so rescheduled status is always current.
     private var rescheduledExerciseIds: Set<String> = []
 
+    func configure(analytics: AnalyticsService) {
+        self.analytics = analytics
+    }
+
     func loadToday(context: ModelContext, showWarnings: Bool = true) {
+        streakWasJustReset = false
         let today = Calendar.current.startOfDay(for: .now)
         let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today) ?? today
         let descriptor = FetchDescriptor<ExerciseEnrolment>(
             predicate: #Predicate { $0.isActive }
         )
         let all = (try? context.fetch(descriptor)) ?? []
+
+        let todayStart = Calendar.current.startOfDay(for: .now)
+        for enrolment in all {
+            guard let scheduled = enrolment.nextScheduledDate,
+                  Calendar.current.startOfDay(for: scheduled) < todayStart,
+                  let def = enrolment.exerciseDefinition else { continue }
+            let skips = max(1, Calendar.current.dateComponents([.day], from: scheduled, to: todayStart).day ?? 1)
+            analytics?.record(AnalyticsEvent(
+                name: "scheduled_session_skipped",
+                properties: .scheduledSessionSkipped(
+                    exerciseId: def.exerciseId,
+                    level: enrolment.currentLevel,
+                    dayNumber: enrolment.currentDay,
+                    consecutiveSkips: skips
+                )
+            ))
+        }
+
+        let hasAnySets = (try? context.fetch(FetchDescriptor<CompletedSet>()))?.isEmpty == false
+        hasTrainedBefore = hasAnySets
 
         // Exercises due today (scheduled today or overdue)
         let dueToday = all.filter { enrolment in
@@ -60,9 +92,7 @@ final class TodayViewModel {
         dueExercises = dueToday + completedEnrolments
         isRestDay = dueExercises.isEmpty
 
-        if isRestDay {
-            computeNextTraining(from: all, after: today)
-        }
+        computeNextTraining(from: all, after: today)
 
         if showWarnings {
             detectConflictsForToday()
@@ -70,10 +100,21 @@ final class TodayViewModel {
             conflictWarnings = [:]
         }
         resetStreakForMissedDayIfNeeded(context: context, today: today)
+        if !isRestDay {
+            updateLastDueDateIfNeeded(context: context, today: today)
+        }
         buildAndRunAdvisor(context: context, all: all, todaySets: todaySets, today: today)
+
+        let uncelebrated = (try? context.fetch(
+            FetchDescriptor<Achievement>(predicate: #Predicate { !$0.wasCelebrated })
+        )) ?? []
+        pendingCelebrations = uncelebrated
     }
 
     private func computeNextTraining(from all: [ExerciseEnrolment], after today: Date) {
+        nextTrainingDate = nil
+        nextTrainingCount = 0
+        nextTrainingDayExercises = []
         let futureDates = all.compactMap(\.nextScheduledDate)
             .map { Calendar.current.startOfDay(for: $0) }
             .filter { $0 > today }
@@ -83,6 +124,17 @@ final class TodayViewModel {
             guard let d = enrolment.nextScheduledDate else { return false }
             return Calendar.current.startOfDay(for: d) == nearest
         }.count
+        // Populate exercise list for rest day upcoming session card
+        nextTrainingDayExercises = all
+            .filter { enrolment in
+                guard let date = enrolment.nextScheduledDate else { return false }
+                return Calendar.current.isDate(date, inSameDayAs: nearest)
+            }
+            .compactMap { enrolment -> (exerciseName: String, level: Int, dayNumber: Int)? in
+                guard let name = enrolment.exerciseDefinition?.name else { return nil }
+                return (exerciseName: name, level: enrolment.currentLevel, dayNumber: enrolment.currentDay)
+            }
+            .sorted { $0.exerciseName < $1.exerciseName }
     }
 
     private func detectConflictsForToday() {
@@ -116,13 +168,35 @@ final class TodayViewModel {
         let streaks = (try? context.fetch(FetchDescriptor<StreakState>())) ?? []
         guard let streakState = streaks.first, streakState.currentStreak > 0 else { return }
         guard let lastActive = streakState.lastActiveDate else { return }
+        // Without lastDueDate we have no reliable way to distinguish rest days from skipped
+        // training days, so skip the check to avoid false resets on upgrade.
+        guard let lastDue = streakState.lastDueDate else { return }
 
         let lastDay = Calendar.current.startOfDay(for: lastActive)
-        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today) ?? today
-        if lastDay < Calendar.current.startOfDay(for: yesterday) {
+        let referenceDay = Calendar.current.startOfDay(for: lastDue)
+        if lastDay < referenceDay {
+            let brokenStreak = streakState.currentStreak
             streakState.currentStreak = 0
+            streakWasJustReset = true
+            analytics?.record(AnalyticsEvent(
+                name: "streak_broken",
+                properties: .streakBroken(streakLengthAtBreak: brokenStreak)
+            ))
             try? context.save()
         }
+    }
+
+    private func updateLastDueDateIfNeeded(context: ModelContext, today: Date) {
+        let streaks = (try? context.fetch(FetchDescriptor<StreakState>())) ?? []
+        guard let streakState = streaks.first else { return }
+        guard streakState.lastDueDate.map({ !Calendar.current.isDate($0, inSameDayAs: today) }) ?? true else { return }
+        // Preserve the old lastDueDate as previousLastDueDate so the streak calculator
+        // can use it as the true "previous training day" reference. Without this,
+        // lastDueDate equals today by the time a workout completes, and consecutive-day
+        // streak increments silently fail.
+        streakState.previousLastDueDate = streakState.lastDueDate
+        streakState.lastDueDate = today
+        try? context.save()
     }
 
     func currentPrescription(for enrolment: ExerciseEnrolment) -> DayPrescription? {

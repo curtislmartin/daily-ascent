@@ -12,6 +12,8 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
     private let sessionStream: AsyncStream<[WatchSession]>
     private let _recordingTriggers: AsyncStream<WatchRecordingTrigger>.Continuation
     let recordingTriggers: AsyncStream<WatchRecordingTrigger>
+    private let _historyEntries: AsyncStream<WatchHistoryEntry>.Continuation
+    let historyEntries: AsyncStream<WatchHistoryEntry>
 
     var sessions: [WatchSession] = []
     var lastSyncDate: Date? = nil
@@ -23,6 +25,9 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
         let (triggerStream, triggerContinuation) = AsyncStream<WatchRecordingTrigger>.makeStream()
         recordingTriggers = triggerStream
         _recordingTriggers = triggerContinuation
+        let (historyStream, historyContinuation) = AsyncStream<WatchHistoryEntry>.makeStream()
+        historyEntries = historyStream
+        _historyEntries = historyContinuation
         super.init()
     }
 
@@ -93,12 +98,33 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
         _ session: WCSession,
         didReceiveUserInfo userInfo: [String: Any]
     ) {
-        guard let type = userInfo["type"] as? String,
-              type == "schedule",
-              let data = userInfo["data"] as? Data,
-              let received = try? JSONDecoder().decode([WatchSession].self, from: data)
-        else { return }
-        sessionContinuation.yield(received)
+        guard let type = userInfo["type"] as? String else { return }
+        switch type {
+        case "schedule":
+            guard let data = userInfo["data"] as? Data,
+                  let received = try? JSONDecoder().decode([WatchSession].self, from: data)
+            else { return }
+            sessionContinuation.yield(received)
+        case "historyEntry":
+            guard let exerciseName = userInfo["exerciseName"] as? String,
+                  let level = userInfo["level"] as? Int,
+                  let dayNumber = userInfo["dayNumber"] as? Int,
+                  let totalReps = userInfo["totalReps"] as? Int,
+                  let setCount = userInfo["setCount"] as? Int,
+                  let completedAtInterval = userInfo["completedAt"] as? Double
+            else { return }
+            let entry = WatchHistoryEntry(
+                exerciseName: exerciseName,
+                level: level,
+                dayNumber: dayNumber,
+                totalReps: totalReps,
+                setCount: setCount,
+                completedAt: Date(timeIntervalSince1970: completedAtInterval)
+            )
+            _historyEntries.yield(entry)
+        default:
+            break
+        }
     }
 
     nonisolated func session(

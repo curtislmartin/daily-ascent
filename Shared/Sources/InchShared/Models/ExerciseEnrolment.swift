@@ -13,6 +13,13 @@ public final class ExerciseEnrolment {
 
     public var restPatternIndex: Int = 0
 
+    // MARK: - Adaptive difficulty
+    public var recentDifficultyRatings: [String] = []
+    public var recentCompletionRatios: [Double] = []
+    public var needsRepeat: Bool = false
+    public var isRepeatSession: Bool = false
+    public var sessionPrescriptionOverride: Double? = nil
+
     public var exerciseDefinition: ExerciseDefinition?
 
     @Relationship(deleteRule: .cascade, inverse: \CompletedSet.enrolment)

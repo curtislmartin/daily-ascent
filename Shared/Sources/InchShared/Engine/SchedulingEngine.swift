@@ -122,12 +122,37 @@ public struct SchedulingEngine: Sendable {
     // MARK: - Write-back helper
 
     /// Apply a computed EnrolmentSnapshot back to the @Model object.
-    public func writeBack(_ snapshot: EnrolmentSnapshot, to enrolment: ExerciseEnrolment, nextDate: Date?) {
+    ///
+    /// When `applyRepeatIfNeeded` is `true` (the default), the method checks the
+    /// `needsRepeat` flag on the model object and handles adaptive repeat logic:
+    /// - If `needsRepeat == true`: keeps `currentDay` at its current value (no
+    ///   advancement), sets `isRepeatSession = true`, and clears `needsRepeat`.
+    /// - If `isRepeatSession == true` (and `needsRepeat == false`): the repeat
+    ///   session just completed normally, so `isRepeatSession` is cleared.
+    public func writeBack(
+        _ snapshot: EnrolmentSnapshot,
+        to enrolment: ExerciseEnrolment,
+        nextDate: Date?,
+        applyRepeatIfNeeded: Bool = true
+    ) {
+        if applyRepeatIfNeeded && enrolment.needsRepeat {
+            // Repeat the current day: do not advance day/level/patternIndex.
+            enrolment.needsRepeat = false
+            enrolment.isRepeatSession = true
+            enrolment.lastCompletedDate = snapshot.lastCompletedDate
+            enrolment.nextScheduledDate = nextDate
+            return
+        }
+
         enrolment.currentLevel = snapshot.currentLevel
         enrolment.currentDay = snapshot.currentDay
         enrolment.lastCompletedDate = snapshot.lastCompletedDate
         enrolment.restPatternIndex = snapshot.restPatternIndex
         enrolment.isActive = snapshot.isActive
         enrolment.nextScheduledDate = nextDate
+
+        if applyRepeatIfNeeded && enrolment.isRepeatSession {
+            enrolment.isRepeatSession = false
+        }
     }
 }

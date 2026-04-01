@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import BackgroundTasks
+import UIKit
 import InchShared
 
 @main
@@ -13,6 +14,7 @@ struct InchApp: App {
     let notificationService = NotificationService()
     let metricKit = MetricKitService()
     let notificationDelegate = ForegroundNotificationDelegate()
+    let analytics = AnalyticsService()
 
     init() {
         do {
@@ -34,9 +36,26 @@ struct InchApp: App {
                 .environment(motionRecording)
                 .environment(dataUpload)
                 .environment(notificationService)
+                .environment(analytics)
                 .task {
                     watchConnectivity.activate()
                     await notificationService.checkAuthorizationStatus()
+
+                    let analyticsContext = ModelContext(self.container)
+                    let userSettings = (try? analyticsContext.fetch(FetchDescriptor<UserSettings>()))?.first
+                    analytics.configure(enabled: userSettings?.analyticsEnabled ?? true)
+
+                    if userSettings?.isFirstLaunch == true {
+                        let appVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
+                        let osVersion = UIDevice.current.systemVersion
+                        analytics.record(AnalyticsEvent(
+                            name: "app_installed",
+                            properties: .appInstalled(appVersion: appVersion, osVersion: osVersion)
+                        ))
+                        userSettings?.isFirstLaunch = false
+                        try? analyticsContext.save()
+                    }
+
                     await withTaskGroup(of: Void.self) { group in
                         group.addTask {
                             let context = ModelContext(self.container)
@@ -66,6 +85,14 @@ struct InchApp: App {
             Task { @MainActor in
                 let context = ModelContext(container)
                 await dataUpload.handleBGUpload(task: processingTask, context: context)
+                if let plistURL = Bundle.main.url(forResource: "Secrets", withExtension: "plist"),
+                   let dict = NSDictionary(contentsOf: plistURL) as? [String: Any],
+                   let urlString = dict["SupabaseURL"] as? String,
+                   let url = URL(string: urlString),
+                   let anonKey = dict["SupabaseAnonKey"] as? String {
+                    await analytics.flush(supabaseURL: url, anonKey: anonKey)
+                }
+                processingTask.setTaskCompleted(success: true)
             }
         }
     }

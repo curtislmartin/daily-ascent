@@ -83,6 +83,26 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
         sendSchedule(sessions)
     }
 
+    func sendHistoryEntry(
+        exerciseName: String,
+        level: Int,
+        dayNumber: Int,
+        totalReps: Int,
+        setCount: Int,
+        completedAt: Date
+    ) {
+        guard let wcSession, wcSession.activationState == .activated else { return }
+        wcSession.transferUserInfo([
+            "type": "historyEntry",
+            "exerciseName": exerciseName,
+            "level": level,
+            "dayNumber": dayNumber,
+            "totalReps": totalReps,
+            "setCount": setCount,
+            "completedAt": completedAt.timeIntervalSince1970
+        ])
+    }
+
     func sendRecordingStart(exerciseId: String, setNumber: Int, sessionId: String) {
         guard let wcSession, wcSession.isReachable else { return }
         wcSession.sendMessage(
@@ -190,7 +210,25 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
         let nextDate = engine.computeNextDate(enrolment: updated, level: levelSnap)
         engine.writeBack(updated, to: enrolment, nextDate: nextDate)
 
+        updateStreak(completedAt: report.completedAt, context: context)
         try? context.save()
+    }
+
+    private func updateStreak(completedAt: Date, context: ModelContext) {
+        let streaks = (try? context.fetch(FetchDescriptor<StreakState>())) ?? []
+        let streakState: StreakState
+        if let existing = streaks.first {
+            streakState = existing
+        } else {
+            streakState = StreakState()
+            context.insert(streakState)
+        }
+        StreakCalculator().updateStreakState(
+            streakState,
+            today: completedAt,
+            hadDueExercises: true,
+            completedAny: true
+        )
     }
 
     // MARK: - WCSessionDelegate

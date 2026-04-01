@@ -74,6 +74,20 @@ struct StreakCalculatorTests {
         #expect(state.currentStreak == 1, "Large gap should reset streak to 1")
     }
 
+    // MARK: - Training after rest day
+
+    @Test(.tags(.streak))
+    func trainingAfterRestDayMaintainsStreak() {
+        // lastActive March 25, rest day March 26, trains March 27
+        // previousDueDate tells the calculator that March 25 was the last training day
+        var state = StreakStateDTO(currentStreak: 5, longestStreak: 5,
+                                   lastActiveDate: makeDate(2026, 3, 25))
+        calc.update(state: &state, today: makeDate(2026, 3, 27),
+                    hadDueExercises: true, completedAny: true,
+                    previousDueDate: makeDate(2026, 3, 25))
+        #expect(state.currentStreak == 6)
+    }
+
     @Test(.tags(.streak))
     func longestStreakIsNotReducedOnReset() {
         var state = StreakStateDTO(currentStreak: 5, longestStreak: 10,

@@ -21,25 +21,33 @@ public struct StreakCalculator: Sendable {
     /// - Parameters:
     ///   - hadDueExercises: Whether any exercises were scheduled for today.
     ///   - completedAny: Whether the user completed at least one exercise today.
+    ///   - previousDueDate: The last date before today when exercises were due. When provided,
+    ///     streak continues if `lastActiveDate` matches this date — correctly treating scheduled
+    ///     rest days between training sessions as transparent. When nil, falls back to checking
+    ///     whether `lastActiveDate` was yesterday.
     public func update(
         state: inout StreakStateDTO,
         today: Date,
         hadDueExercises: Bool,
-        completedAny: Bool
+        completedAny: Bool,
+        previousDueDate: Date? = nil
     ) {
         // Rest day — streak neither broken nor extended
         guard hadDueExercises else { return }
 
         if completedAny {
-            let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today) ?? today
-            if let last = state.lastActiveDate, Calendar.current.isDate(last, inSameDayAs: yesterday) {
-                state.currentStreak += 1
-            } else if state.lastActiveDate == nil {
-                state.currentStreak = 1
+            let isConsecutive: Bool
+            if let last = state.lastActiveDate {
+                if let prev = previousDueDate {
+                    isConsecutive = Calendar.current.isDate(last, inSameDayAs: prev)
+                } else {
+                    let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today) ?? today
+                    isConsecutive = Calendar.current.isDate(last, inSameDayAs: yesterday)
+                }
             } else {
-                // Gap of more than one day — streak resets
-                state.currentStreak = 1
+                isConsecutive = false
             }
+            state.currentStreak = isConsecutive ? state.currentStreak + 1 : 1
             state.lastActiveDate = today
             state.longestStreak = max(state.longestStreak, state.currentStreak)
         } else {
@@ -59,9 +67,13 @@ public struct StreakCalculator: Sendable {
             longestStreak: streakState.longestStreak,
             lastActiveDate: streakState.lastActiveDate
         )
-        update(state: &dto, today: today, hadDueExercises: hadDueExercises, completedAny: completedAny)
+        update(state: &dto, today: today, hadDueExercises: hadDueExercises, completedAny: completedAny,
+               previousDueDate: streakState.previousLastDueDate)
         streakState.currentStreak = dto.currentStreak
         streakState.longestStreak = dto.longestStreak
         streakState.lastActiveDate = dto.lastActiveDate
+        if hadDueExercises {
+            streakState.lastDueDate = today
+        }
     }
 }

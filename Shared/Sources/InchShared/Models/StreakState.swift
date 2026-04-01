@@ -6,10 +6,19 @@ public final class StreakState {
     public var currentStreak: Int = 0
     public var longestStreak: Int = 0
     public var lastActiveDate: Date? = nil
+    /// Last calendar date when exercises were due. Used to distinguish rest days from skipped
+    /// training days when evaluating streak continuity.
+    public var lastDueDate: Date? = nil
+    /// The value of lastDueDate immediately before it was advanced to the current training day.
+    /// Used by the streak calculator as `previousDueDate` so that rest days between sessions
+    /// are treated as transparent — without this, lastDueDate equals today by the time the
+    /// workout completes, making consecutive-day detection fail.
+    public var previousLastDueDate: Date? = nil
 
-    public init(currentStreak: Int = 0, longestStreak: Int = 0, lastActiveDate: Date? = nil) {
+    public init(currentStreak: Int = 0, longestStreak: Int = 0, lastActiveDate: Date? = nil, lastDueDate: Date? = nil) {
         self.currentStreak = currentStreak
         self.longestStreak = longestStreak
         self.lastActiveDate = lastActiveDate
+        self.lastDueDate = lastDueDate
     }
 }

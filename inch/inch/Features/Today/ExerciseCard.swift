@@ -45,6 +45,11 @@ struct ExerciseCard: View {
                     Text(definition?.name ?? "Exercise")
                         .font(.body)
                         .fontWeight(.semibold)
+                    ExerciseInfoButton(
+                        exerciseId: definition?.exerciseId ?? "",
+                        exerciseName: definition?.name ?? "Exercise",
+                        level: enrolment.currentLevel
+                    )
                     if isTestDay {
                         testDayBadge
                     }

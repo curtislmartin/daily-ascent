@@ -7,6 +7,7 @@ struct WorkoutSessionView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(AnalyticsService.self) private var analytics
     @Environment(HealthKitService.self) private var healthKit
     @Environment(MotionRecordingService.self) private var motionRecording
     @Environment(DataUploadService.self) private var dataUpload
@@ -51,6 +52,8 @@ struct WorkoutSessionView: View {
     @State private var showingQuitConfirm = false
     @State private var sessionId: String = ""
     @State private var showHoldPhoneHint = true
+    @State private var showNudge = false
+    @State private var showTier3Intro = false
     @State private var setStartOrientation: String = ""
 
     init(enrolmentId: PersistentIdentifier) {
@@ -123,7 +126,16 @@ struct WorkoutSessionView: View {
                     totalReps: viewModel.sessionTotalReps,
                     previousSessionReps: viewModel.previousSessionReps,
                     nextDate: viewModel.enrolment?.nextScheduledDate,
-                    onDone: { dismiss() }
+                    onDone: { dismiss() },
+                    achievements: viewModel.pendingAchievements,
+                    adaptationMessage: viewModel.adaptationMessage,
+                    showMoveOnAnyway: viewModel.showMoveOnAnyway,
+                    onRatingSubmitted: viewModel.isTestDay ? nil : { rating in
+                        viewModel.submitDifficultyRating(rating, context: modelContext)
+                    },
+                    onMoveOnAnyway: {
+                        viewModel.moveOnAnyway(context: modelContext)
+                    }
                 )
             }
         }
@@ -143,14 +155,49 @@ struct WorkoutSessionView: View {
             }
         }
         .alert("Quit workout?", isPresented: $showingQuitConfirm) {
-            Button("Quit Workout", role: .destructive) { dismiss() }
+            Button("Quit Workout", role: .destructive) {
+                analytics.record(AnalyticsEvent(
+                    name: "workout_abandoned",
+                    properties: .workoutAbandoned(
+                        exerciseId: viewModel.enrolment?.exerciseDefinition?.exerciseId ?? "",
+                        level: viewModel.enrolment?.currentLevel ?? 0,
+                        dayNumber: viewModel.enrolment?.currentDay ?? 0,
+                        setsCompleted: viewModel.currentSetIndex,
+                        setsTotal: viewModel.totalSets
+                    )
+                ))
+                dismiss()
+            }
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("Your progress so far won't be saved.")
         }
+        .sheet(isPresented: $showTier3Intro, onDismiss: markExerciseSeen) {
+            NavigationStack {
+                ExerciseInfoSheet(
+                    exerciseId: exerciseId,
+                    exerciseName: viewModel.exerciseName,
+                    level: viewModel.enrolment?.currentLevel ?? 1
+                )
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Got it") { showTier3Intro = false }
+                    }
+                }
+            }
+        }
         .task {
             sessionId = UUID().uuidString
+            viewModel.configure(analytics: analytics)
             viewModel.load(context: modelContext)
+            let tier3Exercises = ["dead_bugs", "glute_bridges"]
+            if tier3Exercises.contains(exerciseId),
+               let s = settings,
+               !s.seenExerciseInfo.contains(exerciseId) {
+                showTier3Intro = true
+            } else if let s = settings, !s.seenExerciseInfo.contains(exerciseId) {
+                showNudge = true
+            }
             let id = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
             if Self.phoneAutoCountedExercises.contains(id),
                let config = RepCountingConfig.config(for: id) {
@@ -209,6 +256,14 @@ struct WorkoutSessionView: View {
                 }
             case .complete:
                 dataUpload.scheduleBGUpload()
+                watchConnectivity.sendHistoryEntry(
+                    exerciseName: viewModel.exerciseName,
+                    level: viewModel.completedLevel,
+                    dayNumber: viewModel.completedDay,
+                    totalReps: viewModel.sessionTotalReps,
+                    setCount: viewModel.totalSets,
+                    completedAt: viewModel.sessionDate
+                )
                 let start = viewModel.sessionDate
                 let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
                 Task {
@@ -264,6 +319,20 @@ struct WorkoutSessionView: View {
                 }
                 .padding(12)
                 .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 10))
+            }
+
+            if showNudge && viewModel.currentSetIndex == 0 {
+                ExerciseNudgeBanner(exerciseName: viewModel.exerciseName) {
+                    dismissNudge()
+                }
+            }
+
+            if viewModel.prescriptionOverrideMultiplier != nil {
+                Text("Lighter session today")
+                    .font(.caption)
+                    .foregroundStyle(.orange)
+                    .padding(.horizontal, 12).padding(.vertical, 4)
+                    .background(.orange.opacity(0.15), in: Capsule())
             }
 
             setProgressHeader
@@ -330,6 +399,7 @@ struct WorkoutSessionView: View {
                 .controlSize(.large)
             } else {
                 Button("Start Set \(viewModel.currentSetIndex + 1)") {
+                    showNudge = false
                     viewModel.startSet()
                 }
                 .buttonStyle(.borderedProminent)
@@ -345,10 +415,14 @@ struct WorkoutSessionView: View {
 
             Spacer()
 
-            VStack(spacing: 8) {
-                Text("Set in progress…")
-                    .font(.title2)
-                    .fontWeight(.semibold)
+            VStack(spacing: 16) {
+                VStack(spacing: 8) {
+                    Text("\(viewModel.currentTargetReps)")
+                        .font(.system(size: 80, weight: .bold, design: .rounded))
+                    Text("target reps")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
                 ElapsedTimerView()
             }
 
@@ -364,27 +438,43 @@ struct WorkoutSessionView: View {
     }
 
     private var setProgressHeader: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Set \(viewModel.currentSetIndex + 1) of \(viewModel.totalSets)")
-                    .font(.headline)
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 2) {
                 if let variation = viewModel.variationName {
                     Text(variation)
-                        .font(.caption)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
                         .foregroundStyle(Color.accentColor)
                 }
-                Text("Day \(viewModel.enrolment?.currentDay ?? 0) · Level \(viewModel.enrolment?.currentLevel ?? 0)")
+                Text("Set \(viewModel.currentSetIndex + 1) of \(viewModel.totalSets)  ·  Day \(viewModel.enrolment?.currentDay ?? 0)  ·  Level \(viewModel.enrolment?.currentLevel ?? 0)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                ExerciseInfoButton(
+                    exerciseId: exerciseId,
+                    exerciseName: viewModel.exerciseName,
+                    level: viewModel.enrolment?.currentLevel ?? 1
+                )
             }
             Spacer()
             if let next = viewModel.prescription?.sets[safe: viewModel.currentSetIndex + 1] {
-                Text("Next: \(next) reps")
+                Text("Next: \(next)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
         }
         .accessibilityElement(children: .combine)
+    }
+
+    private func dismissNudge() {
+        showNudge = false
+        markExerciseSeen()
+    }
+
+    private func markExerciseSeen() {
+        guard let s = settings,
+              !s.seenExerciseInfo.contains(exerciseId) else { return }
+        s.seenExerciseInfo.append(exerciseId)
+        try? modelContext.save()
     }
 }
 

@@ -5,11 +5,15 @@ import InchShared
 struct TodayView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(WatchConnectivityService.self) private var watchConnectivity
+    @Environment(AnalyticsService.self) private var analytics
     @Query private var streakStates: [StreakState]
     @Query private var allSettings: [UserSettings]
 
     @State private var viewModel = TodayViewModel()
     @State private var nudgeDismissed = false
+    @Environment(NotificationService.self) private var notifications
+    @State private var streakRecoveryDismissed = false
+    @State private var showPendingCelebration = false
 
     private var settings: UserSettings? { allSettings.first }
 
@@ -21,6 +25,7 @@ struct TodayView: View {
     private var showConflictWarnings: Bool { allSettings.first?.showConflictWarnings ?? true }
 
     private var streak: Int { streakStates.first?.currentStreak ?? 0 }
+    private var longestStreak: Int { streakStates.first?.longestStreak ?? 0 }
 
     private var completedTodayCount: Int {
         viewModel.dueExercises.filter {
@@ -34,7 +39,8 @@ struct TodayView: View {
                 RestDayView(
                     streak: streak,
                     nextTrainingDate: viewModel.nextTrainingDate,
-                    nextTrainingCount: viewModel.nextTrainingCount
+                    nextTrainingDayExercises: viewModel.nextTrainingDayExercises,
+                    hasTrainedBefore: viewModel.hasTrainedBefore
                 )
             } else {
                 exerciseList
@@ -56,14 +62,32 @@ struct TodayView: View {
         .withWorkoutDestinations()
         .withTodayDestinations()
         .task {
+            viewModel.configure(analytics: analytics)
             viewModel.loadToday(context: modelContext, showWarnings: showConflictWarnings)
             watchConnectivity.sendTodaySchedule(
                 enrolments: viewModel.dueExercises,
                 settings: settings
             )
+            try? await Task.sleep(for: .seconds(1))
+            if !viewModel.pendingCelebrations.isEmpty {
+                showPendingCelebration = true
+            }
+        }
+        .fullScreenCover(isPresented: $showPendingCelebration) {
+            if let achievement = viewModel.pendingCelebrations.first {
+                AchievementCelebrationView(achievement: achievement) {
+                    achievement.wasCelebrated = true
+                    try? modelContext.save()
+                    showPendingCelebration = false
+                }
+            }
         }
         .onAppear {
+            viewModel.configure(analytics: analytics)
             viewModel.loadToday(context: modelContext, showWarnings: showConflictWarnings)
+            if viewModel.streakWasJustReset, let nextDate = viewModel.nextTrainingDate {
+                notifications.scheduleStreakRecovery(nextTrainingDate: nextDate)
+            }
         }
     }
 
@@ -76,6 +100,11 @@ struct TodayView: View {
                     totalCount: viewModel.dueExercises.count,
                     advisory: viewModel.advisory
                 )
+                if streak == 0 && longestStreak > 0 && !viewModel.isRestDay && !streakRecoveryDismissed {
+                    StreakRecoveryBanner {
+                        streakRecoveryDismissed = true
+                    }
+                }
                 if showDemographicsNudge {
                     TodayDemographicsNudge {
                         nudgeDismissed = true

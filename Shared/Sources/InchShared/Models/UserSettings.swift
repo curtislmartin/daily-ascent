@@ -33,6 +33,10 @@ public final class UserSettings {
     public var biologicalSex: String? = nil
     public var activityLevel: String? = nil
     public var onboardingComplete: Bool = false
+    public var seenExerciseInfo: [String] = []
+    public var isFirstLaunch: Bool = true
+    public var analyticsEnabled: Bool = true
+    public var achievementNotificationEnabled: Bool = true
 
     public var hasDemographics: Bool {
         ageRange != nil && heightRange != nil &&
@@ -62,7 +66,11 @@ public final class UserSettings {
         heightRange: String? = nil,
         biologicalSex: String? = nil,
         activityLevel: String? = nil,
-        onboardingComplete: Bool = false
+        onboardingComplete: Bool = false,
+        seenExerciseInfo: [String] = [],
+        isFirstLaunch: Bool = true,
+        analyticsEnabled: Bool = true,
+        achievementNotificationEnabled: Bool = true
     ) {
         self.createdAt = createdAt
         self.restOverrides = restOverrides
@@ -87,5 +95,9 @@ public final class UserSettings {
         self.biologicalSex = biologicalSex
         self.activityLevel = activityLevel
         self.onboardingComplete = onboardingComplete
+        self.seenExerciseInfo = seenExerciseInfo
+        self.isFirstLaunch = isFirstLaunch
+        self.analyticsEnabled = analyticsEnabled
+        self.achievementNotificationEnabled = achievementNotificationEnabled
     }
 }

@@ -3,6 +3,7 @@ import InchShared
 
 struct DayGroupRow: View {
     let day: HistoryViewModel.DayGroup
+    var hasAchievement: Bool = false
     @State private var isExpanded = false
 
     private var dayLabel: String {
@@ -38,6 +39,11 @@ struct DayGroupRow: View {
                                 .font(.subheadline)
                                 .fontWeight(.medium)
                                 .foregroundStyle(.primary)
+                            if hasAchievement {
+                                Image(systemName: "trophy.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.yellow)
+                            }
                             Spacer()
                             Text("\(day.totalReps) reps")
                                 .font(.subheadline)

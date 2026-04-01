@@ -16,6 +16,8 @@ enum WorkoutPhase: Equatable {
 @Observable
 final class WorkoutViewModel {
     private let enrolmentId: PersistentIdentifier
+    private var analytics: AnalyticsService?
+    private var sessionStartDate: Date = .now
 
     var phase: WorkoutPhase = .loading
     var currentSetIndex: Int = 0
@@ -27,13 +29,26 @@ final class WorkoutViewModel {
     private(set) var previousSessionReps: Int? = nil
     private(set) var didAdvanceLevel: Bool = false
     private(set) var newLevel: Int = 0
+    private(set) var completedLevel: Int = 0
+    private(set) var completedDay: Int = 0
+    var pendingAchievements: [Achievement] = []
     private let scheduler = SchedulingEngine()
+
+    private(set) var prescriptionOverrideMultiplier: Double? = nil
+    private(set) var overriddenSets: [Int]? = nil
+    private(set) var adaptationMessage: String? = nil
+    private(set) var showMoveOnAnyway: Bool = false
 
     var exerciseName: String { enrolment?.exerciseDefinition?.name ?? "" }
     var accentColorHex: String { enrolment?.exerciseDefinition?.color ?? "" }
     var countingMode: CountingMode { enrolment?.exerciseDefinition?.countingMode ?? .postSetConfirmation }
     var restSeconds: Int { enrolment?.exerciseDefinition?.defaultRestSeconds ?? 60 }
-    var currentTargetReps: Int { prescription?.sets[safe: currentSetIndex] ?? 0 }
+    var currentTargetReps: Int {
+        if let overridden = overriddenSets {
+            return overridden[safe: currentSetIndex] ?? 0
+        }
+        return prescription?.sets[safe: currentSetIndex] ?? 0
+    }
     var isTimedExercise: Bool { countingMode == .timed }
     var totalSets: Int { prescription?.sets.count ?? 0 }
     var isTestDay: Bool { prescription?.isTest ?? false }
@@ -48,15 +63,32 @@ final class WorkoutViewModel {
         self.enrolmentId = enrolmentId
     }
 
+    func configure(analytics: AnalyticsService) {
+        self.analytics = analytics
+    }
+
     func load(context: ModelContext) {
         let enrolment: ExerciseEnrolment? = context.registeredModel(for: enrolmentId)
             ?? fetchEnrolment(context: context)
         guard let enrolment else { return }
         self.enrolment = enrolment
         self.prescription = currentPrescription(for: enrolment)
+        if let override = enrolment.sessionPrescriptionOverride {
+            applyPrescriptionOverride(override)
+        }
         loadPreviousSession(exerciseId: enrolment.exerciseDefinition?.exerciseId, context: context)
         sessionDate = .now
         phase = .ready
+        guard let def = enrolment.exerciseDefinition else { return }
+        sessionStartDate = .now
+        analytics?.record(AnalyticsEvent(
+            name: "workout_started",
+            properties: .workoutStarted(
+                exerciseId: def.exerciseId,
+                level: enrolment.currentLevel,
+                dayNumber: enrolment.currentDay
+            )
+        ))
     }
 
     func startSet() {
@@ -212,14 +244,127 @@ final class WorkoutViewModel {
             actualDate: sessionDate,
             totalReps: sessionTotalReps
         )
+        completedLevel = snapshot.currentLevel
+        completedDay = snapshot.currentDay
         didAdvanceLevel = updated.currentLevel > snapshot.currentLevel
         newLevel = updated.currentLevel
         let nextDate = scheduler.computeNextDate(enrolment: updated, level: levelSnap)
         scheduler.writeBack(updated, to: enrolment, nextDate: nextDate)
         resolveScheduleConflicts(context: context)
         updateStreak(context: context)
+
+        if didAdvanceLevel {
+            enrolment.recentCompletionRatios = []
+            enrolment.recentDifficultyRatings = []
+        }
+
+        if enrolment.sessionPrescriptionOverride != nil {
+            enrolment.sessionPrescriptionOverride = nil
+        }
+
+        if !isTestDay {
+            let totalPrescribed = prescription?.sets.reduce(0, +) ?? 0
+            let ratio = totalPrescribed > 0 ? Double(sessionTotalReps) / Double(totalPrescribed) : 1.0
+            var ratios = enrolment.recentCompletionRatios
+            ratios.append(ratio)
+            if ratios.count > 3 { ratios.removeFirst() }
+            enrolment.recentCompletionRatios = ratios
+        }
+
         try? context.save()
+
+        if !isTestDay {
+            let adaptResult = AdaptationEngine().evaluate(enrolment: enrolment)
+            applyAdaptationResult(adaptResult, to: enrolment, context: context)
+        }
+
         phase = .complete
+
+        // Achievement check — capture values before analytics
+        let achChecker = AchievementChecker()
+        let achExerciseId = def.exerciseId
+        let achLevel = completedLevel
+        let achReps = sessionTotalReps
+        let achDidAdvance = didAdvanceLevel
+        let achIsTestDay = isTestDay
+        let achSessionDate = sessionDate
+
+        var newAchievements = achChecker.check(
+            after: .workoutCompleted(
+                exerciseId: achExerciseId,
+                totalReps: achReps,
+                level: achLevel,
+                sessionDate: achSessionDate
+            ),
+            in: context
+        )
+
+        if achIsTestDay && achDidAdvance {
+            newAchievements += achChecker.check(
+                after: .testPassed(
+                    exerciseId: achExerciseId,
+                    level: achLevel,
+                    sessionDate: achSessionDate
+                ),
+                in: context
+            )
+        }
+
+        for achievement in newAchievements {
+            if achievement.category == "performance",
+               let existingAch = (try? context.fetch(FetchDescriptor<Achievement>()))?.first(where: { $0.id == achievement.id }) {
+                existingAch.numericValue = achievement.numericValue
+                existingAch.unlockedAt = .now
+            } else {
+                context.insert(achievement)
+            }
+        }
+        try? context.save()
+        pendingAchievements = newAchievements
+
+        let exerciseId = def.exerciseId
+        let duration = Int(Date.now.timeIntervalSince(sessionStartDate))
+        let wasTestDay = isTestDay
+        let didAdvance = didAdvanceLevel
+        let advancedToLevel = newLevel
+        let capturedTotalReps = sessionTotalReps
+        let capturedTotalSets = totalSets
+        let capturedCompletedLevel = completedLevel
+        let capturedCompletedDay = completedDay
+        let capturedCountingMode = countingMode.rawValue
+
+        analytics?.record(AnalyticsEvent(
+            name: "workout_completed",
+            properties: .workoutCompleted(
+                exerciseId: exerciseId,
+                level: capturedCompletedLevel,
+                dayNumber: capturedCompletedDay,
+                totalSets: capturedTotalSets,
+                totalReps: capturedTotalReps,
+                durationSeconds: duration,
+                countingMode: capturedCountingMode
+            )
+        ))
+        if wasTestDay {
+            analytics?.record(AnalyticsEvent(
+                name: "level_test_attempted",
+                properties: .levelTestAttempted(
+                    exerciseId: exerciseId,
+                    currentLevel: capturedCompletedLevel
+                )
+            ))
+        }
+        if didAdvance {
+            analytics?.record(AnalyticsEvent(
+                name: "level_advanced",
+                properties: .levelAdvanced(
+                    exerciseId: exerciseId,
+                    fromLevel: capturedCompletedLevel,
+                    toLevel: advancedToLevel,
+                    maxRepsAchieved: capturedTotalReps
+                )
+            ))
+        }
     }
 
     /// Runs the conflict detect → resolve loop (up to maxIterations) after any schedule change,
@@ -294,6 +439,59 @@ final class WorkoutViewModel {
             context.insert(streakState)
         }
         calculator.updateStreakState(streakState, today: sessionDate, hadDueExercises: true, completedAny: true)
+    }
+
+    private func applyPrescriptionOverride(_ multiplier: Double) {
+        prescriptionOverrideMultiplier = multiplier
+        guard let p = prescription else { return }
+        overriddenSets = p.sets.map { target in
+            max(1, Int((Double(target) * multiplier).rounded()))
+        }
+    }
+
+    private func applyAdaptationResult(
+        _ result: AdaptationResult,
+        to enrolment: ExerciseEnrolment,
+        context: ModelContext
+    ) {
+        switch result {
+        case .noAction:
+            adaptationMessage = nil
+            showMoveOnAnyway = false
+        case .repeatDay(let message):
+            adaptationMessage = message
+            showMoveOnAnyway = true
+            enrolment.needsRepeat = true
+            try? context.save()
+        case .earlyTestEligible(let message):
+            adaptationMessage = message
+            showMoveOnAnyway = false
+        case .prescriptionReduction(let multiplier, let message):
+            adaptationMessage = message
+            showMoveOnAnyway = false
+            enrolment.sessionPrescriptionOverride = multiplier
+            try? context.save()
+        }
+    }
+
+    func submitDifficultyRating(_ rating: DifficultyRating, context: ModelContext) {
+        guard !isTestDay, let enrolment else { return }
+        var ratings = enrolment.recentDifficultyRatings
+        ratings.append(rating.rawValue)
+        if ratings.count > 3 { ratings.removeFirst() }
+        enrolment.recentDifficultyRatings = ratings
+        try? context.save()
+
+        let result = AdaptationEngine().evaluate(enrolment: enrolment)
+        applyAdaptationResult(result, to: enrolment, context: context)
+    }
+
+    func moveOnAnyway(context: ModelContext) {
+        guard let enrolment else { return }
+        enrolment.needsRepeat = false
+        adaptationMessage = nil
+        showMoveOnAnyway = false
+        try? context.save()
     }
 
     private func currentPrescription(for enrolment: ExerciseEnrolment) -> DayPrescription? {

@@ -7,6 +7,8 @@ struct RestTimerView: View {
     let onComplete: () -> Void
 
     @State private var remaining: Int
+    @State private var endDate: Date = .distantFuture
+    @Environment(\.scenePhase) private var scenePhase
 
     init(totalSeconds: Int, nextSetReps: Int? = nil, nextSetDuration: Int? = nil, onComplete: @escaping () -> Void) {
         self.totalSeconds = totalSeconds
@@ -67,11 +69,16 @@ struct RestTimerView: View {
         .navigationTitle("Rest")
         .navigationBarTitleDisplayMode(.inline)
         .task {
+            endDate = .now.addingTimeInterval(TimeInterval(totalSeconds))
             while remaining > 0 {
                 try? await Task.sleep(for: .seconds(1))
-                remaining -= 1
+                remaining = max(0, Int(endDate.timeIntervalSinceNow.rounded()))
             }
             onComplete()
+        }
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .active, endDate < .distantFuture else { return }
+            remaining = max(0, Int(endDate.timeIntervalSinceNow.rounded()))
         }
     }
 
