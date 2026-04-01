@@ -48,14 +48,18 @@ struct TodayView: View {
         }
         .navigationTitle("Today")
         .navigationBarTitleDisplayMode(.large)
-        .toolbar {
+        .overlay(alignment: .topTrailing) {
             if completedTodayCount >= 1 && streak > 0 {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Text("🔥 \(streak)")
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .allowsHitTesting(false)
+                HStack(spacing: 4) {
+                    Image(systemName: "flame.fill")
+                    Text("\(streak)")
                 }
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundStyle(.orange)
+                .padding(.trailing, 16)
+                .padding(.top, 8)
+                .allowsHitTesting(false)
             }
         }
         .withWorkoutDestinations()
