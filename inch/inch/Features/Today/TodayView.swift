@@ -51,17 +51,10 @@ struct TodayView: View {
         .toolbar {
             if completedTodayCount >= 1 && streak > 0 {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {} label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "flame.fill")
-                            Text("\(streak)")
-                        }
+                    Text("🔥 \(streak)")
                         .font(.subheadline)
                         .fontWeight(.semibold)
-                        .foregroundStyle(.orange)
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(true)
+                        .allowsHitTesting(false)
                 }
             }
         }
