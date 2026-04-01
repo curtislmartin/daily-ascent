@@ -96,4 +96,90 @@ struct StreakCalculatorTests {
                     hadDueExercises: true, completedAny: false)
         #expect(state.longestStreak == 10, "longestStreak should not change on reset")
     }
+
+    // MARK: - shouldBreakStreak
+
+    @Test(.tags(.streak))
+    func shouldBreakStreak_missedDay_returnsTrue() {
+        // Trained March 30, skipped March 31, opens app April 1
+        #expect(calc.shouldBreakStreak(
+            currentStreak: 2,
+            lastActiveDate: makeDate(2026, 3, 30),
+            lastDueDate: makeDate(2026, 3, 31),
+            today: makeDate(2026, 4, 1),
+            isRestDay: false
+        ) == true)
+    }
+
+    @Test(.tags(.streak))
+    func shouldBreakStreak_trainedOnLastDueDate_returnsFalse() {
+        // Trained March 31, opens app April 1, lastDue still March 31
+        #expect(calc.shouldBreakStreak(
+            currentStreak: 2,
+            lastActiveDate: makeDate(2026, 3, 31),
+            lastDueDate: makeDate(2026, 3, 31),
+            today: makeDate(2026, 4, 1),
+            isRestDay: false
+        ) == false)
+    }
+
+    @Test(.tags(.streak))
+    func shouldBreakStreak_lastDueIsToday_returnsFalse() {
+        // loadToday was already called once this session — lastDueDate has been
+        // advanced to today. The second call must not falsely break the streak.
+        #expect(calc.shouldBreakStreak(
+            currentStreak: 2,
+            lastActiveDate: makeDate(2026, 3, 31),
+            lastDueDate: makeDate(2026, 4, 1),   // already advanced to today
+            today: makeDate(2026, 4, 1),
+            isRestDay: false
+        ) == false)
+    }
+
+    @Test(.tags(.streak))
+    func shouldBreakStreak_acrossMonthBoundary_doubleCallDoesNotBreak() {
+        // Exact scenario that caused the April 1 bug:
+        // Trained March 31, double-load on April 1 after lastDue advanced to April 1.
+        #expect(calc.shouldBreakStreak(
+            currentStreak: 3,
+            lastActiveDate: makeDate(2026, 3, 31),
+            lastDueDate: makeDate(2026, 4, 1),
+            today: makeDate(2026, 4, 1),
+            isRestDay: false
+        ) == false)
+    }
+
+    @Test(.tags(.streak))
+    func shouldBreakStreak_restDay_returnsFalse() {
+        #expect(calc.shouldBreakStreak(
+            currentStreak: 5,
+            lastActiveDate: makeDate(2026, 3, 30),
+            lastDueDate: makeDate(2026, 3, 30),
+            today: makeDate(2026, 4, 1),
+            isRestDay: true
+        ) == false)
+    }
+
+    @Test(.tags(.streak))
+    func shouldBreakStreak_noCurrentStreak_returnsFalse() {
+        #expect(calc.shouldBreakStreak(
+            currentStreak: 0,
+            lastActiveDate: makeDate(2026, 3, 30),
+            lastDueDate: makeDate(2026, 3, 31),
+            today: makeDate(2026, 4, 1),
+            isRestDay: false
+        ) == false)
+    }
+
+    @Test(.tags(.streak))
+    func shouldBreakStreak_noLastDueDate_returnsFalse() {
+        // Upgrade safety: pre-existing installs may have no lastDueDate
+        #expect(calc.shouldBreakStreak(
+            currentStreak: 3,
+            lastActiveDate: makeDate(2026, 3, 30),
+            lastDueDate: nil,
+            today: makeDate(2026, 4, 1),
+            isRestDay: false
+        ) == false)
+    }
 }

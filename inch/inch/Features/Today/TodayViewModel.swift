@@ -193,30 +193,24 @@ final class TodayViewModel {
     }
 
     private func resetStreakForMissedDayIfNeeded(context: ModelContext, today: Date) {
-        guard !isRestDay else { return }
         let streaks = (try? context.fetch(FetchDescriptor<StreakState>())) ?? []
-        guard let streakState = streaks.first, streakState.currentStreak > 0 else { return }
-        guard let lastActive = streakState.lastActiveDate else { return }
-        // Without lastDueDate we have no reliable way to distinguish rest days from skipped
-        // training days, so skip the check to avoid false resets on upgrade.
-        guard let lastDue = streakState.lastDueDate else { return }
-        // If lastDue is already today, updateLastDueDateIfNeeded has already advanced it this
-        // session (loadToday is called from both .task and .onAppear). The user hasn't had a
-        // chance to work out yet today — don't penalise them for the double-call.
-        guard !Calendar.current.isDate(lastDue, inSameDayAs: today) else { return }
+        guard let streakState = streaks.first else { return }
+        guard StreakCalculator().shouldBreakStreak(
+            currentStreak: streakState.currentStreak,
+            lastActiveDate: streakState.lastActiveDate,
+            lastDueDate: streakState.lastDueDate,
+            today: today,
+            isRestDay: isRestDay
+        ) else { return }
 
-        let lastDay = Calendar.current.startOfDay(for: lastActive)
-        let referenceDay = Calendar.current.startOfDay(for: lastDue)
-        if lastDay < referenceDay {
-            let brokenStreak = streakState.currentStreak
-            streakState.currentStreak = 0
-            streakWasJustReset = true
-            analytics?.record(AnalyticsEvent(
-                name: "streak_broken",
-                properties: .streakBroken(streakLengthAtBreak: brokenStreak)
-            ))
-            try? context.save()
-        }
+        let brokenStreak = streakState.currentStreak
+        streakState.currentStreak = 0
+        streakWasJustReset = true
+        analytics?.record(AnalyticsEvent(
+            name: "streak_broken",
+            properties: .streakBroken(streakLengthAtBreak: brokenStreak)
+        ))
+        try? context.save()
     }
 
     private func updateLastDueDateIfNeeded(context: ModelContext, today: Date) {
