@@ -126,7 +126,8 @@ struct WorkoutSessionView: View {
                     totalReps: viewModel.sessionTotalReps,
                     previousSessionReps: viewModel.previousSessionReps,
                     nextDate: viewModel.enrolment?.nextScheduledDate,
-                    onDone: { dismiss() }
+                    onDone: { dismiss() },
+                    achievements: viewModel.pendingAchievements
                 )
             }
         }
