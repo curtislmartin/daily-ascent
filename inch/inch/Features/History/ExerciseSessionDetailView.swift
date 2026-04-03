@@ -10,6 +10,7 @@ struct ExerciseSessionDetailView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
     @State private var showDeleteConfirmation = false
+    @State private var showDeleteError = false
 
     @State private var viewModel = HistoryViewModel()
 
@@ -79,16 +80,25 @@ struct ExerciseSessionDetailView: View {
             titleVisibility: .visible
         ) {
             Button("Delete Session", role: .destructive) {
-                try? viewModel.deleteSession(
-                    exerciseId: exerciseId,
-                    date: sessionDate,
-                    context: context
-                )
-                dismiss()
+                do {
+                    try viewModel.deleteSession(
+                        exerciseId: exerciseId,
+                        date: sessionDate,
+                        context: context
+                    )
+                    dismiss()
+                } catch {
+                    showDeleteError = true
+                }
             }
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("This cannot be undone. Progress will be rolled back if the session was fully completed.")
+        }
+        .alert("Delete Failed", isPresented: $showDeleteError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("The session could not be deleted. Please try again.")
         }
     }
 
