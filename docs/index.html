@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Ascent — Bodyweight Training App</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      color: #1a1a1a;
+      background: #ffffff;
+      padding: 0 1rem 2rem;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 5rem 1rem 4rem;
+      border-bottom: 1px solid #e5e5e5;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      color: #111;
+      letter-spacing: -0.5px;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      color: #555;
+      max-width: 600px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .download-btn {
+      display: inline-block;
+      background-color: #000;
+      color: #fff;
+      padding: 0.9rem 2rem;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.1rem;
+      transition: background-color 0.2s ease;
+    }
+
+    .download-btn:hover {
+      background-color: #333;
+      text-decoration: none;
+    }
+
+    /* Features Section */
+    .features-header {
+      text-align: center;
+      margin: 4rem 0 2rem;
+    }
+
+    .features-header h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #111;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-bottom: 4rem;
+    }
+
+    @media (min-width: 600px) {
+      .features-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .feature-card {
+      background: #f9f9f9;
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid #eaeaea;
+    }
+
+    .feature-card h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #111;
+    }
+
+    .feature-card p {
+      font-size: 0.95rem;
+      color: #444;
+      margin: 0;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding-top: 2rem;
+      border-top: 1px solid #e5e5e5;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    footer nav {
+      margin-bottom: 1rem;
+    }
+    
+    footer nav a {
+      color: #0066cc;
+      text-decoration: none;
+      margin: 0 0.5rem;
+    }
+
+    footer nav a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+      .hero h1 { font-size: 2rem; }
+      .hero p { font-size: 1.05rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <header class="hero">
+      <h1>Build a real bodyweight training habit.</h1>
+      <p>Stop guessing your workouts. Master 9 bodyweight exercises with a smart schedule that adapts to your life, plus full Apple Watch support to train from your wrist.</p>
+      <a href="#" class="download-btn">Download on the App Store</a>
+    </header>
+
+    <section>
+      <div class="features-header">
+        <h2>Everything you need to get stronger.</h2>
+      </div>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <h3>🔹 Master Your Bodyweight</h3>
+          <p>Push-Ups, Squats, Pull-Ups, Dead Bugs, Hip Hinges, Spinal Extensions, Planks, Rows, and Dips. From beginner to advanced, every training day is mapped out.</p>
+        </div>
+        
+        <div class="feature-card">
+          <h3>🗓️ Smart Scheduling</h3>
+          <p>Rest days are calculated automatically based on when you actually trained - not when you planned to. Miss a session? Your schedule shifts. No lost progress.</p>
+        </div>
+        
+        <div class="feature-card">
+          <h3>📈 Earned Progression</h3>
+          <p>Each level ends with a max-rep test. Pass it and move up. Just clear, structured progression without the need for guesswork or self-assessment.</p>
+        </div>
+        
+        <div class="feature-card">
+          <h3>⌚ Train From Your Wrist</h3>
+          <p>Leave your phone in your pocket. Pair with your Apple Watch to count reps, time rest periods, and automatically log sessions.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <nav>
+        <a href="support/">Support</a>
+        &bull;
+        <a href="privacy/">Privacy Policy</a>
+        &bull;
+        <a href="https://clmartin.dev">Developer Website</a>
+      </nav>
+      <p>&copy; 2026 Curtis L. Martin. All rights reserved.</p>
+    </footer>
+    
+  </div>
+</body>
+</html>
