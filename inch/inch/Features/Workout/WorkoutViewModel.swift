@@ -21,6 +21,9 @@ final class WorkoutViewModel {
     private var sessionStartDate: Date = .now
 
     var phase: WorkoutPhase = .loading
+    var shouldOfferResume: Bool = false
+    private(set) var resumeSetCount: Int = 0
+    private(set) var resumeSessionReps: Int = 0
     var currentSetIndex: Int = 0
     var enrolment: ExerciseEnrolment?
     var prescription: DayPrescription?
@@ -79,17 +82,32 @@ final class WorkoutViewModel {
         }
         loadPreviousSession(exerciseId: enrolment.exerciseDefinition?.exerciseId, context: context)
         sessionDate = .now
+
+        if let exerciseId = enrolment.exerciseDefinition?.exerciseId, let prescription {
+            let todayStart = Calendar.current.startOfDay(for: .now)
+            let allSets = (try? context.fetch(FetchDescriptor<CompletedSet>())) ?? []
+            let todaySets = allSets.filter { $0.exerciseId == exerciseId && $0.sessionDate >= todayStart }
+            let completedCount = todaySets.count
+            if completedCount > 0, completedCount < prescription.sets.count {
+                shouldOfferResume = true
+                resumeSetCount = completedCount
+                resumeSessionReps = todaySets.reduce(0) { $0 + $1.actualReps }
+            }
+        }
+
         phase = .ready
         guard let def = enrolment.exerciseDefinition else { return }
         sessionStartDate = .now
-        analytics?.record(AnalyticsEvent(
-            name: "workout_started",
-            properties: .workoutStarted(
-                exerciseId: def.exerciseId,
-                level: enrolment.currentLevel,
-                dayNumber: enrolment.currentDay
-            )
-        ))
+        if !shouldOfferResume {
+            analytics?.record(AnalyticsEvent(
+                name: "workout_started",
+                properties: .workoutStarted(
+                    exerciseId: def.exerciseId,
+                    level: enrolment.currentLevel,
+                    dayNumber: enrolment.currentDay
+                )
+            ))
+        }
     }
 
     func startSet() {
@@ -133,6 +151,35 @@ final class WorkoutViewModel {
 
     func finishRest() {
         phase = .ready
+    }
+
+    func resumeSession() {
+        currentSetIndex = resumeSetCount
+        sessionTotalReps = resumeSessionReps
+        shouldOfferResume = false
+        guard let enrolment, let def = enrolment.exerciseDefinition else { return }
+        analytics?.record(AnalyticsEvent(
+            name: "workout_resumed",
+            properties: .workoutResumed(
+                exerciseId: def.exerciseId,
+                level: enrolment.currentLevel,
+                dayNumber: enrolment.currentDay,
+                resumedFromSet: resumeSetCount + 1
+            )
+        ))
+    }
+
+    func restartSession() {
+        shouldOfferResume = false
+        guard let enrolment, let def = enrolment.exerciseDefinition else { return }
+        analytics?.record(AnalyticsEvent(
+            name: "workout_started",
+            properties: .workoutStarted(
+                exerciseId: def.exerciseId,
+                level: enrolment.currentLevel,
+                dayNumber: enrolment.currentDay
+            )
+        ))
     }
 
     // MARK: - Private
