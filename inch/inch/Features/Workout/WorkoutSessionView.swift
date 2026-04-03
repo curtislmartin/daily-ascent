@@ -50,6 +50,7 @@ struct WorkoutSessionView: View {
     ]
     @State private var realTimeSetStartDate: Date?
     @State private var showingQuitConfirm = false
+    @State private var showResumePrompt = false
     @State private var sessionId: String = ""
     @State private var showHoldPhoneHint = true
     @State private var showNudge = false
@@ -174,7 +175,44 @@ struct WorkoutSessionView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Your progress so far won't be saved.")
+            Text("Any sets in progress won't be saved.")
+        }
+        .confirmationDialog(
+            "Resume workout?",
+            isPresented: $showResumePrompt
+        ) {
+            Button("Resume from set \(viewModel.resumeSetCount + 1)") {
+                // A recording for set 1 was started before the dialog appeared.
+                // Discard it — the user is resuming from a later set.
+                if motionRecording.isRecording {
+                    let url = motionRecording.stopRecording()
+                    if let url { try? FileManager.default.removeItem(at: url) }
+                }
+                viewModel.resumeSession()
+                // Start a fresh recording for the correct set number.
+                if sensorConsented {
+                    let id = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
+                    repCounter?.reset()
+                    motionRecording.onSample = { [repCounter] ax, ay, az in
+                        repCounter?.processSample(ax: ax, ay: ay, az: az)
+                    }
+                    motionRecording.startRecording(
+                        exerciseId: id,
+                        setNumber: viewModel.currentSetIndex + 1,
+                        sessionId: sessionId,
+                        context: modelContext
+                    )
+                }
+            }
+            Button("Start over", role: .destructive) {
+                // Recording for set 1 is already running and correct — no action needed.
+                viewModel.restartSession()
+            }
+        }
+        .onChange(of: showResumePrompt) { old, new in
+            if old, !new, viewModel.shouldOfferResume {
+                viewModel.restartSession()
+            }
         }
         .sheet(isPresented: $showTier3Intro, onDismiss: markExerciseSeen) {
             NavigationStack {
@@ -194,6 +232,9 @@ struct WorkoutSessionView: View {
             sessionId = UUID().uuidString
             viewModel.configure(analytics: analytics)
             viewModel.load(context: modelContext)
+            if viewModel.shouldOfferResume {
+                showResumePrompt = true
+            }
             let tier3Exercises = ["dead_bugs", "glute_bridges"]
             if tier3Exercises.contains(exerciseId),
                let s = settings,
