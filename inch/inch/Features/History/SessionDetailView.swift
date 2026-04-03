@@ -26,7 +26,7 @@ struct SessionDetailView: View {
             ForEach(byExercise, id: \.name) { group in
                 Section(group.name) {
                     ForEach(group.sets, id: \.setNumber) { set in
-                        SetRow(set: set)
+                        SessionSetRow(set: set)
                     }
                 }
             }
@@ -37,7 +37,7 @@ struct SessionDetailView: View {
     }
 }
 
-private struct SetRow: View {
+private struct SessionSetRow: View {
     let set: CompletedSet
 
     var body: some View {
