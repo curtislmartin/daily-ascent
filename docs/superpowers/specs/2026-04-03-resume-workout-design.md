@@ -18,7 +18,7 @@ The user's experience today: open the exercise, workout opens at set 1, has to r
 
 ## Architecture
 
-Changes span four locations:
+Changes span five files:
 
 | File | Change |
 |---|---|
@@ -26,7 +26,7 @@ Changes span four locations:
 | `TodayView.swift` | Pass `isInProgress` to `ExerciseCard` |
 | `ExerciseCard.swift` | Add `isInProgress: Bool`, show subtle indicator |
 | `WorkoutViewModel.swift` | Detect partial completion in `load()`, add `resumeSession()` / `restartSession()` |
-| `WorkoutSessionView.swift` | Add `.confirmationDialog` bound to `viewModel.shouldOfferResume` |
+| `WorkoutSessionView.swift` | Add `@State private var showResumePrompt` and `.confirmationDialog` |
 
 ## Behaviour
 
@@ -37,7 +37,8 @@ Changes span four locations:
 An exercise is in progress if:
 - `completedCount > 0`
 - `completedCount < prescribedCount`
-- It is NOT in `completedTodayIds` (not fully complete)
+
+(This is mutually exclusive with `completedTodayIds`, which requires `completedCount >= prescribedCount`, so no additional guard is needed.)
 
 `ExerciseCard` receives a new `isInProgress: Bool` parameter. When `true`, it shows a subtle "In progress" label. The indicator is intentionally unobtrusive — it signals that a resume is available without drawing attention to an incomplete session.
 
@@ -45,11 +46,11 @@ An exercise is in progress if:
 
 ### Resume detection in `WorkoutViewModel.load()`
 
-After loading the prescription and before setting `phase = .ready`, `load()` queries today's `CompletedSet` records for this exercise:
+After loading the prescription and before setting `phase = .ready`, `load()` queries today's `CompletedSet` records for this exercise. Use `sessionDate` (not `completedAt`) to match the date-filtering convention used elsewhere in the codebase (`TodayViewModel` filters by `sessionDate`):
 
 ```
 let todayStart = Calendar.current.startOfDay(for: .now)
-let todaySets = sets where exerciseId matches AND completedAt >= todayStart
+let todaySets = sets where exerciseId matches AND sessionDate >= todayStart
 let completedCount = todaySets.count
 let totalSets = prescription.sets.count
 ```
@@ -62,10 +63,12 @@ If `completedCount > 0 && completedCount < totalSets`:
 
 `phase` still transitions to `.ready` at `currentSetIndex = 0`. The dialog appears on top; the user cannot interact with the underlying view while it is presented.
 
+**Timed exercises:** `CompletedSet.actualReps` is always `0` for timed sets (the timed path stores `setDurationSeconds` instead). Therefore `resumeSessionReps` will be `0` for a resumed timed workout. This is acceptable — `sessionTotalReps` is only used in `completeSession()` for the completion ratio and the `workout_completed` analytics event, and for timed exercises that ratio is always computed from durations rather than reps at a higher level. The completion screen for timed exercises does not display a total-reps count.
+
 ### New ViewModel properties
 
 ```swift
-private(set) var shouldOfferResume: Bool = false
+var shouldOfferResume: Bool = false      // plain var — WorkoutSessionView binds to it via local @State
 private(set) var resumeSetCount: Int = 0       // number of sets already done
 private(set) var resumeSessionReps: Int = 0    // sum of actualReps for today's sets
 ```
@@ -83,19 +86,31 @@ Phase remains `.ready`. The ready view updates to show "Start Set \(currentSetIn
 
 ### `restartSession()`
 
-Called when the user taps "Start over" or dismisses the dialog:
+Called when the user taps "Start over" or the dialog is dismissed without a button tap:
 
-1. Fire `workout_started` analytics event (same as the existing event in `load()`)
+1. Fire `workout_started` analytics event (same properties as the existing event currently fired in `load()`)
 2. `shouldOfferResume = false`
 
 `currentSetIndex` stays at 0, `sessionTotalReps` stays at 0. Normal flow continues.
 
 ### WorkoutSessionView — confirmation dialog
 
+Use a local `@State private var showResumePrompt = false` rather than binding directly to `viewModel.shouldOfferResume`. This avoids any ambiguity around `Bindable` initialisation from a `@State`-held `@Observable` object and keeps the dialog's presentation state firmly in the view layer.
+
+Set `showResumePrompt = true` in `.task` after `viewModel.load()` returns, if `viewModel.shouldOfferResume` is true.
+
 ```swift
+@State private var showResumePrompt = false
+
+// In .task, after viewModel.load():
+if viewModel.shouldOfferResume {
+    showResumePrompt = true
+}
+
+// Modifier on the view:
 .confirmationDialog(
     "Resume workout?",
-    isPresented: Bindable(viewModel).shouldOfferResume
+    isPresented: $showResumePrompt
 ) {
     Button("Resume from set \(viewModel.resumeSetCount + 1)") {
         viewModel.resumeSession()
@@ -104,13 +119,19 @@ Called when the user taps "Start over" or dismisses the dialog:
         viewModel.restartSession()
     }
 }
+.onChange(of: showResumePrompt) { old, new in
+    // Handles outside-tap dismissal (iOS sets the binding to false without calling a button action)
+    if old == true, new == false, viewModel.shouldOfferResume {
+        viewModel.restartSession()
+    }
+}
 ```
 
-No cancel button. If the user dismisses by tapping outside (iOS default behaviour for confirmation dialogs), `shouldOfferResume` is set to `false` by the binding and `restartSession()` is NOT called — which means `workout_started` analytics is not fired. To handle this, `WorkoutSessionView` uses `.onChange(of: viewModel.shouldOfferResume)` to call `restartSession()` if `shouldOfferResume` transitions from `true` to `false` without either button being tapped.
+No cancel button. Outside-tap dismissal is treated as "Start over" via the `.onChange` handler above. The guard `viewModel.shouldOfferResume` ensures `restartSession()` is not called spuriously after one of the buttons has already cleared the flag.
 
-Actually, the simpler approach: use an `onDismiss` closure on the `.confirmationDialog` modifier (not available directly), or just accept that outside-tap dismissal is equivalent to "Start over" — wire the dismiss path to call `restartSession()` by observing the binding going false while neither button was tapped.
+### "Quit Workout" alert message
 
-**Simpler solution:** Add a local `@State private var resumeHandled = false` in `WorkoutSessionView`. Both buttons set `resumeHandled = true` before calling their respective ViewModel methods. Use `.onChange(of: viewModel.shouldOfferResume) { _, new in if !new && !resumeHandled { viewModel.restartSession() } }` to catch outside-tap dismissal. Reset `resumeHandled = false` after the dialog closes.
+The existing alert message "Your progress so far won't be saved." is misleading after a resume, because sets completed before the interruption are already persisted in SwiftData. Update the message to something accurate for both paths, for example: "Any sets in progress won't be saved." This is a minor copy change in `WorkoutSessionView`.
 
 ### sessionDate
 
@@ -124,7 +145,7 @@ No special handling. Resume logic applies identically.
 
 | Event | When |
 |---|---|
-| `workout_started` | `restartSession()` is called (user chooses "Start over" or dismisses dialog, OR no resume is offered and `load()` proceeds normally) |
+| `workout_started` | `restartSession()` is called (user chooses "Start over", dismisses dialog, OR no resume was offered and `load()` proceeds normally) |
 | `workout_resumed` | `resumeSession()` is called |
 
 `workout_resumed` properties: `exerciseId`, `level`, `dayNumber`, `resumedFromSet` (1-based).
@@ -135,9 +156,9 @@ Unit-testable logic in `WorkoutViewModel`:
 
 1. `load()` with no today sets → `shouldOfferResume == false`
 2. `load()` with `completedCount == totalSets` → `shouldOfferResume == false` (fully complete)
-3. `load()` with `0 < completedCount < totalSets` → `shouldOfferResume == true`, `resumeSetCount == completedCount`, `resumeSessionReps == sum`
+3. `load()` with `0 < completedCount < totalSets` → `shouldOfferResume == true`, `resumeSetCount == completedCount`, `resumeSessionReps == sum of actualReps`
 4. `load()` with today sets from a different exercise → `shouldOfferResume == false`
 5. `resumeSession()` → `currentSetIndex == resumeSetCount`, `sessionTotalReps == resumeSessionReps`, `shouldOfferResume == false`
 6. `restartSession()` → `currentSetIndex == 0`, `sessionTotalReps == 0`, `shouldOfferResume == false`
 
-`TodayViewModel.inProgressTodayIds` logic is also unit-testable alongside existing streak/completion tests.
+`TodayViewModel.inProgressTodayIds` logic is also unit-testable alongside existing completion tests.
