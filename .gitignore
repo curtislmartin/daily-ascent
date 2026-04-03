@@ -2,6 +2,12 @@
 inch/inch/Secrets.plist
 .worktrees/
 
+# Claude Code / AI tooling
+.claude/
+.superpowers/
+.playwright/
+.playwright-mcp/
+
 # Swift Package Manager build artifacts
 Shared/.build/
 *.o
