@@ -12,6 +12,7 @@ enum ProgramDestination: Hashable {
 
 enum HistoryDestination: Hashable {
     case exerciseDetail(PersistentIdentifier)
+    case exerciseSession(exerciseId: String, sessionDate: Date)
 }
 
 enum TodayDestination: Hashable {
@@ -44,6 +45,8 @@ extension View {
             switch destination {
             case .exerciseDetail(let id):
                 ExerciseDetailView(enrolmentId: id)
+            case .exerciseSession(let exerciseId, let sessionDate):
+                ExerciseSessionDetailView(exerciseId: exerciseId, sessionDate: sessionDate)
             }
         }
     }
