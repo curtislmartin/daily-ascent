@@ -125,7 +125,8 @@ struct TodayView: View {
                         enrolment: enrolment,
                         prescription: viewModel.currentPrescription(for: enrolment),
                         conflictWarning: viewModel.conflictWarnings[exerciseId],
-                        isCompleted: viewModel.completedTodayIds.contains(exerciseId)
+                        isCompleted: viewModel.completedTodayIds.contains(exerciseId),
+                        isInProgress: viewModel.inProgressTodayIds.contains(exerciseId)
                     )
                 }
             }

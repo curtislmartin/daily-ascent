@@ -6,6 +6,7 @@ import InchShared
 final class TodayViewModel {
     var dueExercises: [ExerciseEnrolment] = []
     var completedTodayIds: Set<String> = []
+    var inProgressTodayIds: Set<String> = []
     var isRestDay: Bool = false
     var conflictWarnings: [String: String] = [:]
     var nextTrainingDate: Date? = nil
@@ -82,6 +83,14 @@ final class TodayViewModel {
         })
 
         completedTodayIds = fullyCompletedIds
+
+        inProgressTodayIds = Set(all.compactMap { enrolment -> String? in
+            guard let id = enrolment.exerciseDefinition?.exerciseId else { return nil }
+            let completedCount = setsByExercise[id]?.count ?? 0
+            let prescribedCount = currentPrescription(for: enrolment)?.sets.count ?? 0
+            guard prescribedCount > 0, completedCount > 0, completedCount < prescribedCount else { return nil }
+            return id
+        })
 
         // Include completed-today exercises that are no longer in the due list
         let completedEnrolments = all.filter { enrolment in

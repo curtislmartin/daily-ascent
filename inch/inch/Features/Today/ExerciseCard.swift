@@ -7,6 +7,7 @@ struct ExerciseCard: View {
     let prescription: DayPrescription?
     let conflictWarning: String?
     var isCompleted: Bool = false
+    var isInProgress: Bool = false
 
     private var definition: ExerciseDefinition? { enrolment.exerciseDefinition }
     private var isTestDay: Bool { prescription?.isTest ?? false }
@@ -62,9 +63,20 @@ struct ExerciseCard: View {
                         muscleGroupTag(group)
                     }
                 }
-                Text("Day \(enrolment.currentDay)")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
+                HStack(spacing: 6) {
+                    Text("Day \(enrolment.currentDay)")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                    if isInProgress {
+                        Text("In progress")
+                            .font(.caption2)
+                            .fontWeight(.medium)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(.blue.opacity(0.1), in: Capsule())
+                            .foregroundStyle(.blue)
+                    }
+                }
             }
             if isCompleted {
                 Image(systemName: "checkmark.circle.fill")
@@ -150,6 +162,7 @@ struct ExerciseCard: View {
         if let summary = setSummary { parts.append(summary) }
         if let warning = conflictWarning { parts.append("Warning: \(warning)") }
         if isCompleted { parts.append("Completed") }
+        if isInProgress { parts.append("In progress") }
         return parts.joined(separator: ", ")
     }
 
