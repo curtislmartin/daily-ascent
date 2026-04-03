@@ -252,6 +252,9 @@ final class HistoryViewModel {
             enrolment.lastCompletedDate = nil
             enrolment.nextScheduledDate = nil
             enrolment.restPatternIndex = 0
+            enrolment.isActive = true
+            enrolment.isRepeatSession = false
+            enrolment.needsRepeat = false
         } else {
             let lastSet = remaining[0]
 
@@ -281,6 +284,11 @@ final class HistoryViewModel {
             enrolment.lastCompletedDate = lastSet.sessionDate
 
             let newLevelDef = enrolment.exerciseDefinition?.levels?.first { $0.level == newLevel }
+            // Reactivate unless this reconstructed state itself represents programme complete
+            let isProgrammeComplete = newLevel == 3 && newDay > (newLevelDef?.totalDays ?? Int.max)
+            enrolment.isActive = !isProgrammeComplete
+            enrolment.isRepeatSession = false
+            enrolment.needsRepeat = false
             let patternCount = newLevelDef?.restDayPattern.count ?? 1
             enrolment.restPatternIndex = (newDay - 1) % patternCount
 
