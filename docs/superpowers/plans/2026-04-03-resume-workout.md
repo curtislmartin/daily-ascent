@@ -331,13 +331,38 @@ The `.onChange(of: showResumePrompt)` handler catches outside-tap dismissal (iOS
       isPresented: $showResumePrompt
   ) {
       Button("Resume from set \(viewModel.resumeSetCount + 1)") {
+          // A recording for set 1 was started before the dialog appeared.
+          // Discard it — the user is resuming from a later set.
+          if motionRecording.isRecording {
+              let url = motionRecording.stopRecording()
+              if let url { try? FileManager.default.removeItem(at: url) }
+          }
           viewModel.resumeSession()
+          // Start a fresh recording for the correct set number.
+          if sensorConsented {
+              let id = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
+              repCounter?.reset()
+              motionRecording.onSample = { [repCounter] ax, ay, az in
+                  repCounter?.processSample(ax: ax, ay: ay, az: az)
+              }
+              motionRecording.startRecording(
+                  exerciseId: id,
+                  setNumber: viewModel.currentSetIndex + 1,
+                  sessionId: sessionId,
+                  context: modelContext
+              )
+          }
       }
       Button("Start over", role: .destructive) {
+          // Recording for set 1 is already running and correct — no action needed.
           viewModel.restartSession()
       }
   }
   ```
+
+  **Why Resume needs explicit recording restart:** `viewModel.load()` triggers `phase = .ready`, which causes the `.task` block and `.onChange(.ready)` handler to start recording for set 1 before the dialog appears. When the user resumes from set N, that set-1 recording is orphaned. Stopping it and starting a fresh recording for the correct set ensures sensor data is captured for the actual set being performed.
+
+  **Why Start Over does not:** the recording already running is for set 1, which is exactly what's needed.
 
 - [ ] **Step 4: Add `.onChange` to handle outside-tap dismissal**
 
