@@ -78,8 +78,13 @@ struct DayGroupRow: View {
                 Divider()
                     .padding(.vertical, 8)
                 ForEach(day.exercises) { exercise in
-                    ExerciseSummaryRow(exercise: exercise)
-                        .padding(.vertical, 2)
+                    NavigationLink(value: HistoryDestination.exerciseSession(
+                        exerciseId: exercise.id,
+                        sessionDate: day.id
+                    )) {
+                        ExerciseSummaryRow(exercise: exercise)
+                    }
+                    .padding(.vertical, 2)
                 }
             }
         }
@@ -89,36 +94,41 @@ struct DayGroupRow: View {
     @ViewBuilder
     private var testDayContent: some View {
         ForEach(day.exercises.filter(\.isTest)) { exercise in
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    if exercise.testPassed == true {
-                        Image(systemName: "trophy.fill")
-                            .foregroundStyle(.yellow)
-                            .font(.caption)
+            NavigationLink(value: HistoryDestination.exerciseSession(
+                exerciseId: exercise.id,
+                sessionDate: day.id
+            )) {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        if exercise.testPassed == true {
+                            Image(systemName: "trophy.fill")
+                                .foregroundStyle(.yellow)
+                                .font(.caption)
+                        }
+                        Text("\(dayLabel) — \(exercise.exerciseName) Test")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
                     }
-                    Text("\(dayLabel) — \(exercise.exerciseName) Test")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
+                    let outcome: String = {
+                        let resultLabel: String
+                        if exercise.countingMode == .timed {
+                            let held = exercise.totalDurationSeconds.map { String(format: "%.0fs", $0) } ?? "—"
+                            let target = exercise.targetDurationSeconds.map { "\($0)s" } ?? "—"
+                            resultLabel = "\(held) / \(target)"
+                        } else {
+                            resultLabel = "\(exercise.actualReps) / \(exercise.targetReps)"
+                        }
+                        if let passed = exercise.testPassed {
+                            return passed
+                                ? "Level \(exercise.level) Final — \(resultLabel) — PASSED"
+                                : "Level \(exercise.level) Final — \(resultLabel) — Retry next"
+                        }
+                        return "Level \(exercise.level) Final — \(resultLabel)"
+                    }()
+                    Text(outcome)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
-                let outcome: String = {
-                    let resultLabel: String
-                    if exercise.countingMode == .timed {
-                        let held = exercise.totalDurationSeconds.map { String(format: "%.0fs", $0) } ?? "—"
-                        let target = exercise.targetDurationSeconds.map { "\($0)s" } ?? "—"
-                        resultLabel = "\(held) / \(target)"
-                    } else {
-                        resultLabel = "\(exercise.actualReps) / \(exercise.targetReps)"
-                    }
-                    if let passed = exercise.testPassed {
-                        return passed
-                            ? "Level \(exercise.level) Final — \(resultLabel) — PASSED"
-                            : "Level \(exercise.level) Final — \(resultLabel) — Retry next"
-                    }
-                    return "Level \(exercise.level) Final — \(resultLabel)"
-                }()
-                Text(outcome)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
             .padding(.vertical, 4)
         }
