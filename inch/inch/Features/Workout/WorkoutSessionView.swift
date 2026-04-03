@@ -208,16 +208,16 @@ struct WorkoutSessionView: View {
                 repCounter = RepCounter(config: config)
             }
             if sensorConsented, !motionRecording.isRecording {
+                repCounter?.reset()
+                motionRecording.onSample = { [repCounter] ax, ay, az in
+                    repCounter?.processSample(ax: ax, ay: ay, az: az)
+                }
                 motionRecording.startRecording(
                     exerciseId: id,
                     setNumber: viewModel.currentSetIndex + 1,
                     sessionId: sessionId,
                     context: modelContext
                 )
-                motionRecording.onSample = { [repCounter] ax, ay, az in
-                    repCounter?.processSample(ax: ax, ay: ay, az: az)
-                }
-                repCounter?.reset()
             }
             await healthKit.requestAuthorization()
         }
@@ -226,16 +226,16 @@ struct WorkoutSessionView: View {
             case .ready:
                 if sensorConsented, !motionRecording.isRecording {
                     let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
+                    repCounter?.reset()
+                    motionRecording.onSample = { [repCounter] ax, ay, az in
+                        repCounter?.processSample(ax: ax, ay: ay, az: az)
+                    }
                     motionRecording.startRecording(
                         exerciseId: exerciseId,
                         setNumber: viewModel.currentSetIndex + 1,
                         sessionId: sessionId,
                         context: modelContext
                     )
-                    motionRecording.onSample = { [repCounter] ax, ay, az in
-                        repCounter?.processSample(ax: ax, ay: ay, az: az)
-                    }
-                    repCounter?.reset()
                 }
             case .inRealTimeSet:
                 showHoldPhoneHint = false
