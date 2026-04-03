@@ -52,12 +52,16 @@ struct WatchTodayView: View {
 
     private func exerciseIcon(for exerciseId: String) -> String {
         switch exerciseId {
-        case "push_ups": return "figure.strengthtraining.traditional"
-        case "squats": return "figure.gymnastics"
-        case "pull_ups": return "figure.highintensity.intervaltraining"
-        case "hip_hinge": return "figure.flexibility"
-        case "dead_bugs": return "figure.cooldown"
-        default: return "figure.strengthtraining.functional"
+        case "push_ups":         return "figure.strengthtraining.traditional"
+        case "squats":           return "figure.gymnastics"
+        case "pull_ups":         return "figure.climbing"
+        case "hip_hinge":        return "figure.flexibility"
+        case "dead_bugs":        return "figure.cooldown"
+        case "spinal_extension": return "figure.pilates"
+        case "plank":            return "figure.core.training"
+        case "rows":             return "figure.rowing"
+        case "dips":             return "figure.cross.training"
+        default:                 return "figure.strengthtraining.functional"
         }
     }
 }
