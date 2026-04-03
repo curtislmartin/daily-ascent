@@ -290,6 +290,8 @@ final class HistoryViewModel {
             enrolment.isRepeatSession = false
             enrolment.needsRepeat = false
             let patternCount = newLevelDef?.restDayPattern.count ?? 1
+            // Note: assumes linear progression. For users with adaptive repeat sessions
+            // (same dayNumber stored twice), this index may be off by one.
             enrolment.restPatternIndex = (newDay - 1) % patternCount
 
             if let newLevelDef {

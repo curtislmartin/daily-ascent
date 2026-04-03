@@ -7,7 +7,7 @@ struct SetRow: View {
 
     var body: some View {
         HStack {
-            Text("Set \(set.setNumber + 1)")
+            Text("Set \(set.setNumber)")
                 .foregroundStyle(.primary)
             Spacer()
             if isTimed {
