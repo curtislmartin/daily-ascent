@@ -22,6 +22,7 @@ enum AnalyticsProperties: Sendable, Encodable {
     case appOpened(appVersion: String)
     case onboardingCompleted(exercisesEnrolled: [String], dataConsentGiven: Bool)
     case workoutStarted(exerciseId: String, level: Int, dayNumber: Int)
+    case workoutResumed(exerciseId: String, level: Int, dayNumber: Int, resumedFromSet: Int)
     case workoutCompleted(exerciseId: String, level: Int, dayNumber: Int,
                           totalSets: Int, totalReps: Int,
                           durationSeconds: Int, countingMode: String)
@@ -42,7 +43,7 @@ enum AnalyticsProperties: Sendable, Encodable {
         case current_level, from_level, to_level, max_reps_achieved
         case tested_level, threshold_required, streak_length_at_break
         case consecutive_skips, exercises_enrolled, data_consent_given
-        case app_version, os_version
+        case app_version, os_version, resumed_from_set
     }
 
     func encode(to encoder: Encoder) throws {
@@ -60,6 +61,11 @@ enum AnalyticsProperties: Sendable, Encodable {
             try c.encode(id, forKey: .exercise_id)
             try c.encode(lv, forKey: .level)
             try c.encode(day, forKey: .day_number)
+        case .workoutResumed(let id, let lv, let day, let set):
+            try c.encode(id, forKey: .exercise_id)
+            try c.encode(lv, forKey: .level)
+            try c.encode(day, forKey: .day_number)
+            try c.encode(set, forKey: .resumed_from_set)
         case .workoutCompleted(let id, let lv, let day, let sets, let reps, let dur, let mode):
             try c.encode(id, forKey: .exercise_id)
             try c.encode(lv, forKey: .level)
