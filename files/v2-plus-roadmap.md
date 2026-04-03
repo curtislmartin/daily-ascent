@@ -2,7 +2,7 @@
 
 > **Status:** Brainstorm / bullet-point level. Nothing here is specced at implementation level yet.
 >
-> **Last updated:** 2026-03-16
+> **Last updated:** 2026-04-03
 
 ---
 

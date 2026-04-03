@@ -54,7 +54,8 @@ inch-project/
 │       ├── Features/              # Watch Today, Workout, rest timer
 │       └── Services/
 │           ├── WatchConnectivityService.swift
-│           └── WatchMotionRecordingService.swift
+│           ├── WatchMotionRecordingService.swift
+│           └── WatchHealthService.swift
 ├── Shared/                        # Swift package shared by both targets
 │   └── Sources/InchShared/
 │       ├── Models/                # SwiftData @Model classes + Enums
@@ -107,6 +108,8 @@ inch-project/
 | `SensorRecording` | Metadata for a captured motion file |
 | `UserSettings` | App-wide preferences (counting mode, rest timers, consent, notifications) |
 | `StreakState` | Current streak count and last-updated date |
+| `Achievement` | Unlocked achievement record (streak, level, rep milestones) |
+| `UserEntitlement` | In-app purchase / subscription record |
 
 ---
 
@@ -121,13 +124,28 @@ open inch/inch.xcodeproj
 # Watch: Apple Watch Series 10
 ```
 
-Signing is automatic. No environment setup required for local development. Supabase upload only activates when the user has granted data consent.
+Signing is automatic. Before building, create `inch/inch/Secrets.plist` (gitignored):
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>SupabaseURL</key>
+    <string>https://your-project.supabase.co</string>
+    <key>SupabaseAnonKey</key>
+    <string>your-publishable-key</string>
+</dict>
+</plist>
+```
+
+Without this file the app builds and runs normally — analytics and sensor uploads are simply skipped. Supabase upload only activates when the user has granted data consent in onboarding.
 
 ---
 
 ## Spec Documents
 
-All product and technical decisions live in `files/`. These are read-only — do not modify them. When asking an AI for help, paste the relevant spec alongside your question.
+All product and technical decisions live in `files/`. These are read-only reference documents.
 
 | File | Read when |
 |---|---|

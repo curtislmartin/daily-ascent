@@ -1,5 +1,7 @@
 # Framework-Specific Guidance
 
+> Last updated: 2026-04-03
+
 Guidance for Apple frameworks that don't have community agent skills. These patterns are current as of iOS 18 / watchOS 11 / Swift 6.2.
 
 ---

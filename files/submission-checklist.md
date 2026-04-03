@@ -2,7 +2,7 @@
 
 > **Purpose:** Step-by-step checklist for TestFlight and App Store submission. Work through top to bottom.
 >
-> **Last updated:** 2026-03-16
+> **Last updated:** 2026-04-03
 
 ---
 

@@ -1,5 +1,7 @@
 # Bodyweight Training App — UX & Interaction Design (v2)
 
+> Last updated: 2026-04-03
+
 ## The Core Design Challenge
 
 The original Runtastic apps were single-exercise, single-purpose. Each app had one job: guide you through today's push-ups, count your reps, and send you on your way.

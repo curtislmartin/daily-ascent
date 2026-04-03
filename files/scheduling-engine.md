@@ -1,5 +1,7 @@
 # Scheduling Engine Specification
 
+> Last updated: 2026-04-03
+
 The scheduling engine computes training dates, detects conflicts, and resolves them. It is pure logic with no UI dependencies — it operates on data model state and returns schedule decisions.
 
 > **This is the first code to build and the most important to test.**

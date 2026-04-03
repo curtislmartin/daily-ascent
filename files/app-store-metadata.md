@@ -2,7 +2,7 @@
 
 > **Purpose:** Draft metadata for App Store Connect submission. Review and adjust before submitting.
 >
-> **Last updated:** 2026-03-22
+> **Last updated:** 2026-04-03
 
 ---
 

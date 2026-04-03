@@ -2,7 +2,7 @@
 
 > **Purpose:** Beta testing information for TestFlight. Internal testing (up to 100 testers) doesn't require review. External testing (up to 10,000) requires Beta App Review on the first build.
 >
-> **Last updated:** 2026-03-16
+> **Last updated:** 2026-04-03
 
 ---
 

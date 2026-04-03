@@ -1,5 +1,7 @@
 # Backend API Specification
 
+> Last updated: 2026-04-03
+
 Lightweight Supabase backend for anonymous sensor data collection. No user accounts, no authentication beyond the contributor UUID.
 
 ---

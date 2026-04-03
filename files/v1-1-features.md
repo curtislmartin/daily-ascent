@@ -1,5 +1,7 @@
 # v1.1 Feature Specification
 
+> Last updated: 2026-04-03
+
 Builds on the v1 foundation. All features reference the existing data model (`data-model.md`), architecture (`architecture.md`), and agent skill conventions.
 
 ---
