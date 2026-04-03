@@ -203,4 +203,103 @@ final class HistoryViewModel {
         let color: String
         let totalReps: Int
     }
+
+    // MARK: - Delete
+
+    func deleteSession(exerciseId: String, date: Date, context: ModelContext) throws {
+        let calendar = Calendar.current
+        let start = calendar.startOfDay(for: date)
+        guard let end = calendar.date(byAdding: .day, value: 1, to: start) else { return }
+
+        let descriptor = FetchDescriptor<CompletedSet>(
+            predicate: #Predicate { set in
+                set.exerciseId == exerciseId &&
+                set.sessionDate >= start &&
+                set.sessionDate < end
+            },
+            sortBy: [SortDescriptor(\.setNumber)]
+        )
+        let sessionSets = try context.fetch(descriptor)
+        guard !sessionSets.isEmpty else { return }
+
+        let firstSet = sessionSets[0]
+        // DayPrescription.sets is [Int] (array of target rep counts per set — not optional).
+        // LevelDefinition.days is [DayPrescription]? (optional relationship).
+        let levelDef = firstSet.enrolment?.exerciseDefinition?.levels?
+            .first { $0.level == firstSet.level }
+        let dayPrescription = levelDef?.days?
+            .first { $0.dayNumber == firstSet.dayNumber }
+        let prescribedCount = dayPrescription?.sets.count ?? 0
+        let wasComplete = prescribedCount > 0 && sessionSets.count >= prescribedCount
+        let enrolment = firstSet.enrolment
+
+        for set in sessionSets {
+            context.delete(set)
+        }
+        try context.save()
+
+        guard wasComplete, let enrolment else { return }
+
+        let remainingDescriptor = FetchDescriptor<CompletedSet>(
+            predicate: #Predicate { set in set.exerciseId == exerciseId },
+            sortBy: [SortDescriptor(\.sessionDate, order: .reverse)]
+        )
+        let remaining = try context.fetch(remainingDescriptor)
+
+        if remaining.isEmpty {
+            enrolment.currentLevel = 1
+            enrolment.currentDay = 1
+            enrolment.lastCompletedDate = nil
+            enrolment.nextScheduledDate = nil
+            enrolment.restPatternIndex = 0
+        } else {
+            let lastSet = remaining[0]
+
+            let newLevel: Int
+            let newDay: Int
+            if lastSet.isTest && lastSet.testPassed == true {
+                if lastSet.level < 3 {
+                    newLevel = lastSet.level + 1
+                    newDay = 1
+                } else {
+                    // Level 3 test passed = programme complete
+                    newLevel = lastSet.level
+                    newDay = lastSet.dayNumber + 1
+                }
+            } else if lastSet.isTest {
+                // Test failed — retry the same day
+                newLevel = lastSet.level
+                newDay = lastSet.dayNumber
+            } else {
+                // Normal day — advance to next day
+                newLevel = lastSet.level
+                newDay = lastSet.dayNumber + 1
+            }
+
+            enrolment.currentLevel = newLevel
+            enrolment.currentDay = newDay
+            enrolment.lastCompletedDate = lastSet.sessionDate
+
+            let newLevelDef = enrolment.exerciseDefinition?.levels?.first { $0.level == newLevel }
+            let patternCount = newLevelDef?.restDayPattern.count ?? 1
+            enrolment.restPatternIndex = (newDay - 1) % patternCount
+
+            if let newLevelDef {
+                let snapshot = EnrolmentSnapshot(
+                    currentLevel: newLevel,
+                    currentDay: newDay,
+                    lastCompletedDate: lastSet.sessionDate,
+                    restPatternIndex: enrolment.restPatternIndex,
+                    enrolledAt: enrolment.enrolledAt,
+                    isActive: enrolment.isActive
+                )
+                enrolment.nextScheduledDate = SchedulingEngine().computeNextDate(
+                    enrolment: snapshot,
+                    level: LevelSnapshot(newLevelDef)
+                )
+            }
+        }
+
+        try context.save()
+    }
 }
