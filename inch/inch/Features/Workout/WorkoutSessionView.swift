@@ -168,6 +168,8 @@ struct WorkoutSessionView: View {
                         setsTotal: viewModel.totalSets
                     )
                 ))
+                let url = motionRecording.stopRecording()
+                if let url { try? FileManager.default.removeItem(at: url) }
                 dismiss()
             }
             Button("Cancel", role: .cancel) {}
@@ -201,18 +203,28 @@ struct WorkoutSessionView: View {
                 showNudge = true
             }
             let id = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
-            if Self.phoneAutoCountedExercises.contains(id),
+            if repCounter == nil, Self.phoneAutoCountedExercises.contains(id),
                let config = RepCountingConfig.config(for: id) {
                 repCounter = RepCounter(config: config)
+            }
+            if sensorConsented, !motionRecording.isRecording {
+                motionRecording.startRecording(
+                    exerciseId: id,
+                    setNumber: viewModel.currentSetIndex + 1,
+                    sessionId: sessionId,
+                    context: modelContext
+                )
+                motionRecording.onSample = { [repCounter] ax, ay, az in
+                    repCounter?.processSample(ax: ax, ay: ay, az: az)
+                }
+                repCounter?.reset()
             }
             await healthKit.requestAuthorization()
         }
         .onChange(of: viewModel.phase) { _, newPhase in
             switch newPhase {
-            case .inRealTimeSet:
-                showHoldPhoneHint = false
-                realTimeSetStartDate = .now
-                if sensorConsented {
+            case .ready:
+                if sensorConsented, !motionRecording.isRecording {
                     let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
                     motionRecording.startRecording(
                         exerciseId: exerciseId,
@@ -220,10 +232,16 @@ struct WorkoutSessionView: View {
                         sessionId: sessionId,
                         context: modelContext
                     )
-                    repCounter?.reset()
                     motionRecording.onSample = { [repCounter] ax, ay, az in
                         repCounter?.processSample(ax: ax, ay: ay, az: az)
                     }
+                    repCounter?.reset()
+                }
+            case .inRealTimeSet:
+                showHoldPhoneHint = false
+                realTimeSetStartDate = .now
+                if sensorConsented {
+                    let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
                     if dualRecordingEnabled {
                         watchConnectivity.sendRecordingStart(
                             exerciseId: exerciseId,
@@ -236,12 +254,6 @@ struct WorkoutSessionView: View {
                 showHoldPhoneHint = false
                 if sensorConsented {
                     let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
-                    motionRecording.startRecording(
-                        exerciseId: exerciseId,
-                        setNumber: viewModel.currentSetIndex + 1,
-                        sessionId: sessionId,
-                        context: modelContext
-                    )
                     if dualRecordingEnabled {
                         watchConnectivity.sendRecordingStart(
                             exerciseId: exerciseId,
@@ -254,12 +266,6 @@ struct WorkoutSessionView: View {
                 showHoldPhoneHint = false
                 if sensorConsented {
                     let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
-                    motionRecording.startRecording(
-                        exerciseId: exerciseId,
-                        setNumber: viewModel.currentSetIndex + 1,
-                        sessionId: sessionId,
-                        context: modelContext
-                    )
                     if dualRecordingEnabled {
                         watchConnectivity.sendRecordingStart(
                             exerciseId: exerciseId,
@@ -319,6 +325,12 @@ struct WorkoutSessionView: View {
                 }
             default:
                 break
+            }
+        }
+        .onDisappear {
+            if motionRecording.isRecording {
+                let url = motionRecording.stopRecording()
+                if let url { try? FileManager.default.removeItem(at: url) }
             }
         }
     }
