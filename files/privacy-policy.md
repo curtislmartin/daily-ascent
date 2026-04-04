@@ -1,10 +1,10 @@
 # Daily Ascent — Privacy Policy
 
-> **Effective date:** [INSERT DATE BEFORE SUBMISSION]
+> **Effective date:** April 2026
 >
-> **Last updated:** 2026-04-03
+> **Last updated:** April 2026
 >
-> **Developer:** Curtis Martin — [INSERT BUSINESS NAME IF REGISTERED, OTHERWISE "Curtis Martin"]
+> **Developer:** Curtis Martin (individual developer, no registered business entity)
 >
 > **Contact:** support@clmartin.dev
 >
@@ -90,7 +90,13 @@ Daily Ascent does not knowingly collect data from children under 13. The app doe
 
 ## Australian Privacy Act
 
-While Daily Ascent may not currently meet the turnover threshold requiring compliance with the Privacy Act 1988 (Cth), the app is designed to meet its principles from day one — including transparency about data collection, purpose limitation, and user control over their data.
+Daily Ascent is developed by an individual developer with no registered business entity and does not generate revenue. It is not currently subject to the Privacy Act 1988 (Cth). Nonetheless, the app is designed to meet its principles — including transparency about data collection, purpose limitation, and user control over their data.
+
+---
+
+## Disclaimer
+
+Daily Ascent is provided free of charge, as-is, with no warranties of any kind. The developer accepts no liability for any loss or damage arising from use of the app. The app does not collect personal information and is not responsible for data stored locally on your device.
 
 ---
 
