@@ -1,0 +1,21 @@
+included:
+  - inch
+
+excluded:
+  - inch/inch.xcodeproj
+  - Shared/.build
+
+opt_in_rules:
+  - force_unwrapping
+  - implicit_return
+  - explicit_init
+
+disabled_rules:
+  - trailing_whitespace
+
+line_length:
+  warning: 120
+  error: 150
+
+force_cast: error
+force_unwrapping: error
