@@ -12,13 +12,10 @@ struct ExerciseInfoSheet: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                // Looping demo video
-                LoopingVideoView(
-                    exerciseId: exerciseId,
-                    fallbackImageName: exerciseId
-                )
-                .frame(height: 220)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                // YouTube demo video
+                YouTubePlayerView(videoId: info?.youtubeVideoId ?? "")
+                    .frame(height: 220)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
 
                 if let info {
                     // Muscle tags
