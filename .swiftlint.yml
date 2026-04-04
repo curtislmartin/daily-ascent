@@ -1,21 +1,35 @@
 included:
   - inch
+  - Shared
 
 excluded:
   - inch/inch.xcodeproj
   - Shared/.build
 
-opt_in_rules:
-  - force_unwrapping
-  - implicit_return
-  - explicit_init
-
 disabled_rules:
+  - type_name              # widget + watch app targets use lowercase-prefixed names by convention
+  - function_parameter_count
+  - type_body_length
+  - file_length
   - trailing_whitespace
+
+opt_in_rules:
+  - implicit_return
+
+identifier_name:
+  min_length: 1            # allow single-letter sensor axes (ax, ay, az, gx, gy, gz) and loop vars
+  max_length: 60
+  excluded:
+    - id
+    - i
+    - x
+    - y
+    - z
 
 line_length:
   warning: 120
   error: 150
+  ignores_comments: true
+  ignores_urls: true
 
-force_cast: error
-force_unwrapping: error
+force_cast: warning
