@@ -10,7 +10,6 @@ struct TrophyShelfView: View {
 
     var body: some View {
         let badges = buildBadges()
-        let earnedIds = Set(achievements.map(\.id))
 
         if badges.isEmpty {
             emptyState
@@ -18,7 +17,7 @@ struct TrophyShelfView: View {
         } else {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    ForEach(sections(from: badges, earnedIds: earnedIds), id: \.category) { section in
+                    ForEach(sections(from: badges), id: \.category) { section in
                         VStack(alignment: .leading, spacing: 12) {
                             Text(section.title)
                                 .font(.headline)
@@ -128,7 +127,7 @@ struct TrophyShelfView: View {
         ("journey", "Journey"),
     ]
 
-    private func sections(from badges: [BadgeDefinition], earnedIds: Set<String>) -> [Section] {
+    private func sections(from badges: [BadgeDefinition]) -> [Section] {
         Self.sectionOrder.compactMap { entry in
             let matching = badges.filter { $0.category == entry.category }
             guard !matching.isEmpty else { return nil }
