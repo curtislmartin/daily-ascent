@@ -54,7 +54,7 @@ struct PrivacySettingsView: View {
     private var analyticsSection: some View {
         Section {
             Toggle(isOn: Binding(
-                get: { settings?.analyticsEnabled ?? true },
+                get: { settings?.analyticsEnabled ?? false },
                 set: { newValue in
                     settings?.analyticsEnabled = newValue
                     try? modelContext.save()

@@ -35,7 +35,7 @@ public final class UserSettings {
     public var onboardingComplete: Bool = false
     public var seenExerciseInfo: [String] = []
     public var isFirstLaunch: Bool = true
-    public var analyticsEnabled: Bool = true
+    public var analyticsEnabled: Bool = false
     public var achievementNotificationEnabled: Bool = true
 
     public var hasDemographics: Bool {
@@ -69,7 +69,7 @@ public final class UserSettings {
         onboardingComplete: Bool = false,
         seenExerciseInfo: [String] = [],
         isFirstLaunch: Bool = true,
-        analyticsEnabled: Bool = true,
+        analyticsEnabled: Bool = false,
         achievementNotificationEnabled: Bool = true
     ) {
         self.createdAt = createdAt

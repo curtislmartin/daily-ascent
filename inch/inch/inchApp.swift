@@ -43,7 +43,7 @@ struct InchApp: App {
 
                     let analyticsContext = ModelContext(self.container)
                     let userSettings = (try? analyticsContext.fetch(FetchDescriptor<UserSettings>()))?.first
-                    analytics.configure(enabled: userSettings?.analyticsEnabled ?? true)
+                    analytics.configure(enabled: userSettings?.analyticsEnabled ?? false)
 
                     if userSettings?.isFirstLaunch == true {
                         let appVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""

@@ -113,7 +113,7 @@ final class AnalyticsService {
     private let sessionId = UUID()
     private var queue: [AnalyticsEvent] = []
     private let maxQueueSize = 500
-    private var analyticsEnabled = true
+    private var analyticsEnabled = false
 
     private var queueFileURL: URL {
         URL.applicationSupportDirectory.appending(path: "pending_analytics.json")

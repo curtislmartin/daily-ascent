@@ -8,8 +8,8 @@ struct AnalyticsUserSettingsTests {
         #expect(settings.isFirstLaunch == true)
     }
 
-    @Test func analyticsEnabledDefaultsTrue() {
+    @Test func analyticsEnabledDefaultsFalse() {
         let settings = UserSettings()
-        #expect(settings.analyticsEnabled == true)
+        #expect(settings.analyticsEnabled == false)
     }
 }

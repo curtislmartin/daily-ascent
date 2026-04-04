@@ -49,7 +49,9 @@ final class MotionRecordingService {
 
         let fileName = "\(exerciseId)_set\(setNumber)_\(sessionId)_iphone.bin"
         let fileURL = dir.appending(path: fileName)
-        FileManager.default.createFile(atPath: fileURL.path, contents: nil)
+        FileManager.default.createFile(atPath: fileURL.path, contents: nil, attributes: [
+            FileAttributeKey.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication
+        ])
 
         guard let fileHandle = try? FileHandle(forWritingTo: fileURL) else { return }
 
