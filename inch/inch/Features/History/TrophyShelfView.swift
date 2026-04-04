@@ -2,94 +2,228 @@ import SwiftUI
 import SwiftData
 import InchShared
 
+// MARK: - TrophyShelfView
+
 struct TrophyShelfView: View {
     @Query private var achievements: [Achievement]
-
-    private let allIds: [(id: String, label: String)] = [
-        ("first_workout", "First Workout"),
-        ("first_test", "First Test"),
-        ("streak_3", "3-Day Streak"),
-        ("streak_7", "7-Day Streak"),
-        ("streak_14", "14-Day Streak"),
-        ("streak_30", "30-Day Streak"),
-        ("streak_60", "60-Day Streak"),
-        ("streak_100", "100-Day Streak"),
-        ("sessions_5", "5 Sessions"),
-        ("sessions_10", "10 Sessions"),
-        ("sessions_25", "25 Sessions"),
-        ("sessions_50", "50 Sessions"),
-        ("sessions_100", "100 Sessions"),
-        ("the_full_set", "The Full Set"),
-        ("test_gauntlet", "Test Gauntlet"),
-        ("program_complete", "Program Complete"),
-    ]
+    @Query private var enrolments: [ExerciseEnrolment]
 
     var body: some View {
+        let badges = buildBadges()
         let earnedIds = Set(achievements.map(\.id))
-        ScrollView {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))], spacing: 20) {
-                ForEach(allIds, id: \.id) { item in
-                    TrophyBadge(
-                        label: item.label,
-                        earned: earnedIds.contains(item.id),
-                        achievement: achievements.first { $0.id == item.id }
-                    )
+
+        if badges.isEmpty {
+            emptyState
+                .navigationTitle("Achievements")
+        } else {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    ForEach(sections(from: badges, earnedIds: earnedIds), id: \.category) { section in
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text(section.title)
+                                .font(.headline)
+                                .foregroundStyle(.secondary)
+                                .padding(.horizontal)
+
+                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))], spacing: 20) {
+                                ForEach(section.badges, id: \.id) { definition in
+                                    TrophyBadge(
+                                        definition: definition,
+                                        achievement: achievements.first { $0.id == definition.id }
+                                    )
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                    }
                 }
+                .padding(.vertical)
             }
-            .padding()
+            .navigationTitle("Achievements")
         }
-        .navigationTitle("Achievements")
+    }
+
+    // MARK: - Private
+
+    private var emptyState: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "star.fill")
+                .font(.system(size: 40))
+                .foregroundStyle(.secondary)
+            Text("Complete a workout to earn your first achievement.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding()
+    }
+
+    /// Builds the full ordered badge list: static badges + per-exercise dynamic badges.
+    private func buildBadges() -> [BadgeDefinition] {
+        var result = BadgeDefinition.staticBadges
+
+        // Active enrolment ghost badges
+        let activeEnrolments = enrolments.filter(\.isActive)
+        let activeExerciseIds = Set(activeEnrolments.compactMap { $0.exerciseDefinition?.exerciseId })
+
+        for enrolment in activeEnrolments {
+            guard let def = enrolment.exerciseDefinition else { continue }
+            let name = def.name
+            let exId = def.exerciseId
+            result.append(BadgeDefinition(
+                id: "sessions_10_\(exId)",
+                label: "\(name) × 10",
+                category: "consistency",
+                description: "Complete 10 sessions of this exercise"
+            ))
+            result.append(BadgeDefinition(
+                id: "personal_best_\(exId)",
+                label: "\(name) PB",
+                category: "performance",
+                description: "Your highest total rep count for this exercise"
+            ))
+        }
+
+        // Earned badges from now-inactive enrolments (show as earned even without ghost)
+        let earnedPerExercise = achievements.filter { a in
+            (a.id.hasPrefix("sessions_10_") || a.id.hasPrefix("personal_best_"))
+            && !(activeExerciseIds.contains(a.exerciseId ?? ""))
+        }
+        for achievement in earnedPerExercise {
+            guard let exId = achievement.exerciseId,
+                  !result.contains(where: { $0.id == achievement.id }) else { continue }
+            let name = exId.replacingOccurrences(of: "_", with: " ").capitalized
+            if achievement.id.hasPrefix("sessions_10_") {
+                result.append(BadgeDefinition(
+                    id: achievement.id,
+                    label: "\(name) × 10",
+                    category: "consistency",
+                    description: "Complete 10 sessions of this exercise"
+                ))
+            } else {
+                result.append(BadgeDefinition(
+                    id: achievement.id,
+                    label: "\(name) PB",
+                    category: "performance",
+                    description: "Your highest total rep count for this exercise"
+                ))
+            }
+        }
+
+        return result
+    }
+
+    private struct Section {
+        let category: String
+        let title: String
+        let badges: [BadgeDefinition]
+    }
+
+    private static let sectionOrder: [(category: String, title: String)] = [
+        ("milestone", "Milestones"),
+        ("streak", "Streaks"),
+        ("consistency", "Consistency"),
+        ("performance", "Performance"),
+        ("journey", "Journey"),
+    ]
+
+    private func sections(from badges: [BadgeDefinition], earnedIds: Set<String>) -> [Section] {
+        Self.sectionOrder.compactMap { entry in
+            let matching = badges.filter { $0.category == entry.category }
+            guard !matching.isEmpty else { return nil }
+            return Section(category: entry.category, title: entry.title, badges: matching)
+        }
     }
 }
 
-struct TrophyBadge: View {
-    let label: String
-    let earned: Bool
+// MARK: - TrophyBadge
+
+private struct TrophyBadge: View {
+    let definition: BadgeDefinition
     let achievement: Achievement?
     @State private var showDetail = false
 
+    private var earned: Bool { achievement != nil }
+
     var body: some View {
         VStack(spacing: 6) {
-            Image(systemName: earned ? "trophy.fill" : "trophy")
-                .font(.system(size: 32))
-                .foregroundStyle(earned ? .yellow : Color.secondary.opacity(0.4))
-            Text(label)
+            AchievementBadgeCircle(
+                category: definition.category,
+                earned: earned,
+                diameter: 56,
+                iconSize: 28
+            )
+
+            Text(definition.label)
                 .font(.caption2)
                 .multilineTextAlignment(.center)
-                .foregroundStyle(earned ? Color.primary : Color.secondary.opacity(0.5))
-            if let value = achievement?.numericValue, earned {
-                Text("\(value)")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+                .foregroundStyle(earned ? Color.primary : Color.secondary)
+
+            if let a = achievement {
+                if let value = a.numericValue {
+                    Text("\(value) reps")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text(a.unlockedAt.formatted(date: .abbreviated, time: .omitted))
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
         .frame(width: 80)
         .onTapGesture { showDetail = true }
         .sheet(isPresented: $showDetail) {
-            TrophyDetailSheet(label: label, earned: earned, achievement: achievement)
+            TrophyDetailSheet(definition: definition, achievement: achievement)
         }
     }
 }
 
-struct TrophyDetailSheet: View {
-    let label: String
-    let earned: Bool
+// MARK: - TrophyDetailSheet
+
+private struct TrophyDetailSheet: View {
+    let definition: BadgeDefinition
     let achievement: Achievement?
     @Environment(\.dismiss) private var dismiss
+
+    private var earned: Bool { achievement != nil }
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
-                Image(systemName: earned ? "trophy.fill" : "trophy")
-                    .font(.system(size: 60))
-                    .foregroundStyle(earned ? .yellow : .secondary)
-                Text(label).font(.title2).fontWeight(.bold)
-                if earned, let date = achievement?.unlockedAt {
-                    Text("Earned \(date.formatted(date: .abbreviated, time: .omitted))")
+                AchievementBadgeCircle(
+                    category: definition.category,
+                    earned: earned,
+                    diameter: 100,
+                    iconSize: 44
+                )
+
+                Text(definition.label)
+                    .font(.title2)
+                    .fontWeight(.bold)
+
+                Text(definition.description)
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+
+                if let a = achievement {
+                    Text(a.unlockedAt.formatted(date: .abbreviated, time: .omitted))
+                        .font(.caption)
                         .foregroundStyle(.secondary)
+                    if let value = a.numericValue {
+                        Text("Personal best: \(value) reps")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 } else {
-                    Text("Not yet earned").foregroundStyle(.secondary)
+                    Text("Not yet earned")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
+
+                Spacer()
             }
             .padding()
             .toolbar {
