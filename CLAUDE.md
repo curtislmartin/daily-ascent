@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Daily Ascent is an iOS + watchOS bodyweight training app with 6 exercises (Push-Ups, Squats, Sit-Ups, Pull-Ups, Glute Bridges, Dead Bugs), each with 3 progressive levels. Users enrol in exercises, follow prescribed set/rep schemes, and progress through levels by passing max-rep tests. The app features injury-aware scheduling, two rep counting modes, and collects anonymous sensor data for future ML-based auto rep counting.
+Daily Ascent is an iOS + watchOS bodyweight training app with 9 exercises (Push-Ups, Squats, Pull-Ups, Dips, Rows, Hip Hinge, Spinal Extension, Plank, Dead Bugs), each with 3 progressive levels. Users enrol in exercises, follow prescribed set/rep schemes, and progress through levels by passing max-rep tests. The app features injury-aware scheduling, two rep counting modes, and collects anonymous sensor data for future ML-based auto rep counting.
 
 ## Specification Documents
 
@@ -11,7 +11,7 @@ Read these before writing any code. They are the source of truth for all feature
 | Document | Purpose | Read When |
 |---|---|---|
 | `files/bodyweight-ux-design-v2.md` | Full UX spec: screens, flows, scheduling rules, privacy, monetisation | Always — product requirements |
-| `files/exercise-data.json` | All exercise progressions: 6 exercises, 18 levels, ~300 days | Building data loader or any UI showing sets/reps |
+| `files/exercise-data.json` | All exercise progressions: 9 exercises, 27 levels | Building data loader or any UI showing sets/reps |
 | `files/data-model.md` | SwiftData schema: all entities, relationships, enums, indexes, transfer DTOs | Building any data layer code |
 | `files/scheduling-engine.md` | Scheduling algorithms with pseudocode and 12 test cases | Building the scheduling engine |
 | `files/architecture.md` | Project structure, target config, state management, navigation, services | Always — structural decisions |
@@ -27,17 +27,6 @@ Read these before writing any code. They are the source of truth for all feature
 - **Signing:** Automatic, development team configured in Xcode
 - **Simulator:** Use iPhone 16 Pro and Apple Watch Series 10 for testing
 - **No third-party dependencies** unless explicitly approved. The app uses only Apple frameworks.
-
-## Agent Skills
-
-The following agent skills are installed and must be followed:
-
-- **SwiftUI Pro** — all UI patterns, navigation, state management
-- **SwiftData Pro** — all data model code, queries, relationships
-- **Swift Concurrency Pro** — all async code, actors, bridging
-- **Swift Testing Pro** — all test code
-
-When these skills conflict with the spec documents, the spec documents take precedence (they were written with the skills in mind).
 
 ## Code Style
 
@@ -162,28 +151,6 @@ struct SchedulingEngineTests {
     }
 }
 ```
-
-## Build Order
-
-Follow this sequence. Each step should be complete with tests before starting the next.
-
-1. **Shared package: Models + Enums** — SwiftData entities from `data-model.md`
-2. **Shared package: ExerciseDataLoader** — parse `exercise-data.json`, seed ModelContext
-3. **Shared package: SchedulingEngine** — all algorithms from `scheduling-engine.md`, full test coverage
-4. **Shared package: ConflictDetector + Resolver** — conflict detection and resolution, tested
-5. **Shared package: StreakCalculator** — streak logic, tested
-6. **iOS app shell** — App entry point, ModelContainer, tab navigation, empty views
-7. **Onboarding** — EnrolmentView, DataConsentView. Seeds data, creates enrolments.
-8. **Today dashboard** — TodayView + TodayViewModel. Shows due exercises with conflict warnings.
-9. **Workout session** — Both counting modes, rest timers, exercise completion, test day flow
-10. **Program view** — Progress bars, exercise detail, level navigation
-11. **Settings** — Rest timers, counting modes, privacy toggles
-12. **WatchConnectivity** — iPhone service, schedule push, completion report handling
-13. **Watch app** — Today view, workout flow, result sync
-14. **HealthKit** — Authorization, workout logging
-15. **Sensor recording** — Core Motion service on both devices, file management
-16. **Background upload** — BGProcessingTask, Supabase upload pipeline
-17. **Streak integration** — Wire calculator into dashboard and history
 
 ## What NOT To Do
 

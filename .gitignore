@@ -1,6 +1,10 @@
 .DS_Store
+**/.DS_Store
 inch/inch/Secrets.plist
 .worktrees/
+
+# Xcode build logs
+Shared/Build *.txt
 
 # Claude Code / AI tooling
 .claude/
