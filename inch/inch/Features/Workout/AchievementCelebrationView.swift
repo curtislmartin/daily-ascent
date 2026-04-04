@@ -7,6 +7,8 @@ struct AchievementCelebrationView: View {
     let onDismiss: () -> Void
     @State private var badgeScale: Double = 0.1
 
+    private var accentColor: Color { achievementStyle(for: achievement.category).color }
+
     var body: some View {
         ZStack {
             Color.black.opacity(0.85).ignoresSafeArea()
@@ -15,23 +17,27 @@ struct AchievementCelebrationView: View {
                 ConfettiView()
             } else {
                 Circle()
-                    .fill(.yellow.opacity(0.3))
+                    .fill(accentColor.opacity(0.3))
                     .frame(width: 300, height: 300)
                     .blur(radius: 40)
             }
 
             VStack(spacing: 32) {
                 Spacer()
-                Image(systemName: "trophy.fill")
-                    .font(.system(size: 80))
-                    .foregroundStyle(.yellow)
-                    .scaleEffect(badgeScale)
-                    .onAppear {
-                        withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
-                            badgeScale = 1.0
-                        }
+
+                AchievementBadgeCircle(
+                    category: achievement.category,
+                    earned: true,
+                    diameter: 100,
+                    iconSize: 44
+                )
+                .scaleEffect(badgeScale)
+                .onAppear {
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
+                        badgeScale = 1.0
                     }
-                    .sensoryFeedback(.impact(weight: .heavy), trigger: true)
+                }
+                .sensoryFeedback(.impact(weight: .heavy), trigger: true)
 
                 VStack(spacing: 8) {
                     Text("Achievement Unlocked")
