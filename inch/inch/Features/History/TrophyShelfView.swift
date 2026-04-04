@@ -10,7 +10,7 @@ struct TrophyShelfView: View {
 
     var body: some View {
         let badges = buildBadges()
-        let achievementById = Dictionary(uniqueKeysWithValues: achievements.map { ($0.id, $0) })
+        let achievementById = Dictionary(achievements.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
 
         if enrolments.filter(\.isActive).isEmpty && achievements.isEmpty {
             VStack(spacing: 12) {
