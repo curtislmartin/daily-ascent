@@ -71,8 +71,10 @@ Core Motion captures accelerometer and gyroscope data during every set on both i
 
 Two modes, selectable per exercise in Settings:
 
-- **Real-time** — motion-based counting using device accelerometer with exercise-specific thresholds
-- **Manual** — user enters reps after completing the set
+- **Real-time** — tap the screen once per rep as you go; sensor data is captured in parallel for future ML-based auto-counting
+- **Post-set** — rest timer runs during the set, then confirm how many reps you completed
+
+Time-based exercises (e.g. Plank) use a third mode automatically: a countdown timer with no rep entry.
 
 ### State Management
 
@@ -160,7 +162,6 @@ inch-project/
 | `DayPrescription` | Per-day rep targets for one level |
 | `ExerciseEnrolment` | User's enrolment state: current level, day, next scheduled date |
 | `CompletedSet` | Record of one completed set (reps, duration, recording reference) |
-| `DifficultyRating` | Post-set perceived difficulty, linked to CompletedSet |
 | `SensorRecording` | Metadata for a captured motion file |
 | `UserSettings` | App-wide preferences (counting mode, rest timers, consent, notifications) |
 | `StreakState` | Current streak count and last-updated date |
