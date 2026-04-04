@@ -24,7 +24,7 @@ Read these before writing any code. They are the source of truth for all feature
 | Document | Purpose | Read When |
 |---|---|---|
 | `files/bodyweight-ux-design-v2.md` | Full UX spec: screens, flows, scheduling rules, privacy, monetisation | Always — product requirements |
-| `files/exercise-data.json` | All exercise progressions: 9 exercises, 27 levels | Building data loader or any UI showing sets/reps |
+| `Shared/Sources/InchShared/Resources/exercise-data.json` | All exercise progressions: 9 exercises, 27 levels | Building data loader or any UI showing sets/reps |
 | `files/data-model.md` | SwiftData schema: all entities, relationships, enums, indexes, transfer DTOs | Building any data layer code |
 | `files/scheduling-engine.md` | Scheduling algorithms with pseudocode and 12 test cases | Building the scheduling engine |
 | `files/architecture.md` | Project structure, target config, state management, navigation, services | Always — structural decisions |

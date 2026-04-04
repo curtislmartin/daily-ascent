@@ -137,7 +137,7 @@ struct PrivacySettingsView: View {
             Text("Data")
         } footer: {
             if settings?.motionDataUploadConsented == true {
-                Text("Contributed sensor data is uploaded with no identifier of any kind — not even a random ID. It cannot be linked back to you or your device, so individual deletion is not possible.")
+                Text("Contributed sensor data is uploaded with a per-session random ID that groups sets from the same workout together, improving training data quality. This ID is not linked to your identity, your device, or any persistent identifier — it is generated fresh each workout and cannot be used to trace data back to you. Individual deletion is not possible.")
             }
         }
     }
