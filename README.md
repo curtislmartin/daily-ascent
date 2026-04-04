@@ -6,10 +6,10 @@ Built as a personal project to explore the full breadth of the Apple SDK — fro
 
 <p align="center">
   <img src="screenshots/today.PNG" width="18%" alt="Today" />
-  <img src="screenshots/workout.PNG" width="18%" alt="Workout" />
   <img src="screenshots/program.PNG" width="18%" alt="Program" />
   <img src="screenshots/exercise.PNG" width="18%" alt="Exercise detail" />
   <img src="screenshots/me.PNG" width="18%" alt="Stats" />
+  <img src="screenshots/workout.PNG" width="18%" alt="Workout" />
 </p>
 
 ---
