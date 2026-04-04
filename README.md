@@ -193,3 +193,7 @@ Signing is automatic. Before building, create `inch/inch/Secrets.plist` (gitigno
 ```
 
 Without this file the app builds and runs normally — sensor upload is simply skipped. Upload only activates when the user has granted data consent in onboarding.
+
+---
+
+Previously developed under the name *Inch*.
