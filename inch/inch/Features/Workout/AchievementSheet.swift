@@ -8,16 +8,19 @@ struct AchievementSheet: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            Image(systemName: "trophy.fill")
-                .font(.system(size: 64))
-                .foregroundStyle(.yellow)
-                .scaleEffect(badgeScale)
-                .onAppear {
-                    withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
-                        badgeScale = 1.0
-                    }
+            AchievementBadgeCircle(
+                category: achievement.category,
+                earned: true,
+                diameter: 100,
+                iconSize: 44
+            )
+            .scaleEffect(badgeScale)
+            .onAppear {
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
+                    badgeScale = 1.0
                 }
-                .sensoryFeedback(.success, trigger: true)
+            }
+            .sensoryFeedback(.success, trigger: true)
 
             VStack(spacing: 8) {
                 Text("Achievement Unlocked")
