@@ -1,6 +1,6 @@
 # Daily Ascent — Bodyweight Training App
 
-iOS + watchOS app that guides users through structured bodyweight training programs. Six exercises, three progressive levels each. Users enrol in exercises, follow a prescribed set/rep scheme per day, and advance through levels by passing a max-rep test.
+iOS + watchOS app that guides users through structured bodyweight training programs. Nine exercises, three progressive levels each. Users enrol in exercises, follow a prescribed set/rep scheme per day, and advance through levels by passing a max-rep test.
 
 Built as a personal project to explore the full breadth of the Apple SDK — from strict Swift 6 concurrency to Core Motion sensor pipelines to a custom scheduling engine.
 
@@ -34,10 +34,13 @@ Built as a personal project to explore the full breadth of the Apple SDK — fro
 |---|---|---|---|
 | Push-Ups | Upper (push) | 3 | 20 → 50 → 100 |
 | Squats | Lower | 3 | 20 → 100 → 150 |
-| Sit-Ups | Core (flexion) | 3 | 20 → 60 → 100 |
 | Pull-Ups | Upper (pull) | 3 | 10 → 20 → 30 |
-| Glute Bridges | Lower (posterior) | 3 | 30 → 100 → 150 |
-| Dead Bugs | Core (anti-extension) | 3 | 20 → 50 → 80 |
+| Dips | Upper (push) | 3 | 20 → 15 → 10 |
+| Rows | Upper (pull) | 3 | 15 → 20 → 12 |
+| Hip Hinge | Lower (posterior) | 3 | 30 → 20 → 20 |
+| Spinal Extension | Lower (posterior) | 3 | 20 → 20 → 20 |
+| Plank | Core (stability) | 3 | 60s → 90s → 120s |
+| Dead Bugs | Core (stability) | 3 | 20 → 50 → 80 |
 
 ---
 
