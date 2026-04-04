@@ -10,14 +10,25 @@ struct TrophyShelfView: View {
 
     var body: some View {
         let badges = buildBadges()
+        let achievementById = Dictionary(uniqueKeysWithValues: achievements.map { ($0.id, $0) })
 
-        if badges.isEmpty {
-            emptyState
-                .navigationTitle("Achievements")
+        if enrolments.filter(\.isActive).isEmpty && achievements.isEmpty {
+            VStack(spacing: 12) {
+                Image(systemName: "star.fill")
+                    .font(.system(size: 40))
+                    .foregroundStyle(.secondary)
+                Text("Complete a workout to earn your first achievement.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding()
+            .navigationTitle("Achievements")
         } else {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    ForEach(sections(from: badges), id: \.category) { section in
+                    ForEach(Self.sections(from: badges), id: \.category) { section in
                         VStack(alignment: .leading, spacing: 12) {
                             Text(section.title)
                                 .font(.headline)
@@ -28,7 +39,7 @@ struct TrophyShelfView: View {
                                 ForEach(section.badges, id: \.id) { definition in
                                     TrophyBadge(
                                         definition: definition,
-                                        achievement: achievements.first { $0.id == definition.id }
+                                        achievement: achievementById[definition.id]
                                     )
                                 }
                             }
@@ -43,20 +54,6 @@ struct TrophyShelfView: View {
     }
 
     // MARK: - Private
-
-    private var emptyState: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "star.fill")
-                .font(.system(size: 40))
-                .foregroundStyle(.secondary)
-            Text("Complete a workout to earn your first achievement.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding()
-    }
 
     /// Builds the full ordered badge list: static badges + per-exercise dynamic badges.
     private func buildBadges() -> [BadgeDefinition] {
@@ -127,7 +124,7 @@ struct TrophyShelfView: View {
         ("journey", "Journey"),
     ]
 
-    private func sections(from badges: [BadgeDefinition]) -> [Section] {
+    private static func sections(from badges: [BadgeDefinition]) -> [Section] {
         Self.sectionOrder.compactMap { entry in
             let matching = badges.filter { $0.category == entry.category }
             guard !matching.isEmpty else { return nil }
@@ -161,7 +158,7 @@ private struct TrophyBadge: View {
 
             if let a = achievement {
                 if let value = a.numericValue {
-                    Text("\(value) reps")
+                    Text("\(value.formatted()) reps")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 } else {
@@ -212,7 +209,7 @@ private struct TrophyDetailSheet: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     if let value = a.numericValue {
-                        Text("Personal best: \(value) reps")
+                        Text("Personal best: \(value.formatted()) reps")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
