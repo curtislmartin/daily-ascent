@@ -94,35 +94,16 @@ public struct StreakCalculator: Sendable {
     ///
     /// - Parameters:
     ///   - currentStreak: The user's current streak value.
-    ///   - lastActiveDate: The last date the user completed a workout.
-    ///   - lastDueDate: The last date exercises were due (may already be today if
-    ///     `updateLastDueDateIfNeeded` has run this session).
-    ///   - today: Today's date.
-    ///   - isRestDay: Whether today is a rest day. Rest days never break a streak.
-    ///
-    /// The `lastDueDate == today` guard is essential: `TodayView` calls `loadToday` from
-    /// both `.task` and `.onAppear`. The first call advances `lastDueDate` to today; without
-    /// this guard the second call would see `lastActive (yesterday) < lastDue (today)` and
-    /// falsely break the streak before the user has had a chance to work out.
+    ///   - hasOverdueExercises: Whether any active enrolment has a `nextScheduledDate` strictly
+    ///     before today. This is the authoritative signal for a missed session — `nextScheduledDate`
+    ///     only advances when the user completes a workout, so a past date means the session was
+    ///     skipped regardless of whether the app was opened that day.
     public func shouldBreakStreak(
         currentStreak: Int,
-        lastActiveDate: Date?,
-        lastDueDate: Date?,
-        today: Date,
-        isRestDay: Bool
+        hasOverdueExercises: Bool
     ) -> Bool {
-        guard !isRestDay else { return false }
         guard currentStreak > 0 else { return false }
-        guard let lastActive = lastActiveDate else { return false }
-        // Without lastDueDate there is no reliable reference — skip to avoid false resets.
-        guard let lastDue = lastDueDate else { return false }
-        // lastDue may already be today if updateLastDueDateIfNeeded ran earlier this session.
-        // The user hasn't had a chance to work out yet — don't penalise the double-call.
-        guard !Calendar.current.isDate(lastDue, inSameDayAs: today) else { return false }
-
-        let lastDay = Calendar.current.startOfDay(for: lastActive)
-        let referenceDay = Calendar.current.startOfDay(for: lastDue)
-        return lastDay < referenceDay
+        return hasOverdueExercises
     }
 
     /// SwiftData variant — reads and writes the persisted StreakState model.

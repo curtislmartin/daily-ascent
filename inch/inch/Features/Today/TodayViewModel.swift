@@ -101,6 +101,12 @@ final class TodayViewModel {
         dueExercises = dueToday + completedEnrolments
         isRestDay = dueExercises.isEmpty
 
+        // Any active enrolment whose nextScheduledDate is strictly before today was missed.
+        let hasOverdueExercises = dueToday.contains { enrolment in
+            guard let scheduled = enrolment.nextScheduledDate else { return false }
+            return Calendar.current.startOfDay(for: scheduled) < today
+        }
+
         computeNextTraining(from: all, after: today)
 
         if showWarnings {
@@ -109,7 +115,7 @@ final class TodayViewModel {
             conflictWarnings = [:]
         }
         deduplicateStreakRecordsIfNeeded(context: context)
-        resetStreakForMissedDayIfNeeded(context: context, today: today)
+        resetStreakForMissedDayIfNeeded(context: context, hasOverdueExercises: hasOverdueExercises)
         if !isRestDay {
             updateLastDueDateIfNeeded(context: context, today: today)
         }
@@ -202,15 +208,12 @@ final class TodayViewModel {
         try? context.save()
     }
 
-    private func resetStreakForMissedDayIfNeeded(context: ModelContext, today: Date) {
+    private func resetStreakForMissedDayIfNeeded(context: ModelContext, hasOverdueExercises: Bool) {
         let streaks = (try? context.fetch(FetchDescriptor<StreakState>())) ?? []
         guard let streakState = streaks.first else { return }
         guard StreakCalculator().shouldBreakStreak(
             currentStreak: streakState.currentStreak,
-            lastActiveDate: streakState.lastActiveDate,
-            lastDueDate: streakState.lastDueDate,
-            today: today,
-            isRestDay: isRestDay
+            hasOverdueExercises: hasOverdueExercises
         ) else { return }
 
         let brokenStreak = streakState.currentStreak

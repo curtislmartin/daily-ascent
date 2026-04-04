@@ -156,86 +156,33 @@ struct StreakCalculatorTests {
     // MARK: - shouldBreakStreak
 
     @Test(.tags(.streak))
-    func shouldBreakStreak_missedDay_returnsTrue() {
-        // Trained March 30, skipped March 31, opens app April 1
-        #expect(calc.shouldBreakStreak(
-            currentStreak: 2,
-            lastActiveDate: makeDate(2026, 3, 30),
-            lastDueDate: makeDate(2026, 3, 31),
-            today: makeDate(2026, 4, 1),
-            isRestDay: false
-        ) == true)
+    func shouldBreakStreak_withOverdueExercises_returnsTrue() {
+        // Overdue exercises mean a scheduled session was missed — streak should break.
+        #expect(calc.shouldBreakStreak(currentStreak: 2, hasOverdueExercises: true) == true)
     }
 
     @Test(.tags(.streak))
-    func shouldBreakStreak_trainedOnLastDueDate_returnsFalse() {
-        // Trained March 31, opens app April 1, lastDue still March 31
-        #expect(calc.shouldBreakStreak(
-            currentStreak: 2,
-            lastActiveDate: makeDate(2026, 3, 31),
-            lastDueDate: makeDate(2026, 3, 31),
-            today: makeDate(2026, 4, 1),
-            isRestDay: false
-        ) == false)
-    }
-
-    @Test(.tags(.streak))
-    func shouldBreakStreak_lastDueIsToday_returnsFalse() {
-        // loadToday was already called once this session — lastDueDate has been
-        // advanced to today. The second call must not falsely break the streak.
-        #expect(calc.shouldBreakStreak(
-            currentStreak: 2,
-            lastActiveDate: makeDate(2026, 3, 31),
-            lastDueDate: makeDate(2026, 4, 1),   // already advanced to today
-            today: makeDate(2026, 4, 1),
-            isRestDay: false
-        ) == false)
-    }
-
-    @Test(.tags(.streak))
-    func shouldBreakStreak_acrossMonthBoundary_doubleCallDoesNotBreak() {
-        // Exact scenario that caused the April 1 bug:
-        // Trained March 31, double-load on April 1 after lastDue advanced to April 1.
-        #expect(calc.shouldBreakStreak(
-            currentStreak: 3,
-            lastActiveDate: makeDate(2026, 3, 31),
-            lastDueDate: makeDate(2026, 4, 1),
-            today: makeDate(2026, 4, 1),
-            isRestDay: false
-        ) == false)
-    }
-
-    @Test(.tags(.streak))
-    func shouldBreakStreak_restDay_returnsFalse() {
-        #expect(calc.shouldBreakStreak(
-            currentStreak: 5,
-            lastActiveDate: makeDate(2026, 3, 30),
-            lastDueDate: makeDate(2026, 3, 30),
-            today: makeDate(2026, 4, 1),
-            isRestDay: true
-        ) == false)
+    func shouldBreakStreak_noOverdueExercises_returnsFalse() {
+        // All exercises due today or later — nothing was missed.
+        #expect(calc.shouldBreakStreak(currentStreak: 2, hasOverdueExercises: false) == false)
     }
 
     @Test(.tags(.streak))
     func shouldBreakStreak_noCurrentStreak_returnsFalse() {
-        #expect(calc.shouldBreakStreak(
-            currentStreak: 0,
-            lastActiveDate: makeDate(2026, 3, 30),
-            lastDueDate: makeDate(2026, 3, 31),
-            today: makeDate(2026, 4, 1),
-            isRestDay: false
-        ) == false)
+        // No streak to break regardless of overdue state.
+        #expect(calc.shouldBreakStreak(currentStreak: 0, hasOverdueExercises: true) == false)
     }
 
     @Test(.tags(.streak))
-    func shouldBreakStreak_noLastDueDate_returnsFalse() {
-        // Upgrade safety: pre-existing installs may have no lastDueDate
-        #expect(calc.shouldBreakStreak(
-            currentStreak: 3,
-            lastActiveDate: makeDate(2026, 3, 30),
-            lastDueDate: nil,
-            today: makeDate(2026, 4, 1),
-            isRestDay: false
-        ) == false)
+    func shouldBreakStreak_restDay_returnsFalse() {
+        // On a rest day no exercises are overdue, so hasOverdueExercises is false.
+        #expect(calc.shouldBreakStreak(currentStreak: 5, hasOverdueExercises: false) == false)
+    }
+
+    @Test(.tags(.streak))
+    func shouldBreakStreak_missedDayWithoutOpeningApp_returnsTrue() {
+        // The previous bug: user trained D-2, skipped D-1 without opening the app,
+        // opens D. nextScheduledDate is still D-1 → overdue → streak breaks.
+        #expect(calc.shouldBreakStreak(currentStreak: 5, hasOverdueExercises: true) == true)
     }
 }
