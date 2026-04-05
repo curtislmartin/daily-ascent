@@ -2,7 +2,7 @@
 
 > **Effective date:** April 2026
 >
-> **Last updated:** April 2026
+> **Last updated:** April 2026 (added YouTube embed disclosure)
 >
 > **Developer:** Curtis Martin (individual developer, no registered business entity)
 >
@@ -78,7 +78,9 @@ Daily Ascent can save your training sessions to Apple Health as workouts (activi
 
 ## Third-Party Services
 
-Daily Ascent uses Supabase for anonymous sensor data storage (for users who opt in to sharing). No other third-party services, analytics SDKs, advertising frameworks, or tracking tools are included in the app.
+Daily Ascent uses Supabase for anonymous sensor data storage (for users who opt in to sharing).
+
+Exercise demonstration videos are embedded from YouTube (google.com/intl/en/policies/privacy). If you play a video, YouTube may collect data about that interaction in accordance with Google's privacy policy. No other third-party services, analytics SDKs, advertising frameworks, or tracking tools are included in the app.
 
 ---
 
