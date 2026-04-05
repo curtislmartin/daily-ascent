@@ -2,7 +2,7 @@
 
 > **Status:** Brainstorm / bullet-point level. Nothing here is specced at implementation level yet.
 >
-> **Last updated:** 2026-04-03
+> **Last updated:** 2026-04-05
 
 ---
 
@@ -42,6 +42,7 @@ Not a single release — a series of point releases from where we are now (v1.1)
 - Watch complications (WidgetKit complications: accessoryCircular, accessoryCorner, accessoryRectangular, accessoryInline — shows due/completed count or rest day)
 - Training intensity preference (rest gap scaling ±1 day)
 - Post-program maintenance mode (what happens after all L3 tests)
+- **Metronome counting mode** (see below)
 
 v1.9 is the gate. The app should feel complete and polished for free users before anything behind a paywall ships.
 
@@ -66,6 +67,46 @@ ML and AI features ship once there's enough accumulated sensor data to train mea
 ### Unscheduled
 
 (Nothing currently — all features assigned to a release.)
+
+---
+
+## Feature Notes
+
+### Metronome Counting Mode
+
+A third counting mode (`metronome`) for exercises where controlled, slow tempo is the point — Dead Bugs, Spinal Extension, Hip Hinge. The metronome drives the movement with combined audio and haptics so the user doesn't need to watch the screen.
+
+**User experience**
+
+- User starts a set; the metronome begins immediately
+- Each beat = one phase of the movement (e.g. beat 1 = lower/extend, beat 2 = return)
+- Beat interval is configurable per exercise (e.g. 3s for Dead Bugs, 2s for Spinal Extension)
+- After the set, user confirms total reps as normal (same as `post_set_confirmation`)
+- A rep counter on screen increments automatically each full cycle so the user has a reference
+
+**Audio + haptics (both required)**
+
+- **Sound:** a soft click or low tick on every beat — essential because phone vibrations are missed when the device is on a surface or the user is focused on the floor
+- **Haptics (iPhone):** `UIImpactFeedbackGenerator(.light)` on every beat
+- **Haptics (Watch):** `WKInterfaceDevice.current().play(.click)` on every beat — wrist taps are the primary feedback during floor exercises
+
+iPhone ships first; Watch ships in the same release. Both platforms must have both audio and haptics — neither alone is sufficient.
+
+**Audio session**
+
+Use `.ambient` category with `.mixWithOthers` so the metronome doesn't interrupt the user's music (same pattern as the existing workout audio session).
+
+**Data model change**
+
+Add `metronome` case to the `CountingMode` enum. Add `metronomeBeatIntervalSeconds: Double` to the exercise JSON (per exercise, not per level — the tempo is the same across levels, the variation is the movement difficulty).
+
+**Exercises to assign this mode initially**
+
+| Exercise | Beat interval | Rationale |
+|---|---|---|
+| Dead Bugs | 3s | Slow enough to fully extend and hold |
+| Spinal Extension | 2s | Shorter range of motion |
+| Hip Hinge | 2s | Controlled hinge and return |
 
 ---
 
