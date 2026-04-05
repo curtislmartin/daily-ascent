@@ -42,7 +42,7 @@ Not a single release — a series of point releases from where we are now (v1.1)
 - Watch complications (WidgetKit complications: accessoryCircular, accessoryCorner, accessoryRectangular, accessoryInline — shows due/completed count or rest day)
 - Training intensity preference (rest gap scaling ±1 day)
 - Post-program maintenance mode (what happens after all L3 tests)
-- **Metronome counting mode** (see below)
+- ~~**Metronome counting mode**~~ ✅ shipped (build 100)
 
 v1.9 is the gate. The app should feel complete and polished for free users before anything behind a paywall ships.
 
@@ -72,7 +72,7 @@ ML and AI features ship once there's enough accumulated sensor data to train mea
 
 ## Feature Notes
 
-### Metronome Counting Mode
+### Metronome Counting Mode ✅ Shipped (build 100)
 
 A third counting mode (`metronome`) for exercises where controlled, slow tempo is the point — Dead Bugs, Spinal Extension, Hip Hinge. The metronome drives the movement with combined audio and haptics so the user doesn't need to watch the screen.
 
