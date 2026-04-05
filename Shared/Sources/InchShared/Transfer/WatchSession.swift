@@ -13,6 +13,9 @@ public struct WatchSession: Codable, Sendable, Identifiable, Equatable {
     public let restSeconds: Int
     public let countingMode: String
     public let variationName: String?
+    public let metronomeBeatIntervalSeconds: Double
+    public let metronomeBeatPattern: [String]
+    public let metronomeSidesPerRep: Int
 
     public init(
         exerciseId: String,
@@ -25,7 +28,10 @@ public struct WatchSession: Codable, Sendable, Identifiable, Equatable {
         testTarget: Int?,
         restSeconds: Int,
         countingMode: String,
-        variationName: String? = nil
+        variationName: String? = nil,
+        metronomeBeatIntervalSeconds: Double = 0,
+        metronomeBeatPattern: [String] = [],
+        metronomeSidesPerRep: Int = 1
     ) {
         self.exerciseId = exerciseId
         self.exerciseName = exerciseName
@@ -38,5 +44,8 @@ public struct WatchSession: Codable, Sendable, Identifiable, Equatable {
         self.restSeconds = restSeconds
         self.countingMode = countingMode
         self.variationName = variationName
+        self.metronomeBeatIntervalSeconds = metronomeBeatIntervalSeconds
+        self.metronomeBeatPattern = metronomeBeatPattern
+        self.metronomeSidesPerRep = metronomeSidesPerRep
     }
 }

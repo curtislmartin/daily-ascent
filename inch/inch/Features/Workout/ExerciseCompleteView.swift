@@ -142,7 +142,7 @@ struct ExerciseCompleteView: View {
 
     private func isTier1(_ a: Achievement) -> Bool {
         let ids = ["first_workout", "first_test", "streak_3", "sessions_5", "sessions_10"]
-        return ids.contains(a.id) || a.id.hasPrefix("personal_best_")
+        return ids.contains(a.id)
     }
 
     private func isTier2(_ a: Achievement) -> Bool {

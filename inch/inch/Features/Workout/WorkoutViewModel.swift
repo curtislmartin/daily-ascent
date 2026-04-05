@@ -9,6 +9,7 @@ enum WorkoutPhase: Equatable {
     case inTimedSet(targetSeconds: Int)          // active hold (view owns elapsed timer)
     case inSet(startedAt: Date)
     case inRealTimeSet                           // real-time counting active
+    case inMetronomeSet(startedAt: Date)         // metronome-driven set
     case confirming(targetReps: Int, duration: Double)
     case resting(restSeconds: Int)
     case complete
@@ -47,6 +48,9 @@ final class WorkoutViewModel {
     var accentColorHex: String { enrolment?.exerciseDefinition?.color ?? "" }
     var countingMode: CountingMode { enrolment?.exerciseDefinition?.countingMode ?? .postSetConfirmation }
     var restSeconds: Int { enrolment?.exerciseDefinition?.defaultRestSeconds ?? 60 }
+    var metronomeBeatIntervalSeconds: Double { enrolment?.exerciseDefinition?.metronomeBeatIntervalSeconds ?? 1.0 }
+    var metronomeBeatPattern: [String] { enrolment?.exerciseDefinition?.metronomeBeatPattern ?? ["strong"] }
+    var metronomeSidesPerRep: Int { enrolment?.exerciseDefinition?.metronomeSidesPerRep ?? 1 }
     var currentTargetReps: Int {
         if let overridden = overriddenSets {
             return overridden[safe: currentSetIndex] ?? 0
@@ -116,6 +120,16 @@ final class WorkoutViewModel {
 
     func startRealTimeSet() {
         phase = .inRealTimeSet
+    }
+
+    func startMetronomeSet() {
+        phase = .inMetronomeSet(startedAt: .now)
+    }
+
+    func endMetronomeSet(autoCountedReps: Int) {
+        guard case .inMetronomeSet(let startedAt) = phase else { return }
+        let duration = Date.now.timeIntervalSince(startedAt)
+        phase = .confirming(targetReps: autoCountedReps, duration: duration)
     }
 
     func endSet() {

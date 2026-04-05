@@ -46,7 +46,7 @@ struct WorkoutSessionView: View {
     @State private var pendingRecordingURL: URL?
 
     private static let phoneAutoCountedExercises: Set<String> = [
-        "push_ups", "pull_ups", "squats", "hip_hinge", "dead_bugs"
+        "push_ups", "pull_ups", "squats"
     ]
     @State private var realTimeSetStartDate: Date?
     @State private var showingQuitConfirm = false
@@ -66,7 +66,7 @@ struct WorkoutSessionView: View {
         switch viewModel.phase {
         case .loading, .complete:
             false
-        case .inSet, .inRealTimeSet, .preparingTimedSet, .inTimedSet:
+        case .inSet, .inRealTimeSet, .preparingTimedSet, .inTimedSet, .inMetronomeSet:
             true
         default:
             viewModel.currentSetIndex > 0
@@ -84,6 +84,16 @@ struct WorkoutSessionView: View {
                 inSetView
             case .inRealTimeSet:
                 realTimeSetView
+            case .inMetronomeSet:
+                MetronomeSetView(
+                    targetReps: viewModel.currentTargetReps,
+                    beatIntervalSeconds: viewModel.metronomeBeatIntervalSeconds,
+                    beatPattern: viewModel.metronomeBeatPattern,
+                    sidesPerRep: viewModel.metronomeSidesPerRep
+                ) { autoCount in
+                    viewModel.endMetronomeSet(autoCountedReps: autoCount)
+                }
+                .id(viewModel.currentSetIndex)
             case .confirming(let targetReps, let duration):
                 PostSetConfirmationView(targetReps: targetReps, duration: duration) { actual in
                     let url = pendingRecordingURL
@@ -303,6 +313,18 @@ struct WorkoutSessionView: View {
                         )
                     }
                 }
+            case .inMetronomeSet:
+                showHoldPhoneHint = false
+                if sensorConsented {
+                    let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
+                    if dualRecordingEnabled {
+                        watchConnectivity.sendRecordingStart(
+                            exerciseId: exerciseId,
+                            setNumber: viewModel.currentSetIndex + 1,
+                            sessionId: sessionId
+                        )
+                    }
+                }
             case .inTimedSet:
                 showHoldPhoneHint = false
                 if sensorConsented {
@@ -437,6 +459,13 @@ struct WorkoutSessionView: View {
                 Button("Start Hold \(viewModel.currentSetIndex + 1)") {
                     setStartOrientation = UIDevice.current.orientation.stringValue
                     viewModel.startTimedSet()
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+            } else if viewModel.countingMode == .metronome {
+                Button("Start Set \(viewModel.currentSetIndex + 1)") {
+                    showNudge = false
+                    viewModel.startMetronomeSet()
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)

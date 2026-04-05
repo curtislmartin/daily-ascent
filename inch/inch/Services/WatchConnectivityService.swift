@@ -76,7 +76,10 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
                 testTarget: prescription.isTest ? prescription.sets.first : nil,
                 restSeconds: restSeconds,
                 countingMode: modeString,
-                variationName: levelDef.variationName
+                variationName: levelDef.variationName,
+                metronomeBeatIntervalSeconds: def.metronomeBeatIntervalSeconds,
+                metronomeBeatPattern: def.metronomeBeatPattern,
+                metronomeSidesPerRep: def.metronomeSidesPerRep
             ))
         }
 

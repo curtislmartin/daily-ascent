@@ -24,7 +24,10 @@ public struct ExerciseDataLoader: Sendable {
                 color: dto.color,
                 countingMode: CountingMode(rawValue: dto.countingMode) ?? .postSetConfirmation,
                 defaultRestSeconds: dto.defaultRestSeconds,
-                sortOrder: index
+                sortOrder: index,
+                metronomeBeatIntervalSeconds: dto.metronomeBeatIntervalSeconds ?? 0,
+                metronomeBeatPattern: dto.metronomeBeatPattern ?? [],
+                metronomeSidesPerRep: dto.metronomeSidesPerRep ?? 1
             )
             context.insert(exercise)
 
@@ -76,12 +79,18 @@ public struct ExerciseDataLoader: Sendable {
                 exercise = found
                 let mg = MuscleGroup(rawValue: dto.muscleGroup) ?? .upperPush
                 let cm = CountingMode(rawValue: dto.countingMode) ?? .postSetConfirmation
-                if exercise.name != dto.name                             { exercise.name = dto.name; dirty = true }
-                if exercise.color != dto.color                           { exercise.color = dto.color; dirty = true }
-                if exercise.muscleGroup != mg                            { exercise.muscleGroup = mg; dirty = true }
-                if exercise.countingMode != cm                           { exercise.countingMode = cm; dirty = true }
-                if exercise.defaultRestSeconds != dto.defaultRestSeconds { exercise.defaultRestSeconds = dto.defaultRestSeconds; dirty = true }
-                if exercise.sortOrder != index                           { exercise.sortOrder = index; dirty = true }
+                let beatInterval = dto.metronomeBeatIntervalSeconds ?? 0
+                let beatPattern = dto.metronomeBeatPattern ?? []
+                let sidesPerRep = dto.metronomeSidesPerRep ?? 1
+                if exercise.name != dto.name                                         { exercise.name = dto.name; dirty = true }
+                if exercise.color != dto.color                                       { exercise.color = dto.color; dirty = true }
+                if exercise.muscleGroup != mg                                        { exercise.muscleGroup = mg; dirty = true }
+                if exercise.countingMode != cm                                       { exercise.countingMode = cm; dirty = true }
+                if exercise.defaultRestSeconds != dto.defaultRestSeconds             { exercise.defaultRestSeconds = dto.defaultRestSeconds; dirty = true }
+                if exercise.sortOrder != index                                       { exercise.sortOrder = index; dirty = true }
+                if exercise.metronomeBeatIntervalSeconds != beatInterval             { exercise.metronomeBeatIntervalSeconds = beatInterval; dirty = true }
+                if exercise.metronomeBeatPattern != beatPattern                      { exercise.metronomeBeatPattern = beatPattern; dirty = true }
+                if exercise.metronomeSidesPerRep != sidesPerRep                     { exercise.metronomeSidesPerRep = sidesPerRep; dirty = true }
             } else {
                 exercise = ExerciseDefinition(
                     exerciseId: dto.id,
@@ -90,7 +99,10 @@ public struct ExerciseDataLoader: Sendable {
                     color: dto.color,
                     countingMode: CountingMode(rawValue: dto.countingMode) ?? .postSetConfirmation,
                     defaultRestSeconds: dto.defaultRestSeconds,
-                    sortOrder: index
+                    sortOrder: index,
+                    metronomeBeatIntervalSeconds: dto.metronomeBeatIntervalSeconds ?? 0,
+                    metronomeBeatPattern: dto.metronomeBeatPattern ?? [],
+                    metronomeSidesPerRep: dto.metronomeSidesPerRep ?? 1
                 )
                 context.insert(exercise)
                 dirty = true
@@ -165,6 +177,9 @@ struct ExerciseDTO: Decodable {
     let countingMode: String
     let defaultRestSeconds: Int
     let levels: [LevelDTO]
+    let metronomeBeatIntervalSeconds: Double?
+    let metronomeBeatPattern: [String]?
+    let metronomeSidesPerRep: Int?
 }
 
 struct LevelDTO: Decodable {

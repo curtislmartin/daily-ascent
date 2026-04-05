@@ -61,6 +61,15 @@ struct WatchWorkoutView: View {
                     ) { actualDuration in
                         viewModel.endSetTimed(duration: actualDuration)
                     }
+                } else if session.countingMode == "metronome" {
+                    WatchMetronomeSetView(
+                        targetReps: viewModel.targetReps,
+                        beatIntervalSeconds: session.metronomeBeatIntervalSeconds,
+                        beatPattern: session.metronomeBeatPattern,
+                        sidesPerRep: session.metronomeSidesPerRep
+                    ) { count in
+                        viewModel.endSetRealTime(count: count)
+                    }
                 } else {
                     WatchInSetView(
                         session: session,

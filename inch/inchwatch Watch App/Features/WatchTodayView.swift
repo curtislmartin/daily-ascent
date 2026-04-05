@@ -17,8 +17,7 @@ struct WatchTodayView: View {
                     activeSession = session
                 } label: {
                     HStack(alignment: .center, spacing: 8) {
-                        Image(systemName: exerciseIcon(for: session.exerciseId))
-                            .font(.title3)
+                        exerciseImage(for: session.exerciseId)
                         VStack(alignment: .leading, spacing: 4) {
                             Text(session.exerciseName)
                                 .font(.headline)
@@ -50,17 +49,33 @@ struct WatchTodayView: View {
         }
     }
 
+    @ViewBuilder
+    private func exerciseImage(for exerciseId: String) -> some View {
+        switch exerciseId {
+        case "push_ups", "plank":
+            Image("push_ups_icon")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 20, height: 20)
+        case "hip_hinge":
+            Image("glute_bridges_icon")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 20, height: 20)
+        default:
+            Image(systemName: exerciseIcon(for: exerciseId))
+                .font(.title3)
+        }
+    }
+
     private func exerciseIcon(for exerciseId: String) -> String {
         switch exerciseId {
-        case "push_ups":         return "figure.strengthtraining.traditional"
-        case "squats":           return "figure.gymnastics"
-        case "pull_ups":         return "figure.climbing"
-        case "hip_hinge":        return "figure.flexibility"
-        case "dead_bugs":        return "figure.cooldown"
-        case "spinal_extension": return "figure.pilates"
-        case "plank":            return "figure.core.training"
-        case "rows":             return "figure.rowing"
-        case "dips":             return "figure.cross.training"
+        case "squats":           return "figure.cross.training"
+        case "pull_ups":         return "figure.play"
+        case "dead_bugs":        return "figure.core.training"
+        case "spinal_extension": return "figure.yoga"
+        case "rows":             return "figure.indoor.rowing"
+        case "dips":             return "figure.rolling"
         default:                 return "figure.strengthtraining.functional"
         }
     }

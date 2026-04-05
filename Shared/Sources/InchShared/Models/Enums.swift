@@ -34,6 +34,7 @@ public enum CountingMode: String, Codable, Sendable {
     case realTime = "real_time"
     case postSetConfirmation = "post_set_confirmation"
     case timed = "timed"
+    case metronome = "metronome"
 }
 
 public enum SensorDevice: String, Codable, Sendable {

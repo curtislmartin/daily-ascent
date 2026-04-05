@@ -10,4 +10,9 @@ enum WorkoutSounds {
     static func playGo() {
         AudioServicesPlaySystemSound(1322)
     }
+
+    /// Soft click played on every metronome beat.
+    static func playMetronomeBeat() {
+        AudioServicesPlaySystemSound(1306) // Tink — lighter than Tock, distinct from rest timer
+    }
 }

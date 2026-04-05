@@ -1601,8 +1601,11 @@
       "name": "Dead Bugs",
       "muscleGroup": "core_stability",
       "color": "#16A34A",
-      "countingMode": "real_time",
+      "countingMode": "metronome",
       "defaultRestSeconds": 45,
+      "metronomeBeatIntervalSeconds": 0.75,
+      "metronomeBeatPattern": ["strong", "regular", "strong", "regular"],
+      "metronomeSidesPerRep": 2,
       "levels": [
         {
           "level": 1,
@@ -2049,8 +2052,11 @@
       "name": "Hip Hinge",
       "muscleGroup": "lower_posterior",
       "color": "#8B5CF6",
-      "countingMode": "post_set_confirmation",
+      "countingMode": "metronome",
       "defaultRestSeconds": 75,
+      "metronomeBeatIntervalSeconds": 1.5,
+      "metronomeBeatPattern": ["strong", "regular"],
+      "metronomeSidesPerRep": 1,
       "levels": [
         {
           "level": 1,
@@ -2389,8 +2395,11 @@
       "name": "Spinal Extension",
       "muscleGroup": "lower_posterior",
       "color": "#8B6914",
-      "countingMode": "post_set_confirmation",
+      "countingMode": "metronome",
       "defaultRestSeconds": 60,
+      "metronomeBeatIntervalSeconds": 2.0,
+      "metronomeBeatPattern": ["strong", "strong"],
+      "metronomeSidesPerRep": 1,
       "levels": [
         {
           "level": 1,
