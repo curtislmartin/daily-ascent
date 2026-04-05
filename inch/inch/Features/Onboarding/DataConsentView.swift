@@ -31,6 +31,7 @@ struct DataConsentView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
+            // swiftlint:disable:next line_length
             Text("If you opt in, your sensor data and optional profile details (age range, height, biological sex, and activity level) are uploaded anonymously to help train a rep-counting model. Different body types move differently — this context makes the model more accurate for everyone.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)

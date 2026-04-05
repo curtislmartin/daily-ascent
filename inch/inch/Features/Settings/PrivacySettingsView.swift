@@ -121,6 +121,7 @@ struct PrivacySettingsView: View {
         } header: {
             Text("Sensor Data")
         } footer: {
+            // swiftlint:disable:next line_length
             Text("While you work out, Daily Ascent records motion sensor data locally on your device. If sharing is enabled, your sensor data and optional profile details (age range, height, biological sex, and activity level) are uploaded anonymously to help train a rep-counting model. Different body types move differently — this context makes the model more accurate for everyone. No data is ever linked to your identity.")
         }
     }
@@ -137,6 +138,7 @@ struct PrivacySettingsView: View {
             Text("Data")
         } footer: {
             if settings?.motionDataUploadConsented == true {
+                // swiftlint:disable:next line_length
                 Text("Contributed sensor data is uploaded with a per-session random ID that groups sets from the same workout together, improving training data quality. This ID is not linked to your identity, your device, or any persistent identifier — it is generated fresh each workout and cannot be used to trace data back to you. Individual deletion is not possible.")
             }
         }
