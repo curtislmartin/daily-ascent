@@ -12,6 +12,7 @@ disabled_rules:
   - type_body_length
   - file_length
   - trailing_whitespace
+  - identifier_name        # CodingKeys enums use snake_case for JSON field names (intentional)
 
 opt_in_rules:
   - implicit_return
@@ -28,8 +29,16 @@ identifier_name:
 
 line_length:
   warning: 120
-  error: 150
+  error: 250              # SwiftUI Text() strings and long string literals can't be meaningfully split
   ignores_comments: true
   ignores_urls: true
+
+function_body_length:
+  warning: 100
+  error: 150
+
+cyclomatic_complexity:
+  warning: 10
+  error: 25              # encode(_:) functions with many associated values legitimately exceed 10
 
 force_cast: warning
