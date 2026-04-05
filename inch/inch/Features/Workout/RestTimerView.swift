@@ -73,7 +73,11 @@ struct RestTimerView: View {
             while remaining > 0 {
                 try? await Task.sleep(for: .seconds(1))
                 remaining = max(0, Int(endDate.timeIntervalSinceNow.rounded()))
+                if remaining == 3 || remaining == 2 || remaining == 1 {
+                    WorkoutSounds.playCountdownTick()
+                }
             }
+            WorkoutSounds.playGo()
             onComplete()
         }
         .onChange(of: scenePhase) { _, phase in
