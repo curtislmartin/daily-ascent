@@ -55,7 +55,13 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
     func sendCompletionReport(_ report: WatchCompletionReport) {
         guard let wcSession, wcSession.activationState == .activated else { return }
         guard let data = try? JSONEncoder().encode(report) else { return }
-        wcSession.transferUserInfo(["type": "completion", "data": data])
+        let payload: [String: Any] = ["type": "completion", "data": data]
+        // Guaranteed background delivery
+        wcSession.transferUserInfo(payload)
+        // Immediate delivery when phone app is in foreground
+        if wcSession.isReachable {
+            wcSession.sendMessage(payload, replyHandler: nil, errorHandler: nil)
+        }
     }
 
     // MARK: - Private
@@ -78,6 +84,25 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
     private func store(_ sessions: [WatchSession]) {
         guard let data = try? JSONEncoder().encode(sessions) else { return }
         UserDefaults.standard.set(data, forKey: sessionsKey)
+    }
+
+    private nonisolated func yieldHistoryEntry(from dict: [String: Any]) {
+        guard let exerciseName = dict["exerciseName"] as? String,
+              let level = dict["level"] as? Int,
+              let dayNumber = dict["dayNumber"] as? Int,
+              let totalReps = dict["totalReps"] as? Int,
+              let setCount = dict["setCount"] as? Int,
+              let completedAtInterval = dict["completedAt"] as? Double
+        else { return }
+        let entry = WatchHistoryEntry(
+            exerciseName: exerciseName,
+            level: level,
+            dayNumber: dayNumber,
+            totalReps: totalReps,
+            setCount: setCount,
+            completedAt: Date(timeIntervalSince1970: completedAtInterval)
+        )
+        _historyEntries.yield(entry)
     }
 
     // MARK: - WCSessionDelegate
@@ -106,22 +131,7 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
             else { return }
             sessionContinuation.yield(received)
         case "historyEntry":
-            guard let exerciseName = userInfo["exerciseName"] as? String,
-                  let level = userInfo["level"] as? Int,
-                  let dayNumber = userInfo["dayNumber"] as? Int,
-                  let totalReps = userInfo["totalReps"] as? Int,
-                  let setCount = userInfo["setCount"] as? Int,
-                  let completedAtInterval = userInfo["completedAt"] as? Double
-            else { return }
-            let entry = WatchHistoryEntry(
-                exerciseName: exerciseName,
-                level: level,
-                dayNumber: dayNumber,
-                totalReps: totalReps,
-                setCount: setCount,
-                completedAt: Date(timeIntervalSince1970: completedAtInterval)
-            )
-            _historyEntries.yield(entry)
+            yieldHistoryEntry(from: userInfo)
         default:
             break
         }
@@ -144,6 +154,8 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
                   let setNumber = message["setNumber"] as? Int
             else { return }
             _recordingTriggers.yield(.stop(exerciseId: exerciseId, setNumber: setNumber))
+        case "historyEntry":
+            yieldHistoryEntry(from: message)
         default:
             break
         }

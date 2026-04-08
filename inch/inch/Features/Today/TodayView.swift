@@ -74,7 +74,7 @@ struct TodayView: View {
             viewModel.configure(analytics: analytics)
             viewModel.loadToday(context: modelContext, showWarnings: showConflictWarnings)
             watchConnectivity.sendTodaySchedule(
-                enrolments: viewModel.dueExercises,
+                enrolments: viewModel.dueExercises.filter { !viewModel.completedTodayIds.contains($0.exerciseDefinition?.exerciseId ?? "") },
                 settings: settings
             )
             try? await Task.sleep(for: .seconds(1))
@@ -94,6 +94,10 @@ struct TodayView: View {
         .onAppear {
             viewModel.configure(analytics: analytics)
             viewModel.loadToday(context: modelContext, showWarnings: showConflictWarnings)
+            watchConnectivity.sendTodaySchedule(
+                enrolments: viewModel.dueExercises.filter { !viewModel.completedTodayIds.contains($0.exerciseDefinition?.exerciseId ?? "") },
+                settings: settings
+            )
             if viewModel.streakWasJustReset, let nextDate = viewModel.nextTrainingDate {
                 notifications.scheduleStreakRecovery(nextTrainingDate: nextDate)
             }

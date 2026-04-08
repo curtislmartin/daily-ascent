@@ -381,7 +381,9 @@ final class WorkoutViewModel {
                let existingAch = (try? context.fetch(FetchDescriptor<Achievement>()))?.first(where: { $0.id == achievement.id }) {
                 existingAch.numericValue = achievement.numericValue
                 existingAch.unlockedAt = .now
+                existingAch.wasCelebrated = true
             } else {
+                achievement.wasCelebrated = true
                 context.insert(achievement)
             }
         }

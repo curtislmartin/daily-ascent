@@ -18,6 +18,7 @@ struct WorkoutSessionView: View {
     private var sensorConsented: Bool { allSettings.first?.motionDataUploadConsented ?? false }
     private var settings: UserSettings? { allSettings.first }
     private var dualRecordingEnabled: Bool { allSettings.first?.dualDeviceRecordingEnabled ?? true }
+    private var workoutSoundsEnabled: Bool { allSettings.first?.workoutSoundsEnabled ?? true }
 
     private var exerciseId: String {
         viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
@@ -89,7 +90,8 @@ struct WorkoutSessionView: View {
                     targetReps: viewModel.currentTargetReps,
                     beatIntervalSeconds: viewModel.metronomeBeatIntervalSeconds,
                     beatPattern: viewModel.metronomeBeatPattern,
-                    sidesPerRep: viewModel.metronomeSidesPerRep
+                    sidesPerRep: viewModel.metronomeSidesPerRep,
+                    soundsEnabled: workoutSoundsEnabled
                 ) { autoCount in
                     viewModel.endMetronomeSet(autoCountedReps: autoCount)
                 }
@@ -104,7 +106,8 @@ struct WorkoutSessionView: View {
                 RestTimerView(
                     totalSeconds: seconds,
                     nextSetReps: viewModel.isTimedExercise ? nil : viewModel.prescription?.sets[safe: viewModel.currentSetIndex],
-                    nextSetDuration: viewModel.isTimedExercise ? viewModel.currentTargetReps : nil
+                    nextSetDuration: viewModel.isTimedExercise ? viewModel.currentTargetReps : nil,
+                    soundsEnabled: workoutSoundsEnabled
                 ) {
                     viewModel.finishRest()
                 }

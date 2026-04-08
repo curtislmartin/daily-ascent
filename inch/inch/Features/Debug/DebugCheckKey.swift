@@ -1,4 +1,4 @@
-#if DEBUG || TESTFLIGHT
+#if DEBUG
 import Foundation
 
 enum DebugCheckKey: String, CaseIterable {

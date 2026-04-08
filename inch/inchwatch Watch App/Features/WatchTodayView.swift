@@ -74,7 +74,7 @@ struct WatchTodayView: View {
         case "pull_ups":         return "figure.play"
         case "dead_bugs":        return "figure.core.training"
         case "spinal_extension": return "figure.yoga"
-        case "rows":             return "figure.indoor.rowing"
+        case "rows":             return "figure.outdoor.rowing"
         case "dips":             return "figure.rolling"
         default:                 return "figure.strengthtraining.functional"
         }

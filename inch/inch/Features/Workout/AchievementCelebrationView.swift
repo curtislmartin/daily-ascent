@@ -69,6 +69,6 @@ struct AchievementCelebrationView: View {
     }
 
     private var shareText: String {
-        "I just unlocked \"\(achievement.id.replacingOccurrences(of: "_", with: " ").capitalized)\" on Daily Ascent! 💪"
+        "I just unlocked \"\(achievement.id.replacingOccurrences(of: "_", with: " ").capitalized)\" on Daily Ascent! 💪 https://apps.apple.com/us/app/daily-ascent/id6760611343"
     }
 }

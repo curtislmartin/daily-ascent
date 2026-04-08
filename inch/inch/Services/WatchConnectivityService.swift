@@ -95,7 +95,7 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
         completedAt: Date
     ) {
         guard let wcSession, wcSession.activationState == .activated else { return }
-        wcSession.transferUserInfo([
+        let payload: [String: Any] = [
             "type": "historyEntry",
             "exerciseName": exerciseName,
             "level": level,
@@ -103,7 +103,13 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
             "totalReps": totalReps,
             "setCount": setCount,
             "completedAt": completedAt.timeIntervalSince1970
-        ])
+        ]
+        // Guaranteed background delivery
+        wcSession.transferUserInfo(payload)
+        // Immediate delivery when watch app is in foreground
+        if wcSession.isReachable {
+            wcSession.sendMessage(payload, replyHandler: nil, errorHandler: nil)
+        }
     }
 
     func sendRecordingStart(exerciseId: String, setNumber: Int, sessionId: String) {
@@ -238,11 +244,22 @@ final class WatchConnectivityService: NSObject, WCSessionDelegate {
 
     nonisolated func session(
         _ session: WCSession,
+        didReceiveMessage message: [String: Any]
+    ) {
+        yieldCompletionReport(from: message)
+    }
+
+    nonisolated func session(
+        _ session: WCSession,
         didReceiveUserInfo userInfo: [String: Any]
     ) {
-        guard let type = userInfo["type"] as? String,
+        yieldCompletionReport(from: userInfo)
+    }
+
+    private nonisolated func yieldCompletionReport(from dict: [String: Any]) {
+        guard let type = dict["type"] as? String,
               type == "completion",
-              let data = userInfo["data"] as? Data,
+              let data = dict["data"] as? Data,
               let report = try? JSONDecoder().decode(WatchCompletionReport.self, from: data)
         else { return }
         _completionReports.yield(report)

@@ -98,18 +98,19 @@ struct WatchWorkoutView: View {
                     totalReps: viewModel.totalReps,
                     remainingSessions: remainingSessions
                 ) { nextSession in
-                    // Capture once — completionReport is computed and includes .now timestamp
+                    // Capture report before any state changes — completedAt is .now
                     let report = viewModel.completionReport
-                    Task {
-                        historyStore.record(report, exerciseName: session.exerciseName)
-                        watchConnectivity.sendCompletionReport(report)
-                        await healthService.endWorkout()
-                        watchConnectivity.removeSession(exerciseId: session.exerciseId)
-                        if let nextSession {
-                            onStartNext?(nextSession)
-                        }
+                    // Sync work: immediate UI + delivery before any await
+                    watchConnectivity.removeSession(exerciseId: session.exerciseId)
+                    historyStore.record(report, exerciseName: session.exerciseName)
+                    watchConnectivity.sendCompletionReport(report)
+                    if let nextSession {
+                        onStartNext?(nextSession)
+                    } else {
                         dismiss()
                     }
+                    // HealthKit cleanup runs in background — doesn't block UI
+                    Task { await healthService.endWorkout() }
                 }
             }
         }

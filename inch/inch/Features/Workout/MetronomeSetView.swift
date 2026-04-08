@@ -5,6 +5,7 @@ struct MetronomeSetView: View {
     let beatIntervalSeconds: Double
     let beatPattern: [String]       // ["strong", "regular", ...]
     let sidesPerRep: Int
+    let soundsEnabled: Bool
     let onDone: (Int) -> Void       // called with auto-counted rep count
 
     @State private var repCount: Int = 0
@@ -103,31 +104,32 @@ struct MetronomeSetView: View {
     private func runCountdown() async {
         for tick in stride(from: 3, through: 1, by: -1) {
             countdownRemaining = tick
-            WorkoutSounds.playCountdownTick()
+            if soundsEnabled { WorkoutSounds.playCountdownTick() }
             strongBeatFired += 1
             do { try await Task.sleep(for: .seconds(1)) } catch { return }
         }
-        WorkoutSounds.playGo()
+        if soundsEnabled { WorkoutSounds.playGo() }
         strongBeatFired += 1
         isCountingDown = false
     }
 
     private func runMetronome() async {
         let pattern = beatPatternParsed
+        let effectiveSides = max(1, sidesPerRep)
         guard !pattern.isEmpty, beatIntervalSeconds > 0 else { return }
 
-        let beatsPerRep = pattern.count * sidesPerRep
+        let beatsPerRep = pattern.count * effectiveSides
         var totalBeatIndex = 0
 
         while true {
             let positionInSide = totalBeatIndex % pattern.count
-            let sideNumber = (totalBeatIndex / pattern.count) % sidesPerRep + 1
+            let sideNumber = (totalBeatIndex / pattern.count) % effectiveSides + 1
             let strong = pattern[positionInSide]
 
             isStrong = strong
             pulseScale = 1.3
             currentSide = sideNumber
-            WorkoutSounds.playMetronomeBeat()
+            if soundsEnabled { WorkoutSounds.playMetronomeBeat() }
             if strong {
                 strongBeatFired += 1
             } else {

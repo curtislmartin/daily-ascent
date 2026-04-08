@@ -1,5 +1,7 @@
 # Daily Ascent — Bodyweight Training App
 
+[![Download on the App Store](https://img.shields.io/badge/App%20Store-Download-blue?logo=apple&logoColor=white)](https://apps.apple.com/us/app/daily-ascent/id6760611343)
+
 iOS + watchOS app that guides users through structured bodyweight training programs. Nine exercises, three progressive levels each. Users enrol in exercises, follow a prescribed set/rep scheme per day, and advance through levels by passing a max-rep test.
 
 Built as a personal project to explore the full breadth of the Apple SDK — from strict Swift 6 concurrency to Core Motion sensor pipelines to a custom scheduling engine.

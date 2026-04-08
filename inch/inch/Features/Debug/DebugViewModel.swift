@@ -1,4 +1,4 @@
-#if DEBUG || TESTFLIGHT
+#if DEBUG
 import Foundation
 import SwiftData
 import UserNotifications

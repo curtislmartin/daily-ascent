@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 import BackgroundTasks
 import UIKit
+import OSLog
 import InchShared
 
 @main
@@ -20,6 +21,8 @@ struct InchApp: App {
         do {
             container = try ModelContainerFactory.makeContainer()
         } catch {
+            let logger = Logger(subsystem: "dev.clmartin.inch", category: "AppInit")
+            logger.critical("Failed to create ModelContainer: \(error, privacy: .public)")
             fatalError("Failed to create ModelContainer: \(error)")
         }
 

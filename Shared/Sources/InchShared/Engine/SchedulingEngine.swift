@@ -39,6 +39,7 @@ public struct SchedulingEngine: Sendable {
 
         // Normal rest pattern
         let pattern = level.restDayPattern
+        guard !pattern.isEmpty else { return nil }
         let gapDays = pattern[enrolment.restPatternIndex % pattern.count]
         return lastCompleted.addingDays(gapDays)
     }

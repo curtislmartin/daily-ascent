@@ -108,7 +108,9 @@ public struct ExerciseDataLoader: Sendable {
                 dirty = true
             }
 
-            let levelMap = Dictionary(uniqueKeysWithValues: (exercise.levels ?? []).map { ($0.level, $0) })
+            let levelMap = (exercise.levels ?? []).reduce(into: [Int: LevelDefinition]()) { dict, level in
+                if dict[level.level] == nil { dict[level.level] = level }
+            }
             for levelDTO in dto.levels {
                 let levelDef: LevelDefinition
                 if let found = levelMap[levelDTO.level] {
@@ -132,7 +134,9 @@ public struct ExerciseDataLoader: Sendable {
                     dirty = true
                 }
 
-                let dayMap = Dictionary(uniqueKeysWithValues: (levelDef.days ?? []).map { ($0.dayNumber, $0) })
+                let dayMap = (levelDef.days ?? []).reduce(into: [Int: DayPrescription]()) { dict, day in
+                    if dict[day.dayNumber] == nil { dict[day.dayNumber] = day }
+                }
                 for dayDTO in levelDTO.days {
                     let isTest = dayDTO.isTest ?? (dayDTO.day == levelDTO.totalDays)
                     if let found = dayMap[dayDTO.day] {

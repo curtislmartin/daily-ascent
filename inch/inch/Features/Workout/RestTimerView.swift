@@ -4,16 +4,18 @@ struct RestTimerView: View {
     let totalSeconds: Int
     let nextSetReps: Int?
     var nextSetDuration: Int? = nil
+    let soundsEnabled: Bool
     let onComplete: () -> Void
 
     @State private var remaining: Int
     @State private var endDate: Date = .distantFuture
     @Environment(\.scenePhase) private var scenePhase
 
-    init(totalSeconds: Int, nextSetReps: Int? = nil, nextSetDuration: Int? = nil, onComplete: @escaping () -> Void) {
+    init(totalSeconds: Int, nextSetReps: Int? = nil, nextSetDuration: Int? = nil, soundsEnabled: Bool = true, onComplete: @escaping () -> Void) {
         self.totalSeconds = totalSeconds
         self.nextSetReps = nextSetReps
         self.nextSetDuration = nextSetDuration
+        self.soundsEnabled = soundsEnabled
         self.onComplete = onComplete
         _remaining = State(initialValue: totalSeconds)
     }
@@ -71,13 +73,13 @@ struct RestTimerView: View {
         .task {
             endDate = .now.addingTimeInterval(TimeInterval(totalSeconds))
             while remaining > 0 {
-                try? await Task.sleep(for: .seconds(1))
+                do { try await Task.sleep(for: .seconds(1)) } catch { return }
                 remaining = max(0, Int(endDate.timeIntervalSinceNow.rounded()))
-                if remaining == 3 || remaining == 2 || remaining == 1 {
+                if soundsEnabled && (remaining == 3 || remaining == 2 || remaining == 1) {
                     WorkoutSounds.playCountdownTick()
                 }
             }
-            WorkoutSounds.playGo()
+            if soundsEnabled { WorkoutSounds.playGo() }
             onComplete()
         }
         .onChange(of: scenePhase) { _, phase in
