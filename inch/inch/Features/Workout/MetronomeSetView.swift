@@ -6,6 +6,7 @@ struct MetronomeSetView: View {
     let beatPattern: [String]       // ["strong", "regular", ...]
     let sidesPerRep: Int
     let soundsEnabled: Bool
+    let cueText: String?
     let onDone: (Int) -> Void       // called with auto-counted rep count
 
     @State private var repCount: Int = 0
@@ -96,6 +97,14 @@ struct MetronomeSetView: View {
             Text("Target: \(targetReps) reps")
                 .font(.caption)
                 .foregroundStyle(.tertiary)
+
+            if let cue = cueText {
+                Text(cue)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+            }
         }
     }
 

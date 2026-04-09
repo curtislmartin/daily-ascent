@@ -20,6 +20,17 @@ struct WorkoutSessionView: View {
     private var dualRecordingEnabled: Bool { allSettings.first?.dualDeviceRecordingEnabled ?? true }
     private var workoutSoundsEnabled: Bool { allSettings.first?.workoutSoundsEnabled ?? true }
 
+    private var metronomeCueText: String? {
+        switch exerciseId {
+        case "dead_bugs":       return "Move with each beat · sides switch automatically"
+        case "hip_hinge":       return "Hinge back on the strong pulse · return on the soft pulse"
+        case "spinal_extension": return "Lift on the first pulse · lower on the second"
+        default:                return nil
+        }
+    }
+
+    private var metronomeIntroKey: String { "metronome_intro_\(exerciseId)" }
+
     private var exerciseId: String {
         viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
     }
@@ -56,6 +67,7 @@ struct WorkoutSessionView: View {
     @State private var showHoldPhoneHint = true
     @State private var showNudge = false
     @State private var showTier3Intro = false
+    @State private var showMetronomeIntro = false
     @State private var setStartOrientation: String = ""
 
     init(enrolmentId: PersistentIdentifier) {
@@ -91,7 +103,8 @@ struct WorkoutSessionView: View {
                     beatIntervalSeconds: viewModel.metronomeBeatIntervalSeconds,
                     beatPattern: viewModel.metronomeBeatPattern,
                     sidesPerRep: viewModel.metronomeSidesPerRep,
-                    soundsEnabled: workoutSoundsEnabled
+                    soundsEnabled: workoutSoundsEnabled,
+                    cueText: metronomeCueText
                 ) { autoCount in
                     viewModel.endMetronomeSet(autoCountedReps: autoCount)
                 }
@@ -227,6 +240,19 @@ struct WorkoutSessionView: View {
                 viewModel.restartSession()
             }
         }
+        .sheet(isPresented: $showMetronomeIntro) {
+            MetronomeIntroSheet(
+                exerciseId: exerciseId,
+                exerciseName: viewModel.exerciseName
+            ) {
+                showMetronomeIntro = false
+                if let s = settings, !s.seenExerciseInfo.contains(metronomeIntroKey) {
+                    s.seenExerciseInfo.append(metronomeIntroKey)
+                    try? modelContext.save()
+                }
+            }
+            .presentationDetents([.medium])
+        }
         .sheet(isPresented: $showTier3Intro, onDismiss: markExerciseSeen) {
             NavigationStack {
                 ExerciseInfoSheet(
@@ -255,6 +281,11 @@ struct WorkoutSessionView: View {
                 showTier3Intro = true
             } else if let s = settings, !s.seenExerciseInfo.contains(exerciseId) {
                 showNudge = true
+            }
+            if viewModel.countingMode == .metronome,
+               let s = settings,
+               !s.seenExerciseInfo.contains(metronomeIntroKey) {
+                showMetronomeIntro = true
             }
             let id = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
             if repCounter == nil, Self.phoneAutoCountedExercises.contains(id),
