@@ -71,12 +71,13 @@ Core Motion captures accelerometer and gyroscope data during every set on both i
 
 ### Rep Counting
 
-Two modes, selectable per exercise in Settings:
+Three modes, selectable per exercise in Settings:
 
 - **Real-time** — tap the screen once per rep as you go; sensor data is captured in parallel for future ML-based auto-counting
+- **Metronome** — the app paces you with audio and haptic beats and counts reps automatically; configurable BPM and beat pattern per exercise
 - **Post-set** — rest timer runs during the set, then confirm how many reps you completed
 
-Time-based exercises (e.g. Plank) use a third mode automatically: a countdown timer with no rep entry.
+Time-based exercises (e.g. Plank) use a timed hold mode automatically: a countdown timer with no rep entry.
 
 ### State Management
 
