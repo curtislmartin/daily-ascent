@@ -73,6 +73,8 @@ public struct AchievementChecker {
 
             checkFullSet(existingIds: existingIds, sessionDate: sessionDate,
                         context: context, into: &unlocked)
+            checkTimeOfDay(existingIds: existingIds, sessionDate: sessionDate,
+                          context: context, into: &unlocked)
 
         case let .testPassed(exerciseId, level, sessionDate):
             if !existingIds.contains("first_test") {
@@ -179,6 +181,48 @@ public struct AchievementChecker {
                 id: "the_full_set", category: "journey",
                 unlockedAt: .now, sessionDate: sessionDate
             ))
+        }
+    }
+
+    private func checkTimeOfDay(existingIds: Set<String>, sessionDate: Date,
+                                 context: ModelContext, into results: inout [Achievement]) {
+        let sets = (try? context.fetch(FetchDescriptor<CompletedSet>())) ?? []
+        let cal = Calendar.current
+
+        func distinctDates(where hourFilter: (Int) -> Bool) -> Int {
+            let matching = sets.filter { hourFilter(cal.component(.hour, from: $0.completedAt)) }
+            return Set(matching.map { cal.startOfDay(for: $0.completedAt) }).count
+        }
+
+        let timeAchievements: [(id: String, filter: (Int) -> Bool)] = [
+            ("time_5am_club",     { $0 < 5 }),
+            ("time_early_bird",   { $0 < 6 }),
+            ("time_dawn_patrol",  { $0 < 7 }),
+            ("time_lunch_legend", { $0 >= 12 && $0 < 13 }),
+            ("time_night_owl",    { $0 >= 21 }),
+        ]
+
+        for (id, filter) in timeAchievements where !existingIds.contains(id) {
+            if distinctDates(where: filter) >= 10 {
+                results.append(Achievement(
+                    id: id, category: "time",
+                    unlockedAt: .now, sessionDate: sessionDate
+                ))
+            }
+        }
+
+        // Sunrise to Sunset — all six 4-hour blocks covered
+        if !existingIds.contains("time_all_hours") {
+            let blocks = [0..<4, 4..<8, 8..<12, 12..<16, 16..<20, 20..<24]
+            let coveredBlocks = blocks.filter { range in
+                sets.contains { range.contains(cal.component(.hour, from: $0.completedAt)) }
+            }
+            if coveredBlocks.count == 6 {
+                results.append(Achievement(
+                    id: "time_all_hours", category: "time",
+                    unlockedAt: .now, sessionDate: sessionDate
+                ))
+            }
         }
     }
 
