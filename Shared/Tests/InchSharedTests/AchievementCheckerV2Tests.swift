@@ -174,4 +174,86 @@ struct AchievementCheckerV2Tests {
         )
         #expect(results.allSatisfy { $0.id != "holiday_christmas" })
     }
+
+    // MARK: - Seasonal
+
+    @Test func januaryPersistenceWith20Workouts() throws {
+        let context = try makeContext()
+        for day in 1...20 {
+            let date = makeDate(2026, 1, day, hour: 10)
+            let set = CompletedSet(
+                completedAt: date, sessionDate: date, exerciseId: "push_ups",
+                level: 1, dayNumber: 1, setNumber: 1, targetReps: 10, actualReps: 10
+            )
+            context.insert(set)
+        }
+        try context.save()
+
+        let checker = AchievementChecker()
+        let results = checker.check(
+            after: .workoutCompleted(exerciseId: "push_ups", totalReps: 10, level: 1, sessionDate: makeDate(2026, 1, 20)),
+            in: context
+        )
+        #expect(results.contains { $0.id == "seasonal_january" })
+    }
+
+    @Test func januaryPersistenceNotWith19Workouts() throws {
+        let context = try makeContext()
+        for day in 1...19 {
+            let date = makeDate(2026, 1, day, hour: 10)
+            let set = CompletedSet(
+                completedAt: date, sessionDate: date, exerciseId: "push_ups",
+                level: 1, dayNumber: 1, setNumber: 1, targetReps: 10, actualReps: 10
+            )
+            context.insert(set)
+        }
+        try context.save()
+
+        let checker = AchievementChecker()
+        let results = checker.check(
+            after: .workoutCompleted(exerciseId: "push_ups", totalReps: 10, level: 1, sessionDate: makeDate(2026, 1, 19)),
+            in: context
+        )
+        #expect(results.allSatisfy { $0.id != "seasonal_january" })
+    }
+
+    @Test func yearRoundWithWorkoutsEveryMonth() throws {
+        let context = try makeContext()
+        for month in 1...12 {
+            let date = makeDate(2026, month, 15, hour: 10)
+            let set = CompletedSet(
+                completedAt: date, sessionDate: date, exerciseId: "push_ups",
+                level: 1, dayNumber: 1, setNumber: 1, targetReps: 10, actualReps: 10
+            )
+            context.insert(set)
+        }
+        try context.save()
+
+        let checker = AchievementChecker()
+        let results = checker.check(
+            after: .workoutCompleted(exerciseId: "push_ups", totalReps: 10, level: 1, sessionDate: makeDate(2026, 12, 15)),
+            in: context
+        )
+        #expect(results.contains { $0.id == "seasonal_year_round" })
+    }
+
+    @Test func yearRoundNotWithMissingMonth() throws {
+        let context = try makeContext()
+        for month in 1...11 {
+            let date = makeDate(2026, month, 15, hour: 10)
+            let set = CompletedSet(
+                completedAt: date, sessionDate: date, exerciseId: "push_ups",
+                level: 1, dayNumber: 1, setNumber: 1, targetReps: 10, actualReps: 10
+            )
+            context.insert(set)
+        }
+        try context.save()
+
+        let checker = AchievementChecker()
+        let results = checker.check(
+            after: .workoutCompleted(exerciseId: "push_ups", totalReps: 10, level: 1, sessionDate: makeDate(2026, 11, 15)),
+            in: context
+        )
+        #expect(results.allSatisfy { $0.id != "seasonal_year_round" })
+    }
 }

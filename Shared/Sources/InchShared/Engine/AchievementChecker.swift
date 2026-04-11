@@ -76,6 +76,8 @@ public struct AchievementChecker {
             checkTimeOfDay(existingIds: existingIds, sessionDate: sessionDate,
                           context: context, into: &unlocked)
             checkHoliday(existingIds: existingIds, sessionDate: sessionDate, into: &unlocked)
+            checkSeasonal(existingIds: existingIds, sessionDate: sessionDate,
+                         context: context, into: &unlocked)
 
         case let .testPassed(exerciseId, level, sessionDate):
             if !existingIds.contains("first_test") {
@@ -235,6 +237,83 @@ public struct AchievementChecker {
                 id: holidayId, category: "holiday",
                 unlockedAt: .now, sessionDate: sessionDate
             ))
+        }
+    }
+
+    private func checkSeasonal(existingIds: Set<String>, sessionDate: Date,
+                                context: ModelContext, into results: inout [Achievement]) {
+        let sets = (try? context.fetch(FetchDescriptor<CompletedSet>())) ?? []
+        let cal = Calendar.current
+
+        func distinctDates(in monthRange: [Int], year: Int) -> Int {
+            let matching = sets.filter {
+                let m = cal.component(.month, from: $0.sessionDate)
+                let y = cal.component(.year, from: $0.sessionDate)
+                return monthRange.contains(m) && y == year
+            }
+            return Set(matching.map { cal.startOfDay(for: $0.sessionDate) }).count
+        }
+
+        let years = Set(sets.map { cal.component(.year, from: $0.sessionDate) })
+
+        // January Persistence — 20+ workouts in any January
+        if !existingIds.contains("seasonal_january") {
+            for year in years {
+                if distinctDates(in: [1], year: year) >= 20 {
+                    results.append(Achievement(
+                        id: "seasonal_january", category: "seasonal",
+                        unlockedAt: .now, sessionDate: sessionDate
+                    ))
+                    break
+                }
+            }
+        }
+
+        // Summer Shape-Up — 50+ workouts in Jun-Aug of any year
+        if !existingIds.contains("seasonal_summer") {
+            for year in years {
+                if distinctDates(in: [6, 7, 8], year: year) >= 50 {
+                    results.append(Achievement(
+                        id: "seasonal_summer", category: "seasonal",
+                        unlockedAt: .now, sessionDate: sessionDate
+                    ))
+                    break
+                }
+            }
+        }
+
+        // Winter Warrior — 40+ workouts in Dec(N)-Feb(N+1) for any year span
+        if !existingIds.contains("seasonal_winter") {
+            for year in years {
+                let winterSets = sets.filter {
+                    let m = cal.component(.month, from: $0.sessionDate)
+                    let y = cal.component(.year, from: $0.sessionDate)
+                    return (m == 12 && y == year) || ((m == 1 || m == 2) && y == year + 1)
+                }
+                let count = Set(winterSets.map { cal.startOfDay(for: $0.sessionDate) }).count
+                if count >= 40 {
+                    results.append(Achievement(
+                        id: "seasonal_winter", category: "seasonal",
+                        unlockedAt: .now, sessionDate: sessionDate
+                    ))
+                    break
+                }
+            }
+        }
+
+        // Year-Round — 1+ workout in every calendar month of a single year
+        if !existingIds.contains("seasonal_year_round") {
+            for year in years {
+                let months = Set(sets.filter { cal.component(.year, from: $0.sessionDate) == year }
+                                     .map { cal.component(.month, from: $0.sessionDate) })
+                if months.count == 12 {
+                    results.append(Achievement(
+                        id: "seasonal_year_round", category: "seasonal",
+                        unlockedAt: .now, sessionDate: sessionDate
+                    ))
+                    break
+                }
+            }
         }
     }
 
