@@ -78,6 +78,9 @@ public struct AchievementChecker {
             checkHoliday(existingIds: existingIds, sessionDate: sessionDate, into: &unlocked)
             checkSeasonal(existingIds: existingIds, sessionDate: sessionDate,
                          context: context, into: &unlocked)
+            checkPlayful(existingIds: existingIds, exerciseId: exerciseId,
+                        totalReps: totalReps, sessionDate: sessionDate,
+                        context: context, into: &unlocked)
 
         case let .testPassed(exerciseId, level, sessionDate):
             if !existingIds.contains("first_test") {
@@ -349,6 +352,172 @@ public struct AchievementChecker {
                 id: "program_complete", category: "milestone",
                 unlockedAt: .now, sessionDate: sessionDate
             ))
+        }
+    }
+
+    private func checkPlayful(existingIds: Set<String>, exerciseId: String,
+                               totalReps: Int, sessionDate: Date,
+                               context: ModelContext, into results: inout [Achievement]) {
+        let sets = (try? context.fetch(FetchDescriptor<CompletedSet>())) ?? []
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: sessionDate)
+
+        // Century Club — 100 distinct workout dates
+        if !existingIds.contains("fun_century_club") {
+            let distinctDates = Set(sets.map { cal.startOfDay(for: $0.sessionDate) })
+            if distinctDates.count >= 100 {
+                results.append(Achievement(
+                    id: "fun_century_club", category: "fun",
+                    unlockedAt: .now, sessionDate: sessionDate
+                ))
+            }
+        }
+
+        // Thousand Repper — 1,000 reps of any single exercise
+        if !existingIds.contains("fun_thousand_repper") {
+            let repsByExercise = Dictionary(grouping: sets, by: \.exerciseId)
+                .mapValues { $0.reduce(0) { $0 + $1.actualReps } }
+            if repsByExercise.values.contains(where: { $0 >= 1000 }) {
+                results.append(Achievement(
+                    id: "fun_thousand_repper", category: "fun",
+                    unlockedAt: .now, sessionDate: sessionDate
+                ))
+            }
+        }
+
+        // Ten Thousand — 10,000 total reps across all exercises
+        if !existingIds.contains("fun_ten_thousand") {
+            let totalAllReps = sets.reduce(0) { $0 + $1.actualReps }
+            if totalAllReps >= 10_000 {
+                results.append(Achievement(
+                    id: "fun_ten_thousand", category: "fun",
+                    unlockedAt: .now, sessionDate: sessionDate
+                ))
+            }
+        }
+
+        // Full Roster — all 9 exercises enrolled
+        if !existingIds.contains("fun_full_roster") {
+            let enrolments = (try? context.fetch(FetchDescriptor<ExerciseEnrolment>())) ?? []
+            let activeCount = enrolments.filter(\.isActive).count
+            if activeCount >= 9 {
+                results.append(Achievement(
+                    id: "fun_full_roster", category: "fun",
+                    unlockedAt: .now, sessionDate: sessionDate
+                ))
+            }
+        }
+
+        // Triple Threat — 3 different exercises in one day
+        if !existingIds.contains("fun_triple_threat") {
+            let todaySets = sets.filter { cal.startOfDay(for: $0.sessionDate) == today }
+            let distinctExercises = Set(todaySets.map(\.exerciseId))
+            if distinctExercises.count >= 3 {
+                results.append(Achievement(
+                    id: "fun_triple_threat", category: "fun",
+                    unlockedAt: .now, sessionDate: sessionDate
+                ))
+            }
+        }
+
+        // Five-a-Day — 5 different exercises in one day
+        if !existingIds.contains("fun_five_a_day") {
+            let todaySets = sets.filter { cal.startOfDay(for: $0.sessionDate) == today }
+            let distinctExercises = Set(todaySets.map(\.exerciseId))
+            if distinctExercises.count >= 5 {
+                results.append(Achievement(
+                    id: "fun_five_a_day", category: "fun",
+                    unlockedAt: .now, sessionDate: sessionDate
+                ))
+            }
+        }
+
+        // Plank Minutes — 10 cumulative minutes of plank holds
+        if !existingIds.contains("fun_plank_minutes") {
+            let plankSets = sets.filter { $0.exerciseId == "plank" }
+            let totalSeconds = plankSets.reduce(0.0) { $0 + ($1.setDurationSeconds ?? 0) }
+            if totalSeconds >= 600 {
+                results.append(Achievement(
+                    id: "fun_plank_minutes", category: "fun",
+                    unlockedAt: .now, sessionDate: sessionDate
+                ))
+            }
+        }
+
+        // Metronome Master — 100 metronome-guided sets
+        if !existingIds.contains("fun_metronome_master") {
+            let metronomeSets = sets.filter { $0.countingMode == .metronome }
+            if metronomeSets.count >= 100 {
+                results.append(Achievement(
+                    id: "fun_metronome_master", category: "fun",
+                    unlockedAt: .now, sessionDate: sessionDate
+                ))
+            }
+        }
+
+        // Test Day Ace — 3 consecutive test passes with no failures between
+        if !existingIds.contains("fun_test_day_ace") {
+            let testSets = sets.filter(\.isTest)
+                .sorted { $0.completedAt < $1.completedAt }
+            if testSets.count >= 3 {
+                let lastThree = testSets.suffix(3)
+                if lastThree.allSatisfy({ $0.testPassed == true }) {
+                    results.append(Achievement(
+                        id: "fun_test_day_ace", category: "fun",
+                        unlockedAt: .now, sessionDate: sessionDate
+                    ))
+                }
+            }
+        }
+
+        // Level Up Trifecta — reached Level 2 in 3 different exercises
+        if !existingIds.contains("fun_level_up_trifecta") {
+            let enrolments = (try? context.fetch(FetchDescriptor<ExerciseEnrolment>())) ?? []
+            let level2Count = enrolments.filter { $0.currentLevel >= 2 }.count
+            if level2Count >= 3 {
+                results.append(Achievement(
+                    id: "fun_level_up_trifecta", category: "fun",
+                    unlockedAt: .now, sessionDate: sessionDate
+                ))
+            }
+        }
+
+        // Maxed Out — reached Level 3 in any exercise
+        if !existingIds.contains("fun_maxed_out") {
+            let enrolments = (try? context.fetch(FetchDescriptor<ExerciseEnrolment>())) ?? []
+            if enrolments.contains(where: { $0.currentLevel >= 3 }) {
+                results.append(Achievement(
+                    id: "fun_maxed_out", category: "fun",
+                    unlockedAt: .now, sessionDate: sessionDate
+                ))
+            }
+        }
+
+        // Grand Master — reached Level 3 in all 9 exercises
+        if !existingIds.contains("fun_grand_master") {
+            let enrolments = (try? context.fetch(FetchDescriptor<ExerciseEnrolment>())) ?? []
+            let active = enrolments.filter(\.isActive)
+            if active.count >= 9 && active.allSatisfy({ $0.currentLevel >= 3 }) {
+                results.append(Achievement(
+                    id: "fun_grand_master", category: "fun",
+                    unlockedAt: .now, sessionDate: sessionDate
+                ))
+            }
+        }
+
+        // Groundhog Day — same exercise, same total reps, two consecutive days
+        if !existingIds.contains("fun_groundhog_day") {
+            guard let yesterday = cal.date(byAdding: .day, value: -1, to: today) else { return }
+            let yesterdaySets = sets.filter {
+                cal.startOfDay(for: $0.sessionDate) == yesterday && $0.exerciseId == exerciseId
+            }
+            let yesterdayReps = yesterdaySets.reduce(0) { $0 + $1.actualReps }
+            if yesterdayReps > 0 && yesterdayReps == totalReps {
+                results.append(Achievement(
+                    id: "fun_groundhog_day", category: "fun",
+                    unlockedAt: .now, sessionDate: sessionDate
+                ))
+            }
         }
     }
 }
