@@ -8,6 +8,7 @@ public enum AchievementEvent {
     case programComplete
     case communityPercentileUpdated(exerciseId: String, level: Int, percentile: Int)
     case communityStreakPercentileUpdated(percentile: Int)
+    case communityLifetimePercentileUpdated(metricType: String, percentile: Int)
 }
 
 public struct AchievementChecker {
@@ -148,6 +149,27 @@ public struct AchievementChecker {
                     id: "community_iron_streak", category: "community",
                     unlockedAt: .now
                 ))
+            }
+
+        case let .communityLifetimePercentileUpdated(metricType, percentile):
+            if metricType == "total_lifetime_reps" {
+                if percentile >= 90 && !existingIds.contains("community_volume_machine") {
+                    unlocked.append(Achievement(
+                        id: "community_volume_machine", category: "community", unlockedAt: .now
+                    ))
+                }
+            }
+            if metricType == "total_workouts" {
+                if percentile >= 75 && !existingIds.contains("community_dedicated") {
+                    unlocked.append(Achievement(
+                        id: "community_dedicated", category: "community", unlockedAt: .now
+                    ))
+                }
+                if percentile >= 90 && !existingIds.contains("community_veteran") {
+                    unlocked.append(Achievement(
+                        id: "community_veteran", category: "community", unlockedAt: .now
+                    ))
+                }
             }
         }
 

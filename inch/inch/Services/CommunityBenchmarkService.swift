@@ -42,6 +42,18 @@ final class CommunityBenchmarkService {
         }
     }
 
+    // MARK: - Lifetime Benchmark Upload
+
+    func uploadLifetimeBenchmark(totalWorkouts: Int, totalLifetimeReps: Int, enrolledExerciseCount: Int) {
+        Task.detached(priority: .utility) { [self] in
+            await _uploadLifetimeBenchmark(
+                totalWorkouts: totalWorkouts,
+                totalLifetimeReps: totalLifetimeReps,
+                enrolledExerciseCount: enrolledExerciseCount
+            )
+        }
+    }
+
     // MARK: - Fetch Distributions
 
     func fetchDistributions(exerciseIds: [(id: String, level: Int)]) async {
@@ -234,6 +246,38 @@ final class CommunityBenchmarkService {
         }
     }
 
+    @concurrent
+    private func _uploadLifetimeBenchmark(totalWorkouts: Int, totalLifetimeReps: Int, enrolledExerciseCount: Int) async {
+        guard let config = supabaseConfig() else { return }
+        let deviceHash = CommunityIdentity.deviceHash
+
+        let payload = LifetimeBenchmarkPayload(
+            deviceHash: deviceHash,
+            totalWorkouts: totalWorkouts,
+            totalLifetimeReps: totalLifetimeReps,
+            enrolledExerciseCount: enrolledExerciseCount
+        )
+
+        guard let url = URL(string: "\(config.url)/rest/v1/lifetime_benchmarks") else { return }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue(config.anonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(config.anonKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("return=minimal", forHTTPHeaderField: "Prefer")
+        request.setValue("resolution=merge-duplicates", forHTTPHeaderField: "Prefer")
+        request.httpBody = try? JSONEncoder().encode(payload)
+
+        do {
+            let (_, response) = try await URLSession.shared.data(for: request)
+            if let http = response as? HTTPURLResponse, http.statusCode < 300 {
+                logger.debug("Lifetime benchmark uploaded")
+            }
+        } catch {
+            logger.debug("Lifetime benchmark upload failed: \(error.localizedDescription)")
+        }
+    }
+
     private nonisolated static func dateString(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
@@ -281,6 +325,20 @@ private nonisolated struct StreakBenchmarkPayload: Encodable {
         case deviceHash = "device_hash"
         case streakDays = "streak_days"
         case exercisesCompletedToday = "exercises_completed_today"
+    }
+}
+
+private nonisolated struct LifetimeBenchmarkPayload: Encodable {
+    let deviceHash: String
+    let totalWorkouts: Int
+    let totalLifetimeReps: Int
+    let enrolledExerciseCount: Int
+
+    enum CodingKeys: String, CodingKey {
+        case deviceHash = "device_hash"
+        case totalWorkouts = "total_workouts"
+        case totalLifetimeReps = "total_lifetime_reps"
+        case enrolledExerciseCount = "enrolled_exercise_count"
     }
 }
 

@@ -75,6 +75,23 @@ struct InchApp: App {
                             try? ExerciseDataLoader().syncFromBundle(context: context)
                         }
                     }
+
+                    // Lifetime benchmark sync (once per app launch; server upserts on device_hash)
+                    if userSettings?.communityBenchmarksEnabled == true {
+                        let syncContext = ModelContext(self.container)
+                        let allSets = (try? syncContext.fetch(FetchDescriptor<CompletedSet>())) ?? []
+                        let enrolments = (try? syncContext.fetch(FetchDescriptor<ExerciseEnrolment>())) ?? []
+
+                        let totalWorkouts = Set(allSets.map { Calendar.current.startOfDay(for: $0.sessionDate) }).count
+                        let totalReps = allSets.reduce(0) { $0 + $1.actualReps }
+                        let enrolledCount = enrolments.filter(\.isActive).count
+
+                        communityBenchmark.uploadLifetimeBenchmark(
+                            totalWorkouts: totalWorkouts,
+                            totalLifetimeReps: totalReps,
+                            enrolledExerciseCount: enrolledCount
+                        )
+                    }
                 }
         }
     }
