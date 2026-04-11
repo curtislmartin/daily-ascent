@@ -10,17 +10,32 @@ struct ExerciseCompleteView: View {
     var achievements: [Achievement] = []
     var adaptationMessage: String? = nil
     var showMoveOnAnyway: Bool = false
+    var personalBestInfo: (reps: Int, percentile: Int?)? = nil
     var onRatingSubmitted: ((DifficultyRating) -> Void)? = nil
     var onMoveOnAnyway: (() -> Void)? = nil
 
     @State private var showBanner = false
     @State private var showSheet = false
     @State private var showCelebration = false
+    @State private var showPBBanner = false
     @State private var ratingSubmitted = false
 
     var body: some View {
-        ZStack(alignment: .bottom) {
+        ZStack {
             mainContent
+            if showPBBanner, let pb = personalBestInfo {
+                VStack {
+                    PersonalBestBanner(
+                        reps: pb.reps,
+                        exerciseName: exerciseName,
+                        percentile: pb.percentile
+                    ) {
+                        withAnimation { showPBBanner = false }
+                    }
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    Spacer()
+                }
+            }
             if showBanner, let achievement = achievements.first(where: { isTier1($0) }) {
                 AchievementBanner(achievement: achievement) {
                     withAnimation { showBanner = false }
@@ -138,6 +153,10 @@ struct ExerciseCompleteView: View {
         if !tier3.isEmpty { showCelebration = true }
         else if !tier2.isEmpty { showSheet = true }
         else if !tier1.isEmpty { withAnimation { showBanner = true } }
+
+        if personalBestInfo != nil {
+            withAnimation { showPBBanner = true }
+        }
     }
 
     private func isTier1(_ a: Achievement) -> Bool {

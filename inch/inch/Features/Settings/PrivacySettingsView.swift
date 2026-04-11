@@ -8,13 +8,18 @@ struct PrivacySettingsView: View {
     @Environment(AnalyticsService.self) private var analytics
     var viewModel: SettingsViewModel
 
+    @Environment(CommunityBenchmarkService.self) private var communityBenchmark
+
     @State private var showingDeleteHistoryConfirm = false
     @State private var showingResetConfirm = false
+    @State private var showingDeleteCommunityConfirm = false
+    @State private var communityDeleteStatus: String?
 
     private var settings: UserSettings? { viewModel.settings }
 
     var body: some View {
         List {
+            communitySection
             consentSection
             analyticsSection
             iCloudSection
@@ -48,6 +53,29 @@ struct PrivacySettingsView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("All progress, history, and settings will be permanently deleted. You'll go through onboarding again.")
+        }
+        .alert(
+            "Delete community data?",
+            isPresented: $showingDeleteCommunityConfirm
+        ) {
+            Button("Delete Community Data", role: .destructive) {
+                Task {
+                    let success = await communityBenchmark.deleteMyData()
+                    communityDeleteStatus = success ? "Community data deleted." : "Deletion failed. Try again later."
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Your anonymous benchmark data will be removed from the community stats. This does not affect sensor data or workout history.")
+        }
+        .alert(
+            communityDeleteStatus ?? "",
+            isPresented: Binding(
+                get: { communityDeleteStatus != nil },
+                set: { if !$0 { communityDeleteStatus = nil } }
+            )
+        ) {
+            Button("OK") { communityDeleteStatus = nil }
         }
     }
 
@@ -123,6 +151,32 @@ struct PrivacySettingsView: View {
         } footer: {
             // swiftlint:disable:next line_length
             Text("While you work out, Daily Ascent records motion sensor data locally on your device. If sharing is enabled, your sensor data and optional profile details (age range, height, biological sex, and activity level) are uploaded anonymously to help train a rep-counting model. Different body types move differently — this context makes the model more accurate for everyone. No data is ever linked to your identity.")
+        }
+    }
+
+    private var communitySection: some View {
+        Section {
+            Toggle(isOn: Binding(
+                get: { settings?.communityBenchmarksEnabled ?? true },
+                set: { newValue in
+                    settings?.communityBenchmarksEnabled = newValue
+                    try? modelContext.save()
+                }
+            )) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Share anonymous benchmarks")
+                    Text("See where you stand relative to other users. No data is ever linked to your identity.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Button("Delete Community Data", role: .destructive) {
+                showingDeleteCommunityConfirm = true
+            }
+        } header: {
+            Text("Community")
+        } footer: {
+            Text("Anonymous performance stats are shared to compute community-wide distributions. A one-way hash identifies your device — it cannot be traced back to you. Data is automatically deleted after 90 days.")
         }
     }
 

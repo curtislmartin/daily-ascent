@@ -13,6 +13,7 @@ struct WorkoutSessionView: View {
     @Environment(DataUploadService.self) private var dataUpload
     @Environment(NotificationService.self) private var notifications
     @Environment(WatchConnectivityService.self) private var watchConnectivity
+    @Environment(CommunityBenchmarkService.self) private var communityBenchmark
 
     @Query private var allSettings: [UserSettings]
     private var sensorConsented: Bool { allSettings.first?.motionDataUploadConsented ?? false }
@@ -159,6 +160,7 @@ struct WorkoutSessionView: View {
                     achievements: viewModel.pendingAchievements,
                     adaptationMessage: viewModel.adaptationMessage,
                     showMoveOnAnyway: viewModel.showMoveOnAnyway,
+                    personalBestInfo: viewModel.personalBestInfo,
                     onRatingSubmitted: viewModel.isTestDay ? nil : { rating in
                         viewModel.submitDifficultyRating(rating, context: modelContext)
                     },
@@ -269,7 +271,7 @@ struct WorkoutSessionView: View {
         }
         .task {
             sessionId = UUID().uuidString
-            viewModel.configure(analytics: analytics)
+            viewModel.configure(analytics: analytics, communityBenchmark: communityBenchmark)
             viewModel.load(context: modelContext)
             if viewModel.shouldOfferResume {
                 showResumePrompt = true

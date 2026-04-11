@@ -12,6 +12,7 @@ func achievementStyle(for category: String) -> (symbol: String, color: Color) {
     case "consistency":  return ("calendar.badge.checkmark",   .blue)
     case "performance":  return ("bolt.fill",                  .teal)
     case "journey":      return ("map.fill",                   .purple)
+    case "community":    return ("person.3.fill",              .green)
     default:             return ("trophy.fill",                .yellow)
     }
 }

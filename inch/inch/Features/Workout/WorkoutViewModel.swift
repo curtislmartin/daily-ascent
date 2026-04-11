@@ -19,7 +19,10 @@ enum WorkoutPhase: Equatable {
 final class WorkoutViewModel {
     private let enrolmentId: PersistentIdentifier
     private var analytics: AnalyticsService?
+    private var communityBenchmark: CommunityBenchmarkService?
     private var sessionStartDate: Date = .now
+    private var bestSetReps: Int = 0
+    private var bestSetDuration: Int = 0
 
     var phase: WorkoutPhase = .loading
     var shouldOfferResume: Bool = false
@@ -43,6 +46,7 @@ final class WorkoutViewModel {
     private(set) var overriddenSets: [Int]? = nil
     private(set) var adaptationMessage: String? = nil
     private(set) var showMoveOnAnyway: Bool = false
+    private(set) var personalBestInfo: (reps: Int, percentile: Int?)? = nil
 
     var exerciseName: String { enrolment?.exerciseDefinition?.name ?? "" }
     var accentColorHex: String { enrolment?.exerciseDefinition?.color ?? "" }
@@ -71,8 +75,9 @@ final class WorkoutViewModel {
         self.enrolmentId = enrolmentId
     }
 
-    func configure(analytics: AnalyticsService) {
+    func configure(analytics: AnalyticsService, communityBenchmark: CommunityBenchmarkService) {
         self.analytics = analytics
+        self.communityBenchmark = communityBenchmark
     }
 
     func load(context: ModelContext) {
@@ -252,6 +257,8 @@ final class WorkoutViewModel {
             context.insert(recording)
         }
 
+        let durationInt = Int(actualDuration)
+        if durationInt > bestSetDuration { bestSetDuration = durationInt }
         sessionTotalReps += 0
         try? context.save()
     }
@@ -293,6 +300,7 @@ final class WorkoutViewModel {
         }
 
         sessionTotalReps += actualReps
+        if actualReps > bestSetReps { bestSetReps = actualReps }
         try? context.save()
     }
 
@@ -433,6 +441,33 @@ final class WorkoutViewModel {
                 )
             ))
         }
+
+        // Community benchmark upload
+        let settings = (try? context.fetch(FetchDescriptor<UserSettings>()))?.first
+        if settings?.communityBenchmarksEnabled == true {
+            let capturedBestSetReps = bestSetReps
+            let capturedBestSetDuration = bestSetDuration
+            communityBenchmark?.uploadExerciseBenchmark(
+                exerciseId: exerciseId,
+                level: capturedCompletedLevel,
+                bestSetReps: capturedBestSetReps > 0 ? capturedBestSetReps : nil,
+                bestSetDuration: capturedBestSetDuration > 0 ? capturedBestSetDuration : nil,
+                sessionTotalReps: capturedTotalReps,
+                sessionDurationSecs: duration,
+                isTestDay: wasTestDay,
+                testReps: wasTestDay ? capturedTotalReps : nil
+            )
+        }
+
+        // PB info for toast — check if this session set a new personal best
+        let pbAchievement = newAchievements.first { $0.id == "personal_best_\(exerciseId)" }
+        if let pb = pbAchievement, let reps = pb.numericValue, reps > 0 {
+            let percentile = communityBenchmark?.exercisePercentile(
+                exerciseId: exerciseId, level: capturedCompletedLevel,
+                metricType: "best_set_reps", value: reps
+            )
+            personalBestInfo = (reps: reps, percentile: percentile)
+        }
     }
 
     /// Runs the conflict detect → resolve loop (up to maxIterations) after any schedule change,
@@ -507,6 +542,14 @@ final class WorkoutViewModel {
             context.insert(streakState)
         }
         calculator.updateStreakState(streakState, today: sessionDate, hadDueExercises: true, completedAny: true)
+
+        let settings = (try? context.fetch(FetchDescriptor<UserSettings>()))?.first
+        if settings?.communityBenchmarksEnabled == true {
+            communityBenchmark?.uploadStreakBenchmark(
+                streakDays: streakState.currentStreak,
+                exercisesCompletedToday: 1
+            )
+        }
     }
 
     private func applyPrescriptionOverride(_ multiplier: Double) {

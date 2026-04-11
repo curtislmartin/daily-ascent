@@ -38,6 +38,7 @@ public final class UserSettings {
     public var analyticsEnabled: Bool = false
     public var achievementNotificationEnabled: Bool = true
     public var workoutSoundsEnabled: Bool = true
+    public var communityBenchmarksEnabled: Bool = true
 
     public var hasDemographics: Bool {
         ageRange != nil && heightRange != nil &&
@@ -72,7 +73,8 @@ public final class UserSettings {
         isFirstLaunch: Bool = true,
         analyticsEnabled: Bool = false,
         achievementNotificationEnabled: Bool = true,
-        workoutSoundsEnabled: Bool = true
+        workoutSoundsEnabled: Bool = true,
+        communityBenchmarksEnabled: Bool = true
     ) {
         self.createdAt = createdAt
         self.restOverrides = restOverrides
@@ -102,5 +104,6 @@ public final class UserSettings {
         self.analyticsEnabled = analyticsEnabled
         self.achievementNotificationEnabled = achievementNotificationEnabled
         self.workoutSoundsEnabled = workoutSoundsEnabled
+        self.communityBenchmarksEnabled = communityBenchmarksEnabled
     }
 }

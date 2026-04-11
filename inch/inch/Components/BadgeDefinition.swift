@@ -28,5 +28,10 @@ struct BadgeDefinition {
         // Journey
         BadgeDefinition(id: "the_full_set",  label: "The Full Set",  category: "journey", description: "Train every enrolled exercise in one week"),
         BadgeDefinition(id: "test_gauntlet", label: "Test Gauntlet", category: "journey", description: "Pass level tests in 3 or more exercises"),
+        // Community
+        BadgeDefinition(id: "community_top_half",       label: "Top Half",       category: "community", description: "Reach the top 50% in any exercise"),
+        BadgeDefinition(id: "community_upper_quarter",  label: "Upper Quarter",  category: "community", description: "Reach the top 25% in any exercise"),
+        BadgeDefinition(id: "community_top_10",         label: "Top 10%",        category: "community", description: "Reach the top 10% in any exercise"),
+        BadgeDefinition(id: "community_iron_streak",    label: "Iron Streak",    category: "community", description: "Your streak is in the top 10% of all users"),
     ]
 }

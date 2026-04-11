@@ -6,6 +6,8 @@ public enum AchievementEvent {
     case testPassed(exerciseId: String, level: Int, sessionDate: Date)
     case streakUpdated
     case programComplete
+    case communityPercentileUpdated(exerciseId: String, level: Int, percentile: Int)
+    case communityStreakPercentileUpdated(percentile: Int)
 }
 
 public struct AchievementChecker {
@@ -109,6 +111,34 @@ public struct AchievementChecker {
             if !existingIds.contains("program_complete") {
                 unlocked.append(Achievement(
                     id: "program_complete", category: "milestone", unlockedAt: .now
+                ))
+            }
+
+        case let .communityPercentileUpdated(exerciseId, _, percentile):
+            if percentile >= 50 && !existingIds.contains("community_top_half") {
+                unlocked.append(Achievement(
+                    id: "community_top_half", category: "community",
+                    unlockedAt: .now, exerciseId: exerciseId
+                ))
+            }
+            if percentile >= 75 && !existingIds.contains("community_upper_quarter") {
+                unlocked.append(Achievement(
+                    id: "community_upper_quarter", category: "community",
+                    unlockedAt: .now, exerciseId: exerciseId
+                ))
+            }
+            if percentile >= 90 && !existingIds.contains("community_top_10") {
+                unlocked.append(Achievement(
+                    id: "community_top_10", category: "community",
+                    unlockedAt: .now, exerciseId: exerciseId
+                ))
+            }
+
+        case let .communityStreakPercentileUpdated(percentile):
+            if percentile >= 90 && !existingIds.contains("community_iron_streak") {
+                unlocked.append(Achievement(
+                    id: "community_iron_streak", category: "community",
+                    unlockedAt: .now
                 ))
             }
         }

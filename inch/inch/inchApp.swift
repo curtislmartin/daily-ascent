@@ -16,6 +16,7 @@ struct InchApp: App {
     let metricKit = MetricKitService()
     let notificationDelegate = ForegroundNotificationDelegate()
     let analytics = AnalyticsService()
+    let communityBenchmark = CommunityBenchmarkService()
 
     init() {
         do {
@@ -40,6 +41,7 @@ struct InchApp: App {
                 .environment(dataUpload)
                 .environment(notificationService)
                 .environment(analytics)
+                .environment(communityBenchmark)
                 .task {
                     watchConnectivity.activate()
                     await notificationService.checkAuthorizationStatus()

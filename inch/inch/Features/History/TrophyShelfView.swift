@@ -122,6 +122,7 @@ struct TrophyShelfView: View {
         ("consistency", "Consistency"),
         ("performance", "Performance"),
         ("journey", "Journey"),
+        ("community", "Community"),
     ]
 
     private static func sections(from badges: [BadgeDefinition]) -> [Section] {
