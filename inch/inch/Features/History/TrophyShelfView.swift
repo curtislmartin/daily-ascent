@@ -9,7 +9,7 @@ struct TrophyShelfView: View {
     @Query private var enrolments: [ExerciseEnrolment]
 
     var body: some View {
-        let badges = buildBadges()
+        let badges = buildBadges(earnedIds: Set(achievements.map(\.id)))
         let achievementById = Dictionary(achievements.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
 
         if enrolments.filter(\.isActive).isEmpty && achievements.isEmpty {
@@ -56,7 +56,7 @@ struct TrophyShelfView: View {
     // MARK: - Private
 
     /// Builds the full ordered badge list: static badges + per-exercise dynamic badges.
-    private func buildBadges() -> [BadgeDefinition] {
+    private func buildBadges(earnedIds: Set<String>) -> [BadgeDefinition] {
         var result = BadgeDefinition.staticBadges
 
         // Active enrolment ghost badges
@@ -107,6 +107,7 @@ struct TrophyShelfView: View {
             }
         }
 
+        result = result.filter { !$0.hidden || earnedIds.contains($0.id) }
         return result
     }
 
@@ -123,6 +124,10 @@ struct TrophyShelfView: View {
         ("performance", "Performance"),
         ("journey", "Journey"),
         ("community", "Community"),
+        ("time", "Time of Day"),
+        ("seasonal", "Seasonal"),
+        ("holiday", "Holidays"),
+        ("fun", "Fun"),
     ]
 
     private static func sections(from badges: [BadgeDefinition]) -> [Section] {

@@ -13,6 +13,10 @@ func achievementStyle(for category: String) -> (symbol: String, color: Color) {
     case "performance":  return ("bolt.fill",                  .teal)
     case "journey":      return ("map.fill",                   .purple)
     case "community":    return ("person.3.fill",              .green)
+    case "time":         return ("clock.fill",                 .indigo)
+    case "seasonal":     return ("leaf.fill",                  .mint)
+    case "holiday":      return ("gift.fill",                  .red)
+    case "fun":          return ("party.popper.fill",          .pink)
     default:             return ("trophy.fill",                .yellow)
     }
 }
