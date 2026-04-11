@@ -95,4 +95,83 @@ struct AchievementCheckerV2Tests {
         let results = checker.check(after: event, in: context)
         #expect(results.contains { $0.id == "time_all_hours" })
     }
+
+    // MARK: - Holiday
+
+    @Test func christmasGainsUnlockedOnChristmas() throws {
+        let context = try makeContext()
+        let christmasDate = makeDate(2026, 12, 25, hour: 10)
+        let set = CompletedSet(
+            completedAt: christmasDate, sessionDate: christmasDate, exerciseId: "push_ups",
+            level: 1, dayNumber: 1, setNumber: 1, targetReps: 10, actualReps: 10
+        )
+        context.insert(set)
+        try context.save()
+
+        let checker = AchievementChecker()
+        let results = checker.check(
+            after: .workoutCompleted(exerciseId: "push_ups", totalReps: 10, level: 1, sessionDate: christmasDate),
+            in: context
+        )
+        #expect(results.contains { $0.id == "holiday_christmas" })
+    }
+
+    @Test func noHolidayOnRegularDay() throws {
+        let context = try makeContext()
+        let date = makeDate(2026, 6, 15, hour: 10)
+        let set = CompletedSet(
+            completedAt: date, sessionDate: date, exerciseId: "push_ups",
+            level: 1, dayNumber: 1, setNumber: 1, targetReps: 10, actualReps: 10
+        )
+        context.insert(set)
+        try context.save()
+
+        let checker = AchievementChecker()
+        let results = checker.check(
+            after: .workoutCompleted(exerciseId: "push_ups", totalReps: 10, level: 1, sessionDate: date),
+            in: context
+        )
+        #expect(results.allSatisfy { !$0.id.hasPrefix("holiday_") })
+    }
+
+    @Test func easterAchievementOnEasterSunday() throws {
+        let context = try makeContext()
+        // Easter 2026 is April 5
+        let date = makeDate(2026, 4, 5, hour: 10)
+        let set = CompletedSet(
+            completedAt: date, sessionDate: date, exerciseId: "push_ups",
+            level: 1, dayNumber: 1, setNumber: 1, targetReps: 10, actualReps: 10
+        )
+        context.insert(set)
+        try context.save()
+
+        let checker = AchievementChecker()
+        let results = checker.check(
+            after: .workoutCompleted(exerciseId: "push_ups", totalReps: 10, level: 1, sessionDate: date),
+            in: context
+        )
+        #expect(results.contains { $0.id == "holiday_easter" })
+    }
+
+    @Test func holidayNotDuplicated() throws {
+        let context = try makeContext()
+        let existing = Achievement(id: "holiday_christmas", category: "holiday", unlockedAt: .now)
+        context.insert(existing)
+        try context.save()
+
+        let date = makeDate(2027, 12, 25, hour: 10)
+        let set = CompletedSet(
+            completedAt: date, sessionDate: date, exerciseId: "push_ups",
+            level: 1, dayNumber: 1, setNumber: 1, targetReps: 10, actualReps: 10
+        )
+        context.insert(set)
+        try context.save()
+
+        let checker = AchievementChecker()
+        let results = checker.check(
+            after: .workoutCompleted(exerciseId: "push_ups", totalReps: 10, level: 1, sessionDate: date),
+            in: context
+        )
+        #expect(results.allSatisfy { $0.id != "holiday_christmas" })
+    }
 }

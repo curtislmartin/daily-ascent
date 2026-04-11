@@ -75,6 +75,7 @@ public struct AchievementChecker {
                         context: context, into: &unlocked)
             checkTimeOfDay(existingIds: existingIds, sessionDate: sessionDate,
                           context: context, into: &unlocked)
+            checkHoliday(existingIds: existingIds, sessionDate: sessionDate, into: &unlocked)
 
         case let .testPassed(exerciseId, level, sessionDate):
             if !existingIds.contains("first_test") {
@@ -223,6 +224,17 @@ public struct AchievementChecker {
                     unlockedAt: .now, sessionDate: sessionDate
                 ))
             }
+        }
+    }
+
+    private func checkHoliday(existingIds: Set<String>, sessionDate: Date,
+                               into results: inout [Achievement]) {
+        let matchingHolidays = HolidayCalendar.holidays(for: sessionDate)
+        for holidayId in matchingHolidays where !existingIds.contains(holidayId) {
+            results.append(Achievement(
+                id: holidayId, category: "holiday",
+                unlockedAt: .now, sessionDate: sessionDate
+            ))
         }
     }
 
