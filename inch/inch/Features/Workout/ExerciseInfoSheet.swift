@@ -60,6 +60,18 @@ struct ExerciseInfoSheet: View {
                         .foregroundStyle(.secondary)
                 }
 
+                if let bullets = ExerciseContent.metronomeBullets(for: exerciseId) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Label("Metronome Guide", systemImage: "metronome")
+                            .font(.headline)
+                        VStack(alignment: .leading, spacing: 6) {
+                            ForEach(bullets, id: \.self) { bullet in
+                                bulletRow(bullet)
+                            }
+                        }
+                    }
+                }
+
                 Spacer(minLength: 24)
             }
             .padding()

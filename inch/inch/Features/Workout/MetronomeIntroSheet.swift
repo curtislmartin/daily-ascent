@@ -49,31 +49,10 @@ struct MetronomeIntroSheet: View {
     }
 
     private var bullets: [String] {
-        switch exerciseId {
-        case "dead_bugs":
-            return [
-                "The beat paces every rep.",
-                "Extend your arm and opposite leg on the pulse, then return.",
-                "The screen shows which side is next — it switches automatically."
-            ]
-        case "hip_hinge":
-            return [
-                "The beat sets your tempo.",
-                "Hinge your hips back on the strong pulse.",
-                "Return to standing on the soft pulse. Slow and controlled."
-            ]
-        case "spinal_extension":
-            return [
-                "The beat controls your pace.",
-                "Lift on the first pulse, lower slowly on the second.",
-                "Both beats are equal — there's no rush phase."
-            ]
-        default:
-            return [
-                "The beat sets your tempo — move with each pulse.",
-                "Strong pulse marks the start of each rep.",
-                "Soft pulse signals the return or recovery phase."
-            ]
-        }
+        ExerciseContent.metronomeBullets(for: exerciseId) ?? [
+            "The beat sets your tempo — move with each pulse.",
+            "Strong pulse marks the start of each rep.",
+            "Soft pulse signals the return or recovery phase."
+        ]
     }
 }

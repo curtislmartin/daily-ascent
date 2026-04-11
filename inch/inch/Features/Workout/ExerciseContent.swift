@@ -281,4 +281,30 @@ enum ExerciseContent {
         ]
     ]
     // swiftlint:enable line_length
+
+    /// Per-exercise metronome guidance bullets. Returns nil for non-metronome exercises.
+    static func metronomeBullets(for exerciseId: String) -> [String]? {
+        switch exerciseId {
+        case "dead_bugs":
+            [
+                "The beat paces every rep.",
+                "Extend your arm and opposite leg on the pulse, then return.",
+                "The screen shows which side is next — it switches automatically."
+            ]
+        case "hip_hinge":
+            [
+                "The beat sets your tempo.",
+                "Hinge your hips back on the strong pulse.",
+                "Return to standing on the soft pulse. Slow and controlled."
+            ]
+        case "spinal_extension":
+            [
+                "The beat controls your pace.",
+                "Lift on the first pulse, lower slowly on the second.",
+                "Both beats are equal — there's no rush phase."
+            ]
+        default:
+            nil
+        }
+    }
 }
