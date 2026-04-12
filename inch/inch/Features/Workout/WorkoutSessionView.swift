@@ -205,41 +205,40 @@ struct WorkoutSessionView: View {
         } message: {
             Text("Any sets in progress won't be saved.")
         }
-        .confirmationDialog(
-            "Resume workout?",
-            isPresented: $showResumePrompt
-        ) {
-            Button("Resume from set \(viewModel.resumeSetCount + 1)") {
-                // A recording for set 1 was started before the dialog appeared.
-                // Discard it — the user is resuming from a later set.
-                if motionRecording.isRecording {
-                    let url = motionRecording.stopRecording()
-                    if let url { try? FileManager.default.removeItem(at: url) }
-                }
-                viewModel.resumeSession()
-                // Start a fresh recording for the correct set number.
-                if sensorConsented {
-                    let id = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
-                    repCounter?.reset()
-                    motionRecording.onSample = { [repCounter] ax, ay, az in
-                        repCounter?.processSample(ax: ax, ay: ay, az: az)
+        .overlay {
+            if showResumePrompt {
+                ResumePromptOverlay(
+                    resumeSetNumber: viewModel.resumeSetCount + 1,
+                    onResume: {
+                        showResumePrompt = false
+                        // A recording for set 1 was started before the prompt appeared.
+                        // Discard it — the user is resuming from a later set.
+                        if motionRecording.isRecording {
+                            let url = motionRecording.stopRecording()
+                            if let url { try? FileManager.default.removeItem(at: url) }
+                        }
+                        viewModel.resumeSession()
+                        // Start a fresh recording for the correct set number.
+                        if sensorConsented {
+                            let id = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
+                            repCounter?.reset()
+                            motionRecording.onSample = { [repCounter] ax, ay, az in
+                                repCounter?.processSample(ax: ax, ay: ay, az: az)
+                            }
+                            motionRecording.startRecording(
+                                exerciseId: id,
+                                setNumber: viewModel.currentSetIndex + 1,
+                                sessionId: sessionId,
+                                context: modelContext
+                            )
+                        }
+                    },
+                    onStartOver: {
+                        showResumePrompt = false
+                        // Recording for set 1 is already running and correct — no action needed.
+                        viewModel.restartSession()
                     }
-                    motionRecording.startRecording(
-                        exerciseId: id,
-                        setNumber: viewModel.currentSetIndex + 1,
-                        sessionId: sessionId,
-                        context: modelContext
-                    )
-                }
-            }
-            Button("Start over", role: .destructive) {
-                // Recording for set 1 is already running and correct — no action needed.
-                viewModel.restartSession()
-            }
-        }
-        .onChange(of: showResumePrompt) { old, new in
-            if old, !new, viewModel.shouldOfferResume {
-                viewModel.restartSession()
+                )
             }
         }
         .sheet(isPresented: $showMetronomeIntro) {

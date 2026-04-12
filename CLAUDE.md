@@ -178,4 +178,5 @@ struct SchedulingEngineTests {
 - No XCTest for unit tests (Swift Testing only)
 - No `Task.sleep(nanoseconds:)` — use `Task.sleep(for:)`
 - No hardcoded API keys in source files
+- No `.confirmationDialog` — use a centered card overlay instead (see `ResumePromptOverlay.swift` for the pattern)
 - Do not modify files in `files/` — they are read-only reference documents
