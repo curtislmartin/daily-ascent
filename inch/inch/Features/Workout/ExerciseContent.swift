@@ -19,6 +19,15 @@ enum ExerciseContent {
     // swiftlint:disable line_length
     private static let lookup: [String: [Int: ExerciseInfo]] = [
         "push_ups": [
+            0: ExerciseInfo(
+                muscles: ["Chest", "Triceps", "Core"],
+                setup: "Hands on a bench, counter, or sturdy elevated surface. Body in a straight line.",
+                movement: "Lower your chest toward the surface, then press back up to full arm extension.",
+                focus: "Keep your core tight — the incline makes it easier, but the form is the same as a full push-up.",
+                commonMistake: "Sagging hips — maintain a rigid plank from head to heels.",
+                levelTip: "The higher the surface, the easier it is. Start with a counter and work down to a bench.",
+                youtubeVideoId: "" // TODO: incline push-up demo
+            ),
             1: ExerciseInfo(
                 muscles: ["Chest", "Triceps", "Core"],
                 setup: "Hands under shoulders, body in a straight line from head to heels.",
@@ -77,6 +86,15 @@ enum ExerciseContent {
             )
         ],
         "pull_ups": [
+            0: ExerciseInfo(
+                muscles: ["Back", "Biceps"],
+                setup: "Stand under a bar you can reach by jumping. Grip with palms facing away, shoulder-width.",
+                movement: "Jump to get your chin above the bar, then lower yourself as slowly as possible (3-5 seconds).",
+                focus: "Resist gravity on the way down — the slower you lower, the stronger you get.",
+                commonMistake: "Dropping fast — if the descent takes less than 2 seconds, you're not getting the benefit.",
+                levelTip: "Negatives build the pulling strength you need for a full pull-up. Focus on control, not speed.",
+                youtubeVideoId: "" // TODO: pull-up negatives demo
+            ),
             1: ExerciseInfo(
                 muscles: ["Back", "Biceps"],
                 setup: "Hang from a bar with palms facing away, hands shoulder-width.",
@@ -106,6 +124,15 @@ enum ExerciseContent {
             )
         ],
         "dips": [
+            0: ExerciseInfo(
+                muscles: ["Triceps", "Chest", "Shoulders"],
+                setup: "Hands on the edge of a bench behind you, feet flat on the floor, knees bent at 90 degrees.",
+                movement: "Lower your body by bending elbows to about 90 degrees, then press back up.",
+                focus: "Keep your back close to the bench — don't let your hips drift forward.",
+                commonMistake: "Going too deep — stop at 90-degree elbow bend to protect your shoulders.",
+                levelTip: "Bent knees take weight off your arms. As you get stronger, you'll extend your legs in Level 1.",
+                youtubeVideoId: "" // TODO: bent-knee bench dips demo
+            ),
             1: ExerciseInfo(
                 muscles: ["Triceps", "Chest", "Shoulders"],
                 setup: "Hands on the edge of a bench or chair behind you, legs extended forward.",
