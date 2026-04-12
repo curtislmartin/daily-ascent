@@ -29,7 +29,7 @@ struct ExerciseDetailView: View {
             detailViewModel.load(enrolmentId: enrolmentId, context: modelContext)
         }
         .alert(
-            "Jump to Level \(pendingLevel ?? 0)?",
+            pendingLevel == 0 ? "Jump to Foundation?" : "Jump to Level \(pendingLevel ?? 0)?",
             isPresented: Binding(get: { pendingLevel != nil }, set: { if !$0 { pendingLevel = nil } })
         ) {
             Button("Change Level") { applyLevelChange() }
@@ -87,7 +87,7 @@ struct ExerciseDetailView: View {
                 }
             }
 
-            Section("Level \(enrolment.currentLevel) — \(days.count) days") {
+            Section("\(enrolment.currentLevel == 0 ? "Foundation" : "Level \(enrolment.currentLevel)") — \(days.count) days") {
                 ForEach(days, id: \.dayNumber) { day in
                     let scheduled = detailViewModel.upcomingSchedule.first(where: { $0.dayNumber == day.dayNumber })?.scheduledDate
                     DayRow(
@@ -118,12 +118,17 @@ struct ExerciseDetailView: View {
 
     private func levelProgressSection(enrolment: ExerciseEnrolment) -> some View {
         let def = enrolment.exerciseDefinition
+        let sortedLevels = (def?.levels ?? []).sorted { $0.level < $1.level }
         return Section {
             HStack(spacing: 0) {
-                ForEach(1...3, id: \.self) { level in
-                    let variationName = def?.levels?.first(where: { $0.level == level })?.variationName
-                    levelSegment(level: level, currentLevel: enrolment.currentLevel, isActive: enrolment.isActive, variationName: variationName)
-                    if level < 3 {
+                ForEach(sortedLevels, id: \.level) { levelDef in
+                    levelSegment(
+                        level: levelDef.level,
+                        currentLevel: enrolment.currentLevel,
+                        isActive: enrolment.isActive,
+                        variationName: levelDef.variationName
+                    )
+                    if levelDef.level < (sortedLevels.last?.level ?? 3) {
                         Image(systemName: "chevron.right")
                             .font(.caption2)
                             .foregroundStyle(.tertiary)
@@ -158,7 +163,7 @@ struct ExerciseDetailView: View {
                     .fill(isPast ? Color.green : isCurrent ? Color.accentColor : Color.secondary.opacity(0.3))
                     .frame(width: 10, height: 10)
                 VStack(alignment: .leading) {
-                    Text("Level \(level)")
+                    Text(level == 0 ? "Foundation" : "Level \(level)")
                         .font(.headline)
                     if let variation = variationName {
                         Text(variation)
