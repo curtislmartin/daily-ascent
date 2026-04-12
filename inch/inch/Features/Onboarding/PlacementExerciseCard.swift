@@ -9,7 +9,11 @@ struct PlacementExerciseCard: View {
     @State private var testRepCount: Int = 0
 
     private var chosenLevel: Int {
-        viewModel.levelChoices[definition.exerciseId] ?? 1
+        if let explicit = viewModel.levelChoices[definition.exerciseId] {
+            return explicit
+        }
+        let hasFoundation = (definition.levels ?? []).contains { $0.level == 0 }
+        return (definition.exerciseId == "pull_ups" && hasFoundation) ? 0 : 1
     }
 
     private var sortedLevels: [LevelDefinition] {
@@ -51,7 +55,7 @@ struct PlacementExerciseCard: View {
                     .font(.headline)
                     .foregroundStyle(.primary)
                 Spacer()
-                Text(chosenLevel == 1 ? "Level 1" : "Level \(chosenLevel)")
+                Text(chosenLevel == 0 ? "Foundation" : "Level \(chosenLevel)")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
@@ -90,10 +94,15 @@ struct PlacementExerciseCard: View {
                     .foregroundStyle(isChosen ? accentColor : .secondary)
                     .font(.title3)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Level \(levelDef.level)")
+                    Text(levelDef.level == 0 ? "Foundation" : "Level \(levelDef.level)")
                         .font(.subheadline)
                         .fontWeight(.medium)
                         .foregroundStyle(.primary)
+                    if let variation = levelDef.variationName {
+                        Text(variation)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                     if !setsFormatted.isEmpty {
                         Text("Day 1: \(setsFormatted) reps")
                             .font(.caption)
@@ -139,19 +148,20 @@ struct PlacementExerciseCard: View {
 
     private var recommendationView: some View {
         let targets = sortedLevels.map { $0.testTarget }
-        let recommended = EnrolmentViewModel.recommendLevel(score: testRepCount, testTargets: targets)
+        let levelNumbers = sortedLevels.map { $0.level }
+        let recommended = EnrolmentViewModel.recommendLevel(score: testRepCount, testTargets: targets, levels: levelNumbers)
         let isApplied = chosenLevel == recommended
 
         return VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Image(systemName: "checkmark.seal.fill")
                     .foregroundStyle(.green)
-                Text("We recommend Level \(recommended)")
+                Text("We recommend \(recommended == 0 ? "Foundation" : "Level \(recommended)")")
                     .font(.subheadline)
                     .fontWeight(.medium)
             }
             if !isApplied {
-                Button("Start at Level \(recommended)") {
+                Button("Start at \(recommended == 0 ? "Foundation" : "Level \(recommended)")") {
                     viewModel.levelChoices[definition.exerciseId] = recommended
                 }
                 .buttonStyle(.borderedProminent)

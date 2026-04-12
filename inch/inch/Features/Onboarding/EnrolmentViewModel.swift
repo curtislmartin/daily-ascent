@@ -19,6 +19,19 @@ final class EnrolmentViewModel {
         return 3
     }
 
+    /// Returns recommended level given a max-rep score.
+    /// levels and testTargets must be sorted by level ascending and have the same count.
+    static func recommendLevel(score: Int, testTargets: [Int], levels: [Int]) -> Int {
+        guard !levels.isEmpty else { return 1 }
+        var recommended = levels[0]
+        for (index, target) in testTargets.enumerated() {
+            if score >= target, index + 1 < levels.count {
+                recommended = levels[index + 1]
+            }
+        }
+        return recommended
+    }
+
     func isSelected(_ exerciseId: String) -> Bool {
         selectedExerciseIds.contains(exerciseId)
     }
@@ -63,7 +76,9 @@ final class EnrolmentViewModel {
             selectedExerciseIds.contains($0.exerciseId) && !existingIds.contains($0.exerciseId)
         }
         for definition in selected {
-            let chosenLevel = levelChoices[definition.exerciseId] ?? 1
+            let hasFoundation = definition.levels?.contains { $0.level == 0 } ?? false
+            let defaultLevel = (definition.exerciseId == "pull_ups" && hasFoundation) ? 0 : 1
+            let chosenLevel = levelChoices[definition.exerciseId] ?? defaultLevel
             let enrolment = ExerciseEnrolment(enrolledAt: startDate, currentLevel: chosenLevel)
             enrolment.exerciseDefinition = definition
             enrolment.nextScheduledDate = startDate
