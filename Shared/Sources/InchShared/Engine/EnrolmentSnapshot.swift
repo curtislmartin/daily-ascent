@@ -34,19 +34,22 @@ public struct LevelSnapshot: Sendable, Equatable {
     public let totalDays: Int
     public let extraRestBeforeTest: Int?
     public let testTarget: Int
+    public let maxLevel: Int
 
     public init(
         level: Int,
         restDayPattern: [Int],
         totalDays: Int,
         extraRestBeforeTest: Int?,
-        testTarget: Int
+        testTarget: Int,
+        maxLevel: Int = 3
     ) {
         self.level = level
         self.restDayPattern = restDayPattern
         self.totalDays = totalDays
         self.extraRestBeforeTest = extraRestBeforeTest
         self.testTarget = testTarget
+        self.maxLevel = maxLevel
     }
 }
 
@@ -72,7 +75,8 @@ public extension LevelSnapshot {
             restDayPattern: level.restDayPattern,
             totalDays: level.totalDays,
             extraRestBeforeTest: level.extraRestBeforeTest,
-            testTarget: level.testTarget
+            testTarget: level.testTarget,
+            maxLevel: level.exercise?.levels?.map(\.level).max() ?? 3
         )
     }
 }

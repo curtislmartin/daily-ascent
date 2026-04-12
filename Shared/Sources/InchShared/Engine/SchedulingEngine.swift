@@ -23,7 +23,7 @@ public struct SchedulingEngine: Sendable {
 
         // Level complete — transition to next level or programme end
         if enrolment.currentDay > level.totalDays {
-            if enrolment.currentLevel < 3 {
+            if enrolment.currentLevel < level.maxLevel {
                 return lastCompleted.addingDays(Self.interLevelGapDays)
             } else {
                 return nil
@@ -63,7 +63,7 @@ public struct SchedulingEngine: Sendable {
         if isTestDay {
             if totalReps >= level.testTarget {
                 // Test passed
-                if updated.currentLevel < 3 {
+                if updated.currentLevel < level.maxLevel {
                     updated.currentLevel += 1
                     updated.currentDay = 1
                     updated.restPatternIndex = 0

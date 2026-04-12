@@ -32,17 +32,20 @@ struct SchedulingEngineTests {
     }
 
     func makeLevel(
+        level: Int = 1,
         pattern: [Int] = [2, 2, 3],
         totalDays: Int = 10,
         extraRest: Int? = nil,
-        testTarget: Int = 20
+        testTarget: Int = 20,
+        maxLevel: Int = 3
     ) -> LevelSnapshot {
         LevelSnapshot(
-            level: 1,
+            level: level,
             restDayPattern: pattern,
             totalDays: totalDays,
             extraRestBeforeTest: extraRest,
-            testTarget: testTarget
+            testTarget: testTarget,
+            maxLevel: maxLevel
         )
     }
 
@@ -180,6 +183,34 @@ struct SchedulingEngineTests {
         )
         #expect(updated.currentLevel == 1)
         #expect(updated.currentDay == 10)  // unchanged
+    }
+
+    // MARK: - maxLevel tests
+
+    @Test(.tags(.scheduling))
+    func testPassedOnMaxLevelDeactivatesEnrolment() {
+        let enrolment = makeEnrolment(level: 3, currentDay: 10, lastCompleted: makeDate(2026, 3, 15))
+        let level = makeLevel(level: 3, totalDays: 10, testTarget: 20, maxLevel: 3)
+        let result = engine.applyCompletion(to: enrolment, level: level, actualDate: makeDate(2026, 3, 15), totalReps: 25)
+        #expect(result.isActive == false)
+    }
+
+    @Test(.tags(.scheduling))
+    func testPassedBelowMaxLevelAdvancesToNextLevel() {
+        let enrolment = makeEnrolment(level: 0, currentDay: 8, lastCompleted: makeDate(2026, 3, 15))
+        let level = makeLevel(level: 0, totalDays: 8, testTarget: 5, maxLevel: 3)
+        let result = engine.applyCompletion(to: enrolment, level: level, actualDate: makeDate(2026, 3, 15), totalReps: 5)
+        #expect(result.currentLevel == 1)
+        #expect(result.currentDay == 1)
+        #expect(result.isActive == true)
+    }
+
+    @Test(.tags(.scheduling))
+    func testLevelCompleteTransitionWorksForLevel0() {
+        let enrolment = makeEnrolment(level: 0, currentDay: 9, lastCompleted: makeDate(2026, 3, 15))
+        let level = makeLevel(level: 0, totalDays: 8, testTarget: 5, maxLevel: 3)
+        let nextDate = engine.computeNextDate(enrolment: enrolment, level: level)
+        #expect(nextDate == makeDate(2026, 3, 17))
     }
 
     // MARK: - Test 6: Missed day then completion — schedule shifts naturally
