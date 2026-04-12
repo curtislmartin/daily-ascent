@@ -71,6 +71,29 @@ struct RepCounterTests {
         #expect(counter.count == 0)
     }
 
+    @Test func requiresDropBelowThresholdBetweenReps() async {
+        // Simulates squat double-counting: two peaks without the signal dropping below threshold
+        let config = RepCountingConfig(threshold: 0.3, minIntervalSeconds: 0.0, smoothingAlpha: 1.0)
+        let counter = RepCounter(config: config)
+
+        // First peak — should count
+        counter.processSample(ax: 0.5, ay: 0.0, az: 0.0)
+        // Dips but stays above threshold
+        counter.processSample(ax: 0.35, ay: 0.0, az: 0.0)
+        // Second peak without crossing below — should NOT count
+        counter.processSample(ax: 0.6, ay: 0.0, az: 0.0)
+
+        await Task.yield()
+        #expect(counter.count == 1)
+
+        // Now drop below threshold and produce another peak — should count
+        counter.processSample(ax: 0.1, ay: 0.0, az: 0.0)
+        counter.processSample(ax: 0.5, ay: 0.0, az: 0.0)
+
+        await Task.yield()
+        #expect(counter.count == 2)
+    }
+
     @Test func usesMagnitudeNotSingleAxis() async {
         // Below threshold on each axis individually, but magnitude is above
         let threshold = 0.3

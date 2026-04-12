@@ -41,6 +41,7 @@ public final class RepCounter {
     private var smoothed: Double = 0
     private var previous: Double = 0
     private var lastRepTime: Date = .distantPast
+    private var wasBelow: Bool = true
 
     public var count: Int = 0
 
@@ -59,9 +60,14 @@ public final class RepCounter {
         let now = Date.now
         let elapsed = now.timeIntervalSince(lastRepTime)
 
-        if smoothed > config.threshold && smoothed > previous && elapsed >= config.minIntervalSeconds {
+        if smoothed <= config.threshold {
+            wasBelow = true
+        }
+
+        if wasBelow && smoothed > config.threshold && smoothed > previous && elapsed >= config.minIntervalSeconds {
             lastRepTime = now
             count += 1
+            wasBelow = false
         }
         previous = smoothed
     }
@@ -71,6 +77,7 @@ public final class RepCounter {
         smoothed = 0
         previous = 0
         lastRepTime = .distantPast
+        wasBelow = true
         count = 0
     }
 }
