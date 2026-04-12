@@ -2,7 +2,7 @@
 
 > **Effective date:** April 2026
 >
-> **Last updated:** April 2026 (added YouTube embed disclosure)
+> **Last updated:** April 2026 (added community benchmarks)
 >
 > **Developer:** Curtis Martin (individual developer, no registered business entity)
 >
@@ -38,7 +38,11 @@ The following data is created and stored locally on your device using Apple's Sw
 
 ## Anonymous Data Sharing (Opt-In Only)
 
-During onboarding, Daily Ascent asks if you'd like to contribute anonymous motion data to help train automatic rep counting models. This is entirely optional and defaults to off.
+Daily Ascent offers two separate, independent opt-in data sharing features. Both are optional and neither requires an account or collects any personally identifiable information.
+
+### Motion Data Sharing
+
+During onboarding, Daily Ascent asks if you'd like to contribute anonymous motion data to help train automatic rep counting models. This defaults to off.
 
 **If you opt in**, the following is uploaded to our servers:
 
@@ -50,21 +54,43 @@ During onboarding, Daily Ascent asks if you'd like to contribute anonymous motio
 
 **If you also choose to share optional demographics** (presented only to users who opt in to data sharing), these anonymous tags may be included: age range, height range, biological sex, and activity level. All fields are optional. They are linked only to your random contributor ID.
 
-**What is NOT uploaded:** your name, Apple ID, email, location, workout schedule, streak data, or any information that could identify you.
-
 **When uploads happen:** only when your device is connected to Wi-Fi and charging, typically overnight. Uploads are processed via a background task and do not affect your active use of the app.
 
 **Where data is stored:** uploaded data is stored on Supabase servers. It is used solely to train and improve automatic rep counting models for this app.
+
+### Community Benchmarks
+
+Daily Ascent can anonymously compare your training progress against the broader community. This is a separate opt-in from motion data sharing and defaults to on. You can disable it at any time in Settings → Privacy.
+
+**If enabled**, the following is uploaded after each workout:
+
+- A device hash (a one-way SHA-256 hash of a randomly generated UUID stored in your device's Keychain — not linked to your Apple ID, name, or any personal information)
+- Exercise ID, level, best set reps, best set duration, session total reps, session duration, and workout hour
+- Whether the session was a test day, and the test result if applicable
+- Current streak length and number of exercises completed that day
+- Lifetime totals: total workouts, total reps, and number of enrolled exercises
+
+**What is NOT uploaded:** your name, Apple ID, email, location, workout schedule, or any information that could identify you. The device hash cannot be reversed to recover your device's UUID.
+
+**What you get in return:** percentile rankings showing where your personal bests and streak stand relative to other users. This data is fetched from the server and cached locally. Rankings require at least 20 users per exercise and level before they are shown.
+
+**When uploads happen:** benchmark data is uploaded immediately after each workout completes. Lifetime totals are synced once per app launch. All uploads are fire-and-forget — failures are silent and do not affect your training experience.
+
+**Where data is stored:** benchmark data is stored on Supabase servers. It is used solely to compute anonymous community distributions for this app.
 
 ---
 
 ## Your Choices and Controls
 
-**Opt out of data sharing at any time.** Settings → Privacy → toggle off "Share anonymous motion data." Future recordings will no longer be uploaded. Recordings already on your device remain local.
+**Opt out of motion data sharing at any time.** Settings → Privacy → toggle off "Share anonymous motion data." Future recordings will no longer be uploaded. Recordings already on your device remain local.
 
-**Delete your contributed data.** Settings → Privacy → "Delete My Data" removes all data associated with your contributor ID from our servers.
+**Opt out of community benchmarks at any time.** Settings → Privacy → toggle off "Share anonymous benchmarks." Your workout data will no longer be uploaded after sessions, and community rankings will no longer be displayed.
 
-**Reset your contributor ID.** Settings → Privacy → "Reset Contributor ID" generates a new random identifier, severing any link between future uploads and past contributions.
+**Delete your contributed motion data.** Settings → Privacy → "Delete My Data" removes all motion data associated with your contributor ID from our servers.
+
+**Delete your community benchmark data.** Settings → Privacy → "Delete Community Data" removes all benchmark data associated with your device hash from our servers.
+
+**Reset your contributor ID.** Settings → Privacy → "Reset Contributor ID" generates a new random identifier, severing any link between future motion data uploads and past contributions.
 
 **Disable local sensor recording.** If you prefer that the app not record sensor data at all (even locally), you can disable this in Settings. Note that this will prevent future on-device rep detection features from working for you.
 
@@ -78,7 +104,7 @@ Daily Ascent can save your training sessions to Apple Health as workouts (activi
 
 ## Third-Party Services
 
-Daily Ascent uses Supabase for anonymous sensor data storage (for users who opt in to sharing).
+Daily Ascent uses Supabase for anonymous sensor data storage (for users who opt in to motion data sharing) and for anonymous community benchmark data (for users who opt in to community benchmarks).
 
 Exercise demonstration videos are embedded from YouTube (google.com/intl/en/policies/privacy). If you play a video, YouTube may collect data about that interaction in accordance with Google's privacy policy. No other third-party services, analytics SDKs, advertising frameworks, or tracking tools are included in the app.
 

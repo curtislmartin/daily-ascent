@@ -50,6 +50,14 @@
       color: #111;
     }
 
+    h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: #222;
+    }
+
     p {
       margin-bottom: 0.85rem;
       color: #333;
@@ -115,52 +123,85 @@
 
     <section>
       <h2>Overview</h2>
-      <p>Daily Ascent is a bodyweight training app for iPhone and Apple Watch. It helps you track workouts across nine exercises — Push-Ups, Squats, Pull-Ups, Dips, Rows, Hip Hinge, Spinal Extension, Plank, and Dead Bugs — and progress through structured training levels.</p>
+      <p>Daily Ascent is a bodyweight training app for iPhone and Apple Watch. This policy explains what data the app collects, how it&rsquo;s used, and what choices you have.</p>
       <div class="highlight-box">
-        <p>Daily Ascent does not require an account, does not collect your name or email, and does not use advertising or third-party analytics. Most data never leaves your device.</p>
+        <p>Daily Ascent collects very little, never identifies you, and gives you control over anything that leaves your device. There are no user accounts. You do not sign in.</p>
       </div>
     </section>
 
     <section>
-      <h2>Data We Collect</h2>
-      <p>The table below summarises everything Daily Ascent stores or transmits:</p>
+      <h2>Data We Do Not Collect</h2>
+      <p>Daily Ascent does not collect, store, or transmit any of the following: your name, email address, Apple ID, phone number, location, contacts, photos, browsing history, or any other personally identifiable information.</p>
+    </section>
+
+    <section>
+      <h2>Data Stored On Your Device Only</h2>
+      <p>The following data is created and stored locally on your device using Apple&rsquo;s SwiftData framework. It is not transmitted to any server unless you explicitly opt in to anonymous data sharing (see below).</p>
       <ul>
-        <li><strong>Workout history</strong> — stored locally on your device using SwiftData. Never uploaded to any server.</li>
-        <li><strong>HealthKit data</strong> — calories burned and active minutes, read and written to the Apple Health app on your device. Stays on your device and your personal iCloud account. Daily Ascent does not receive or store this data on any external server.</li>
-        <li><strong>Motion sensor data (optional)</strong> — accelerometer and gyroscope readings captured during workouts, only if you explicitly opt in. See the section below.</li>
-        <li><strong>Crash diagnostics</strong> — if the app crashes, Apple's MetricKit framework writes a diagnostic report to the app's local Documents folder on your device. These files are not automatically uploaded anywhere; they may be reviewed by the developer only if you choose to share them manually (e.g. via the iOS Files app).</li>
+        <li><strong>Workout data</strong> &mdash; which exercises you&rsquo;re enrolled in, your current level and day, completed sets and reps, scheduled dates, and streak history. This powers the app&rsquo;s core training experience.</li>
+        <li><strong>Sensor recordings</strong> &mdash; during active sets (not during rest periods), the app records accelerometer and gyroscope data from your iPhone and/or Apple Watch. These recordings are stored as files on your device. They exist to support current features like set timing and future on-device rep detection. If you have not opted in to data sharing, these files never leave your device.</li>
+        <li><strong>Settings and preferences</strong> &mdash; rest timer durations, counting mode preferences, notification preferences, and privacy toggles.</li>
       </ul>
-      <p>Daily Ascent collects no location data, no contacts, no camera or microphone access, no browsing history, and no advertising identifiers.</p>
+    </section>
+
+    <section>
+      <h2>Anonymous Data Sharing (Opt-In Only)</h2>
+      <p>Daily Ascent offers two separate, independent opt-in data sharing features. Both are optional and neither requires an account or collects any personally identifiable information.</p>
+
+      <h3>Motion Data Sharing</h3>
+      <p>During onboarding, Daily Ascent asks if you&rsquo;d like to contribute anonymous motion data to help train automatic rep counting models. This defaults to off.</p>
+      <p><strong>If you opt in</strong>, the following is uploaded to our servers:</p>
+      <ul>
+        <li>Accelerometer and gyroscope sensor data recorded during your sets</li>
+        <li>The rep count you confirmed for that set</li>
+        <li>Exercise type, level, day number, set number, and counting mode</li>
+        <li>Device type (iPhone or Apple Watch) and sensor sample rate</li>
+        <li>A randomly generated contributor ID (a UUID created on your device &mdash; not linked to your Apple ID, name, or any personal information)</li>
+      </ul>
+      <p><strong>If you also choose to share optional demographics</strong> (presented only to users who opt in to data sharing), these anonymous tags may be included: age range, height range, biological sex, and activity level. All fields are optional. They are linked only to your random contributor ID.</p>
+      <p><strong>When uploads happen:</strong> only when your device is connected to Wi-Fi and charging, typically overnight. Uploads are processed via a background task and do not affect your active use of the app.</p>
+      <p><strong>Where data is stored:</strong> uploaded data is stored on Supabase servers. It is used solely to train and improve automatic rep counting models for this app.</p>
+
+      <h3>Community Benchmarks</h3>
+      <p>Daily Ascent can anonymously compare your training progress against the broader community. This is a separate opt-in from motion data sharing and defaults to on. You can disable it at any time in Settings &rarr; Privacy.</p>
+      <p><strong>If enabled</strong>, the following is uploaded after each workout:</p>
+      <ul>
+        <li>A device hash (a one-way SHA-256 hash of a randomly generated UUID stored in your device&rsquo;s Keychain &mdash; not linked to your Apple ID, name, or any personal information)</li>
+        <li>Exercise ID, level, best set reps, best set duration, session total reps, session duration, and workout hour</li>
+        <li>Whether the session was a test day, and the test result if applicable</li>
+        <li>Current streak length and number of exercises completed that day</li>
+        <li>Lifetime totals: total workouts, total reps, and number of enrolled exercises</li>
+      </ul>
+      <p><strong>What is NOT uploaded:</strong> your name, Apple ID, email, location, workout schedule, or any information that could identify you. The device hash cannot be reversed to recover your device&rsquo;s UUID.</p>
+      <p><strong>What you get in return:</strong> percentile rankings showing where your personal bests and streak stand relative to other users. This data is fetched from the server and cached locally. Rankings require at least 20 users per exercise and level before they are shown.</p>
+      <p><strong>When uploads happen:</strong> benchmark data is uploaded immediately after each workout completes. Lifetime totals are synced once per app launch. All uploads are fire-and-forget &mdash; failures are silent and do not affect your training experience.</p>
+      <p><strong>Where data is stored:</strong> benchmark data is stored on Supabase servers. It is used solely to compute anonymous community distributions for this app.</p>
+    </section>
+
+    <section>
+      <h2>Your Choices and Controls</h2>
+      <p><strong>Opt out of motion data sharing at any time.</strong> Settings &rarr; Privacy &rarr; toggle off &ldquo;Share anonymous motion data.&rdquo; Future recordings will no longer be uploaded. Recordings already on your device remain local.</p>
+      <p><strong>Opt out of community benchmarks at any time.</strong> Settings &rarr; Privacy &rarr; toggle off &ldquo;Share anonymous benchmarks.&rdquo; Your workout data will no longer be uploaded after sessions, and community rankings will no longer be displayed.</p>
+      <p><strong>Delete your contributed motion data.</strong> Settings &rarr; Privacy &rarr; &ldquo;Delete My Data&rdquo; removes all motion data associated with your contributor ID from our servers.</p>
+      <p><strong>Delete your community benchmark data.</strong> Settings &rarr; Privacy &rarr; &ldquo;Delete Community Data&rdquo; removes all benchmark data associated with your device hash from our servers.</p>
+      <p><strong>Reset your contributor ID.</strong> Settings &rarr; Privacy &rarr; &ldquo;Reset Contributor ID&rdquo; generates a new random identifier, severing any link between future motion data uploads and past contributions.</p>
+      <p><strong>Disable local sensor recording.</strong> If you prefer that the app not record sensor data at all (even locally), you can disable this in Settings. Note that this will prevent future on-device rep detection features from working for you.</p>
     </section>
 
     <section>
       <h2>HealthKit</h2>
-      <p>If you grant permission, Daily Ascent reads and writes workout data (active calories, exercise minutes) to Apple Health. This data is governed by Apple's HealthKit policies and stays within the Apple ecosystem on your device and your private iCloud account.</p>
-      <p>Daily Ascent never sends HealthKit data to any external server. You can revoke Health access at any time in <strong>Settings &rarr; Privacy &amp; Security &rarr; Health &rarr; Daily Ascent</strong>.</p>
+      <p>Daily Ascent can save your training sessions to Apple Health as workouts (activity type: Functional Strength Training). HealthKit access is requested before your first workout, not at app launch. Daily Ascent reads and writes only workout data. HealthKit data is governed by Apple&rsquo;s privacy controls and is never sent to our servers.</p>
     </section>
 
     <section>
-      <h2>Motion Data (Optional)</h2>
-      <p>Daily Ascent includes an optional feature to help improve automatic rep counting in future versions. If you enable <em>"Share motion data anonymously"</em> in Settings, Daily Ascent will record accelerometer and gyroscope data from your iPhone and Apple Watch during workouts and upload it to a secure server.</p>
-      <p>This upload is:</p>
-      <ul>
-        <li><strong>Anonymous</strong> — no name, email, account, or device ID is included. Records cannot be traced back to any individual.</li>
-        <li><strong>Optionally enriched with demographic data</strong> — if you choose to provide an age range, height range, biological sex, or activity level in the app's Settings screen, this information is included alongside the motion data to improve model accuracy for different body types. Providing this information is entirely optional.</li>
-        <li><strong>Used only for training ML models</strong> for rep counting. It is not sold, shared with advertisers, or used for any other purpose.</li>
-        <li><strong>Opt-in only</strong> — the toggle is off by default. You can disable it at any time in the app's Settings screen.</li>
-      </ul>
-      <p>If you do not enable this toggle, no motion data is uploaded. Ever.</p>
+      <h2>Third-Party Services</h2>
+      <p>Daily Ascent uses Supabase for anonymous sensor data storage (for users who opt in to motion data sharing) and for anonymous community benchmark data (for users who opt in to community benchmarks).</p>
+      <p>Exercise demonstration videos are embedded from YouTube (<a href="https://policies.google.com/privacy">Google Privacy Policy</a>). If you play a video, YouTube may collect data about that interaction in accordance with Google&rsquo;s privacy policy. No other third-party services, analytics SDKs, advertising frameworks, or tracking tools are included in the app.</p>
     </section>
 
     <section>
-      <h2>Data Retention</h2>
-      <p><strong>Local data</strong> (workout history, settings, crash diagnostics) is retained on your device until you delete the app or manually remove it.</p>
-      <p><strong>Uploaded motion data</strong>, if you opted in, is retained on our server for as long as it is useful for improving rep counting models, and deleted thereafter. Uploaded records contain no identifier of any kind, so it is not possible to associate them with any individual or to selectively delete a specific person's data. If you have concerns, please contact us before enabling the toggle.</p>
-    </section>
-
-    <section>
-      <h2>Children</h2>
-      <p>Daily Ascent is not directed at children under 13. We do not knowingly collect data from children.</p>
+      <h2>Children&rsquo;s Privacy</h2>
+      <p>Daily Ascent does not knowingly collect data from children under 13. The app does not require an account and does not collect personal information from any user.</p>
     </section>
 
     <section>
@@ -170,17 +211,16 @@
 
     <section>
       <h2>Changes to This Policy</h2>
-      <p>If we make material changes to this privacy policy, we will update the "Last updated" date at the top of this page. Continued use of the app after changes constitutes acceptance of the updated policy.</p>
+      <p>If this policy changes, the updated version will be posted at this URL with a new &ldquo;Last updated&rdquo; date. Material changes to data collection practices will be communicated through an in-app notice and may require renewed consent.</p>
     </section>
 
     <section>
       <h2>Contact</h2>
-      <p>Questions or concerns about this privacy policy? Please open an issue on our GitHub repository:</p>
-      <p><a href="https://github.com/curtislmartin/daily-ascent/issues">https://github.com/curtislmartin/daily-ascent/issues</a></p>
+      <p>For questions or requests related to your data, contact <a href="mailto:support@clmartin.dev">support@clmartin.dev</a>.</p>
     </section>
 
     <footer>
-      <p>Daily Ascent Bodyweight Training &mdash; developed by curtislmartin &mdash; <a href="https://github.com/curtislmartin/daily-ascent">GitHub</a></p>
+      <p>Daily Ascent Bodyweight Training &mdash; developed by Curtis Martin</p>
     </footer>
   </div>
 </body>
