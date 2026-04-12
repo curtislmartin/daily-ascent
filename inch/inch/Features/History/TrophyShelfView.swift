@@ -5,8 +5,11 @@ import InchShared
 // MARK: - TrophyShelfView
 
 struct TrophyShelfView: View {
+    @Environment(CommunityBenchmarkService.self) private var communityBenchmark
     @Query private var achievements: [Achievement]
     @Query private var enrolments: [ExerciseEnrolment]
+    @Query private var streakStates: [StreakState]
+    @Query private var allSettings: [UserSettings]
 
     var body: some View {
         let badges = buildBadges(earnedIds: Set(achievements.map(\.id)))
@@ -28,6 +31,16 @@ struct TrophyShelfView: View {
         } else {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
+                    if allSettings.first?.communityBenchmarksEnabled == true,
+                       communityBenchmark.distributionCache.lastFetched != nil {
+                        CommunityStatsSection(
+                            distributionCache: communityBenchmark.distributionCache,
+                            enrolments: enrolments,
+                            achievements: achievements,
+                            streakState: streakStates.first
+                        )
+                    }
+
                     ForEach(Self.sections(from: badges), id: \.category) { section in
                         VStack(alignment: .leading, spacing: 12) {
                             Text(section.title)
