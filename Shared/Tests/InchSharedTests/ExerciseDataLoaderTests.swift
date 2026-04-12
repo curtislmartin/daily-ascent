@@ -295,6 +295,31 @@ struct ExerciseDataLoaderTests {
         #expect(day13Total <= day11Total, "Day 13 should be consolidation (volume <= day 11)")
     }
 
+    @Test(.tags(.dataLoader), arguments: [
+        ("pull_ups", 3, 32, 30),
+        ("push_ups", 3, 34, 100),
+        ("squats", 3, 26, 150),
+        ("dead_bugs", 3, 26, 80),
+    ])
+    func extendedL3Programs(exerciseId: String, level: Int, expectedDays: Int, expectedTarget: Int) throws {
+        let container = try ModelContainerFactory.makeContainer(inMemory: true)
+        let context = ModelContext(container)
+        try ExerciseDataLoader().seedIfNeeded(context: context)
+
+        let all = try context.fetch(FetchDescriptor<ExerciseDefinition>())
+        let exercise = try #require(all.first { $0.exerciseId == exerciseId })
+        let levelDef = try #require(exercise.levels?.first { $0.level == level })
+        #expect(levelDef.totalDays == expectedDays)
+        #expect(levelDef.testTarget == expectedTarget)
+
+        let days = (levelDef.days ?? []).sorted { $0.dayNumber < $1.dayNumber }
+        #expect(days.count == expectedDays)
+
+        // Last day is test
+        let lastDay = try #require(days.last)
+        #expect(lastDay.isTest == true)
+    }
+
     @Test(.tags(.dataLoader))
     func squatsStillHasThreeLevels() throws {
         let container = try ModelContainerFactory.makeContainer(inMemory: true)
