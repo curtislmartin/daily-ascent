@@ -368,8 +368,11 @@ public struct AchievementChecker {
             FetchDescriptor<ExerciseEnrolment>()
         )) ?? []
         let activeEnrolments = enrolments.filter { $0.isActive }
-        let allLevel3 = activeEnrolments.allSatisfy { $0.currentLevel > 3 || $0.currentDay > 18 }
-        if !activeEnrolments.isEmpty && allLevel3 {
+        let allMaxed = activeEnrolments.allSatisfy { enrolment in
+            let maxLevel = enrolment.exerciseDefinition?.levels?.map(\.level).max() ?? 3
+            return !enrolment.isActive || (enrolment.currentLevel >= maxLevel && enrolment.currentDay > 1)
+        }
+        if !activeEnrolments.isEmpty && allMaxed {
             results.append(Achievement(
                 id: "program_complete", category: "milestone",
                 unlockedAt: .now, sessionDate: sessionDate
