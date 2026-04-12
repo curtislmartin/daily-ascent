@@ -14,6 +14,7 @@ struct ExerciseDetailView: View {
     @State private var showingResetLevelConfirm = false
     @State private var pendingLevel: Int?
     @State private var pendingDay: Int?
+    @State private var previewLevel: LevelDefinition?
 
     var body: some View {
         Group {
@@ -22,6 +23,13 @@ struct ExerciseDetailView: View {
             } else {
                 ProgressView()
             }
+        }
+        .sheet(item: $previewLevel) { levelDef in
+            LevelPreviewSheet(
+                levelDefinition: levelDef,
+                countingMode: enrolment?.exerciseDefinition?.countingMode ?? .postSetConfirmation,
+                exerciseName: enrolment?.exerciseDefinition?.name ?? "Exercise"
+            )
         }
         .navigationBarTitleDisplayMode(.inline)
         .task {
@@ -128,6 +136,13 @@ struct ExerciseDetailView: View {
                         isActive: enrolment.isActive,
                         variationName: levelDef.variationName
                     )
+                    .contextMenu {
+                        Button {
+                            previewLevel = levelDef
+                        } label: {
+                            Label("Preview Level", systemImage: "eye")
+                        }
+                    }
                     if levelDef.level < (sortedLevels.last?.level ?? 3) {
                         Image(systemName: "chevron.right")
                             .font(.caption2)
@@ -146,7 +161,7 @@ struct ExerciseDetailView: View {
                 .foregroundStyle(.secondary)
             }
         } footer: {
-            Text("Tap a level to jump there.")
+            Text("Tap to jump. Long press to preview.")
                 .font(.caption2)
         }
     }
