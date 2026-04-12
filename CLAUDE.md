@@ -8,10 +8,10 @@ Daily Ascent is an iOS + watchOS bodyweight training app with 9 exercises (Push-
 
 Supporting development resources live in a separate private repo: **`curtislmartin/daily-ascent-dev`**
 
-Check there for:
-- **`skills_repo/`** — Claude Code skills for SwiftUI, SwiftData, Swift Concurrency, Swift Testing, App Store, accessibility, and more
+All feature planning (specs, plans, design docs) lives in that repo. Check there for:
 - **`docs/superpowers/plans/`** — implementation plans for all features built to date
 - **`docs/superpowers/specs/`** — design specs for those features
+- **`skills_repo/`** — Claude Code skills for SwiftUI, SwiftData, Swift Concurrency, Swift Testing, App Store, accessibility, and more
 - **`todos/`** — resolved bug and improvement records
 - **`audit.md`**, **`notes.md`** — development notes
 
