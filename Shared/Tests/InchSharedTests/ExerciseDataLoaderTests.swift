@@ -273,6 +273,29 @@ struct ExerciseDataLoaderTests {
     }
 
     @Test(.tags(.dataLoader))
+    func pullUpsLevel1Has25Days() throws {
+        let container = try ModelContainerFactory.makeContainer(inMemory: true)
+        let context = ModelContext(container)
+        try ExerciseDataLoader().seedIfNeeded(context: context)
+
+        let all = try context.fetch(FetchDescriptor<ExerciseDefinition>())
+        let pullUps = try #require(all.first { $0.exerciseId == "pull_ups" })
+        let level1 = try #require(pullUps.levels?.first { $0.level == 1 })
+        #expect(level1.totalDays == 25)
+        #expect(level1.testTarget == 10)
+
+        let days = (level1.days ?? []).sorted { $0.dayNumber < $1.dayNumber }
+        #expect(days.count == 25)
+
+        // Verify consolidation: days 12-13 should not exceed day 11 total volume
+        let day11Total = days.first(where: { $0.dayNumber == 11 })?.sets.reduce(0, +) ?? 0
+        let day12Total = days.first(where: { $0.dayNumber == 12 })?.sets.reduce(0, +) ?? 0
+        let day13Total = days.first(where: { $0.dayNumber == 13 })?.sets.reduce(0, +) ?? 0
+        #expect(day12Total <= day11Total, "Day 12 should be consolidation (volume <= day 11)")
+        #expect(day13Total <= day11Total, "Day 13 should be consolidation (volume <= day 11)")
+    }
+
+    @Test(.tags(.dataLoader))
     func squatsStillHasThreeLevels() throws {
         let container = try ModelContainerFactory.makeContainer(inMemory: true)
         let context = ModelContext(container)
