@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Support — Daily Ascent Bodyweight Training</title>
+  <title>Support — Daily Ascent</title>
+  <link rel="icon" type="image/png" href="../favicon.png" />
   <style>
     *, *::before, *::after {
       box-sizing: border-box;
@@ -29,6 +30,18 @@
       margin-bottom: 2.5rem;
       padding-bottom: 1.5rem;
       border-bottom: 1px solid #e5e5e5;
+    }
+
+    header a {
+      text-decoration: none;
+      color: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    header a:hover {
+      opacity: 0.8;
     }
 
     header h1 {
@@ -76,10 +89,18 @@
     footer {
       margin-top: 3rem;
       padding-top: 1.5rem;
-      border-bottom: none;
       border-top: 1px solid #e5e5e5;
       font-size: 0.85rem;
       color: #888;
+      text-align: center;
+    }
+
+    footer nav {
+      margin-bottom: 1rem;
+    }
+
+    footer nav a {
+      margin: 0 0.5rem;
     }
 
     @media (max-width: 480px) {
@@ -97,13 +118,18 @@
 <body>
   <div class="container">
     <header>
-      <h1>Support</h1>
-      <p>Daily Ascent Bodyweight Training</p>
+      <a href="../">
+        <img src="../app-icon.png" alt="Daily Ascent" width="48" height="48" style="border-radius: 22%;" />
+        <div>
+          <h1>Support</h1>
+          <p>Daily Ascent</p>
+        </div>
+      </a>
     </header>
 
     <section>
       <h2>Get in Touch</h2>
-      <p>If you're experiencing issues, have a feature request, or want to ask a question, the best way to reach out is through GitHub:</p>
+      <p>If you&rsquo;re experiencing issues, have a feature request, or want to ask a question, the best way to reach out is through GitHub:</p>
       <ul>
         <li><strong>Open an Issue:</strong> Log a bug report or feature request on our <a href="https://github.com/curtislmartin/daily-ascent/issues">GitHub Issues page</a>. I monitor this regularly and will respond there.</li>
         <li><strong>Developer Website:</strong> You can learn more about my other work at <a href="https://clmartin.dev">clmartin.dev</a>.</li>
@@ -117,7 +143,7 @@
       <p>No. Daily Ascent does not require an account. All your workout data is stored locally on your device. Optional anonymous features (motion data sharing and community benchmarks) can be controlled in Settings &rarr; Privacy.</p>
 
       <p><strong>Can I use Daily Ascent without an Apple Watch?</strong></p>
-      <p>Yes. The iPhone app is fully self-contained. The Apple Watch app is an optional companion — it lets you track sets, count reps, and manage rest timers from your wrist during workouts.</p>
+      <p>Yes. The iPhone app is fully self-contained. The Apple Watch app is an optional companion &mdash; it lets you track sets, count reps, and manage rest timers from your wrist during workouts.</p>
 
       <p><strong>How does the Apple Watch app work?</strong></p>
       <p>Open Daily Ascent on your Apple Watch. Your workout schedule syncs automatically from your iPhone when you launch the app. You can complete full workout sessions from your watch, and results sync back to your iPhone when the session ends.</p>
