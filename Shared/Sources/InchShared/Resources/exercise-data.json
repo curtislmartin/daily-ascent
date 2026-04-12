@@ -9,6 +9,159 @@
       "defaultRestSeconds": 60,
       "levels": [
         {
+          "level": 0,
+          "variationName": "Incline Push-Up",
+          "restDayPattern": [
+            2,
+            2,
+            3
+          ],
+          "testTarget": 10,
+          "totalDays": 16,
+          "days": [
+            {
+              "day": 1,
+              "sets": [
+                2,
+                2,
+                2,
+                1
+              ]
+            },
+            {
+              "day": 2,
+              "sets": [
+                2,
+                3,
+                2,
+                2
+              ]
+            },
+            {
+              "day": 3,
+              "sets": [
+                3,
+                3,
+                2,
+                2
+              ]
+            },
+            {
+              "day": 4,
+              "sets": [
+                3,
+                3,
+                3,
+                2
+              ]
+            },
+            {
+              "day": 5,
+              "sets": [
+                4,
+                3,
+                3,
+                2
+              ]
+            },
+            {
+              "day": 6,
+              "sets": [
+                4,
+                4,
+                3,
+                3
+              ]
+            },
+            {
+              "day": 7,
+              "sets": [
+                5,
+                4,
+                4,
+                3
+              ]
+            },
+            {
+              "day": 8,
+              "sets": [
+                10
+              ],
+              "isTest": true
+            },
+            {
+              "day": 9,
+              "sets": [
+                5,
+                4,
+                4,
+                3
+              ]
+            },
+            {
+              "day": 10,
+              "sets": [
+                6,
+                5,
+                4,
+                3
+              ]
+            },
+            {
+              "day": 11,
+              "sets": [
+                6,
+                5,
+                5,
+                4
+              ]
+            },
+            {
+              "day": 12,
+              "sets": [
+                7,
+                5,
+                5,
+                4
+              ]
+            },
+            {
+              "day": 13,
+              "sets": [
+                7,
+                6,
+                5,
+                4
+              ]
+            },
+            {
+              "day": 14,
+              "sets": [
+                8,
+                6,
+                5,
+                5
+              ]
+            },
+            {
+              "day": 15,
+              "sets": [
+                8,
+                7,
+                6,
+                5
+              ]
+            },
+            {
+              "day": 16,
+              "sets": [
+                10
+              ],
+              "isTest": true
+            }
+          ]
+        },
+        {
           "level": 1,
           "restDayPattern": [
             2,
@@ -1051,6 +1204,158 @@
       "countingMode": "post_set_confirmation",
       "defaultRestSeconds": 90,
       "levels": [
+        {
+          "level": 0,
+          "variationName": "Negative Pull-Up",
+          "restDayPattern": [
+            2,
+            2,
+            3
+          ],
+          "testTarget": 5,
+          "totalDays": 16,
+          "days": [
+            {
+              "day": 1,
+              "sets": [
+                1,
+                1,
+                1
+              ]
+            },
+            {
+              "day": 2,
+              "sets": [
+                1,
+                1,
+                1,
+                1
+              ]
+            },
+            {
+              "day": 3,
+              "sets": [
+                2,
+                1,
+                1,
+                1
+              ]
+            },
+            {
+              "day": 4,
+              "sets": [
+                2,
+                2,
+                1,
+                1
+              ]
+            },
+            {
+              "day": 5,
+              "sets": [
+                2,
+                2,
+                2,
+                1
+              ]
+            },
+            {
+              "day": 6,
+              "sets": [
+                2,
+                2,
+                2,
+                2
+              ]
+            },
+            {
+              "day": 7,
+              "sets": [
+                3,
+                2,
+                2,
+                2
+              ]
+            },
+            {
+              "day": 8,
+              "sets": [
+                5
+              ],
+              "isTest": true
+            },
+            {
+              "day": 9,
+              "sets": [
+                3,
+                2,
+                2,
+                2
+              ]
+            },
+            {
+              "day": 10,
+              "sets": [
+                3,
+                3,
+                2,
+                2
+              ]
+            },
+            {
+              "day": 11,
+              "sets": [
+                3,
+                3,
+                3,
+                2
+              ]
+            },
+            {
+              "day": 12,
+              "sets": [
+                3,
+                3,
+                3,
+                3
+              ]
+            },
+            {
+              "day": 13,
+              "sets": [
+                4,
+                3,
+                3,
+                2
+              ]
+            },
+            {
+              "day": 14,
+              "sets": [
+                4,
+                3,
+                3,
+                3
+              ]
+            },
+            {
+              "day": 15,
+              "sets": [
+                4,
+                4,
+                3,
+                3
+              ]
+            },
+            {
+              "day": 16,
+              "sets": [
+                5
+              ],
+              "isTest": true
+            }
+          ]
+        },
         {
           "level": 1,
           "restDayPattern": [
@@ -3364,6 +3669,173 @@
       "countingMode": "post_set_confirmation",
       "defaultRestSeconds": 90,
       "levels": [
+        {
+          "level": 0,
+          "variationName": "Assisted Bench Dip",
+          "restDayPattern": [
+            2,
+            2,
+            3
+          ],
+          "testTarget": 12,
+          "totalDays": 16,
+          "days": [
+            {
+              "day": 1,
+              "sets": [
+                2,
+                3,
+                2,
+                2,
+                1
+              ]
+            },
+            {
+              "day": 2,
+              "sets": [
+                3,
+                3,
+                2,
+                2,
+                2
+              ]
+            },
+            {
+              "day": 3,
+              "sets": [
+                3,
+                3,
+                3,
+                2,
+                2
+              ]
+            },
+            {
+              "day": 4,
+              "sets": [
+                4,
+                3,
+                3,
+                3,
+                2
+              ]
+            },
+            {
+              "day": 5,
+              "sets": [
+                4,
+                4,
+                3,
+                3,
+                2
+              ]
+            },
+            {
+              "day": 6,
+              "sets": [
+                5,
+                4,
+                4,
+                3,
+                3
+              ]
+            },
+            {
+              "day": 7,
+              "sets": [
+                6,
+                5,
+                4,
+                4,
+                3
+              ]
+            },
+            {
+              "day": 8,
+              "sets": [
+                12
+              ],
+              "isTest": true
+            },
+            {
+              "day": 9,
+              "sets": [
+                6,
+                5,
+                4,
+                4,
+                3
+              ]
+            },
+            {
+              "day": 10,
+              "sets": [
+                6,
+                5,
+                5,
+                4,
+                4
+              ]
+            },
+            {
+              "day": 11,
+              "sets": [
+                7,
+                6,
+                5,
+                4,
+                4
+              ]
+            },
+            {
+              "day": 12,
+              "sets": [
+                7,
+                6,
+                5,
+                5,
+                4
+              ]
+            },
+            {
+              "day": 13,
+              "sets": [
+                8,
+                6,
+                5,
+                5,
+                4
+              ]
+            },
+            {
+              "day": 14,
+              "sets": [
+                8,
+                7,
+                6,
+                5,
+                4
+              ]
+            },
+            {
+              "day": 15,
+              "sets": [
+                9,
+                7,
+                6,
+                5,
+                5
+              ]
+            },
+            {
+              "day": 16,
+              "sets": [
+                12
+              ],
+              "isTest": true
+            }
+          ]
+        },
         {
           "level": 1,
           "variationName": "Bench Dip",

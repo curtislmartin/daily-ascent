@@ -16,14 +16,13 @@ struct ExerciseDataLoaderTests {
     }
 
     @Test(.tags(.dataLoader))
-    func pushUpsHasThreeLevels() throws {
+    func pushUpsHasFourLevels() throws {
         let container = try ModelContainerFactory.makeContainer(inMemory: true)
         let context = ModelContext(container)
         try ExerciseDataLoader().seedIfNeeded(context: context)
-
         let all = try context.fetch(FetchDescriptor<ExerciseDefinition>())
         let pushUps = try #require(all.first { $0.exerciseId == "push_ups" })
-        #expect(pushUps.levels?.count == 3)
+        #expect(pushUps.levels?.count == 4)
     }
 
     @Test(.tags(.dataLoader))
@@ -54,16 +53,11 @@ struct ExerciseDataLoaderTests {
         let container = try ModelContainerFactory.makeContainer(inMemory: true)
         let context = ModelContext(container)
         try ExerciseDataLoader().seedIfNeeded(context: context)
-
         let levels = try context.fetch(FetchDescriptor<LevelDefinition>())
         for level in levels {
             let sortedDays = (level.days ?? []).sorted { $0.dayNumber < $1.dayNumber }
             let lastDay = try #require(sortedDays.last)
             #expect(lastDay.isTest == true, "Last day \(lastDay.dayNumber) of level \(level.level) should be marked isTest")
-            let nonLastDays = sortedDays.dropLast()
-            for day in nonLastDays {
-                #expect(day.isTest == false, "Day \(day.dayNumber) should not be marked isTest")
-            }
         }
     }
 
@@ -231,5 +225,61 @@ struct ExerciseDataLoaderTests {
         #expect(day10.isTest == true)
         let day1 = try #require(level1.days?.first { $0.dayNumber == 1 })
         #expect(day1.isTest == false)
+    }
+
+    @Test(.tags(.dataLoader))
+    func pullUpsHasFourLevelsIncludingFoundation() throws {
+        let container = try ModelContainerFactory.makeContainer(inMemory: true)
+        let context = ModelContext(container)
+        try ExerciseDataLoader().seedIfNeeded(context: context)
+        let all = try context.fetch(FetchDescriptor<ExerciseDefinition>())
+        let pullUps = try #require(all.first { $0.exerciseId == "pull_ups" })
+        #expect(pullUps.levels?.count == 4)
+        let foundation = try #require(pullUps.levels?.first { $0.level == 0 })
+        #expect(foundation.variationName == "Negative Pull-Up")
+        #expect(foundation.testTarget == 5)
+        #expect(foundation.totalDays == 16)
+    }
+
+    @Test(.tags(.dataLoader))
+    func dipsHasFourLevelsIncludingFoundation() throws {
+        let container = try ModelContainerFactory.makeContainer(inMemory: true)
+        let context = ModelContext(container)
+        try ExerciseDataLoader().seedIfNeeded(context: context)
+        let all = try context.fetch(FetchDescriptor<ExerciseDefinition>())
+        let dips = try #require(all.first { $0.exerciseId == "dips" })
+        #expect(dips.levels?.count == 4)
+        let foundation = try #require(dips.levels?.first { $0.level == 0 })
+        #expect(foundation.variationName == "Assisted Bench Dip")
+        #expect(foundation.testTarget == 12)
+        #expect(foundation.totalDays == 16)
+    }
+
+    @Test(.tags(.dataLoader))
+    func foundationDay8IsCheckpointTest() throws {
+        let container = try ModelContainerFactory.makeContainer(inMemory: true)
+        let context = ModelContext(container)
+        try ExerciseDataLoader().seedIfNeeded(context: context)
+        let all = try context.fetch(FetchDescriptor<ExerciseDefinition>())
+        let pullUps = try #require(all.first { $0.exerciseId == "pull_ups" })
+        let foundation = try #require(pullUps.levels?.first { $0.level == 0 })
+        let days = (foundation.days ?? []).sorted { $0.dayNumber < $1.dayNumber }
+        let day8 = try #require(days.first { $0.dayNumber == 8 })
+        #expect(day8.isTest == true)
+        let day16 = try #require(days.first { $0.dayNumber == 16 })
+        #expect(day16.isTest == true)
+        let day7 = try #require(days.first { $0.dayNumber == 7 })
+        #expect(day7.isTest == false)
+    }
+
+    @Test(.tags(.dataLoader))
+    func squatsStillHasThreeLevels() throws {
+        let container = try ModelContainerFactory.makeContainer(inMemory: true)
+        let context = ModelContext(container)
+        try ExerciseDataLoader().seedIfNeeded(context: context)
+        let all = try context.fetch(FetchDescriptor<ExerciseDefinition>())
+        let squats = try #require(all.first { $0.exerciseId == "squats" })
+        #expect(squats.levels?.count == 3)
+        #expect(squats.levels?.contains { $0.level == 0 } == false)
     }
 }
