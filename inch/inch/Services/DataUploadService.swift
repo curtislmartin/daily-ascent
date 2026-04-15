@@ -32,7 +32,7 @@ final class DataUploadService {
     func scheduleBGUpload() {
         let request = BGProcessingTaskRequest(identifier: Self.taskIdentifier)
         request.requiresNetworkConnectivity = true
-        request.requiresExternalPower = true
+        request.requiresExternalPower = false
         try? BGTaskScheduler.shared.submit(request)
     }
 
