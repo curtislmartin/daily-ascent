@@ -5,13 +5,14 @@ struct LevelPreviewSheet: View {
     let levelDefinition: LevelDefinition
     let countingMode: CountingMode
     let exerciseName: String
+    var exerciseId: String = ""
 
     private var sortedDays: [DayPrescription] {
         (levelDefinition.days ?? []).sorted { $0.dayNumber < $1.dayNumber }
     }
 
     private var levelLabel: String {
-        levelDefinition.level == 0 ? "Foundation" : "Level \(levelDefinition.level)"
+        levelDefinition.level == 0 ? "Prepare" : "Level \(levelDefinition.level)"
     }
 
     var body: some View {
@@ -20,6 +21,11 @@ struct LevelPreviewSheet: View {
                 Section {
                     if let variation = levelDefinition.variationName {
                         LabeledContent("Variation", value: variation)
+                    }
+                    if let info = ExerciseContent.info(exerciseId: exerciseId, level: levelDefinition.level) {
+                        Text(info.movement)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
                     }
                     LabeledContent("Training Days", value: "\(levelDefinition.totalDays)")
                     LabeledContent("Test Target", value: "\(levelDefinition.testTarget) \(countingMode == .timed ? "seconds" : "reps")")

@@ -28,7 +28,8 @@ struct ExerciseDetailView: View {
             LevelPreviewSheet(
                 levelDefinition: levelDef,
                 countingMode: enrolment?.exerciseDefinition?.countingMode ?? .postSetConfirmation,
-                exerciseName: enrolment?.exerciseDefinition?.name ?? "Exercise"
+                exerciseName: enrolment?.exerciseDefinition?.name ?? "Exercise",
+                exerciseId: enrolment?.exerciseDefinition?.exerciseId ?? ""
             )
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -37,7 +38,7 @@ struct ExerciseDetailView: View {
             detailViewModel.load(enrolmentId: enrolmentId, context: modelContext)
         }
         .alert(
-            pendingLevel == 0 ? "Jump to Foundation?" : "Jump to Level \(pendingLevel ?? 0)?",
+            pendingLevel == 0 ? "Jump to Prepare?" : "Jump to Level \(pendingLevel ?? 0)?",
             isPresented: Binding(get: { pendingLevel != nil }, set: { if !$0 { pendingLevel = nil } })
         ) {
             Button("Change Level") { applyLevelChange() }
@@ -95,7 +96,7 @@ struct ExerciseDetailView: View {
                 }
             }
 
-            Section("\(enrolment.currentLevel == 0 ? "Foundation" : "Level \(enrolment.currentLevel)") — \(days.count) days") {
+            Section("\(enrolment.currentLevel == 0 ? "Prepare" : "Level \(enrolment.currentLevel)") — \(days.count) days") {
                 ForEach(days, id: \.dayNumber) { day in
                     let scheduled = detailViewModel.upcomingSchedule.first(where: { $0.dayNumber == day.dayNumber })?.scheduledDate
                     DayRow(
@@ -178,7 +179,7 @@ struct ExerciseDetailView: View {
                     .fill(isPast ? Color.green : isCurrent ? Color.accentColor : Color.secondary.opacity(0.3))
                     .frame(width: 10, height: 10)
                 VStack(alignment: .leading) {
-                    Text(level == 0 ? "Foundation" : "Level \(level)")
+                    Text(level == 0 ? "Prepare" : "Level \(level)")
                         .font(.headline)
                     if let variation = variationName {
                         Text(variation)

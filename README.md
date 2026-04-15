@@ -2,7 +2,7 @@
 
 [![Download on the App Store](https://img.shields.io/badge/App%20Store-Download-blue?logo=apple&logoColor=white)](https://apps.apple.com/us/app/daily-ascent/id6760611343)
 
-iOS + watchOS app that guides users through structured bodyweight training programs. Nine exercises, three progressive levels each. Users enrol in exercises, follow a prescribed set/rep scheme per day, and advance through levels by passing a max-rep test.
+iOS + watchOS app that guides users through structured bodyweight training programs. Nine exercises, three progressive levels each, with an optional "Prepare" beginner tier on the harder upper-body exercises. Users enrol in exercises, follow a prescribed set/rep scheme per day, and advance through levels by passing a max-rep test.
 
 Built as a personal project to explore the full breadth of the Apple SDK — from strict Swift 6 concurrency to Core Motion sensor pipelines to a custom scheduling engine.
 
@@ -34,15 +34,17 @@ Built as a personal project to explore the full breadth of the Apple SDK — fro
 
 | Exercise | Muscle Group | Levels | Test Targets |
 |---|---|---|---|
-| Push-Ups | Upper (push) | 3 | 20 → 50 → 100 |
+| Push-Ups | Upper (push) | 3 + Prepare | 20 → 50 → 100 |
 | Squats | Lower | 3 | 20 → 100 → 150 |
-| Pull-Ups | Upper (pull) | 3 | 10 → 20 → 30 |
-| Dips | Upper (push) | 3 | 20 → 15 → 10 |
+| Pull-Ups | Upper (pull) | 3 + Prepare | 10 → 20 → 30 |
+| Dips | Upper (push) | 3 + Prepare | 20 → 15 → 10 |
 | Rows | Upper (pull) | 3 | 15 → 20 → 12 |
 | Hip Hinge | Lower (posterior) | 3 | 30 → 20 → 20 |
 | Spinal Extension | Lower (posterior) | 3 | 20 → 20 → 20 |
 | Plank | Core (stability) | 3 | 60s → 90s → 120s |
 | Dead Bugs | Core (stability) | 3 | 20 → 50 → 80 |
+
+The "Prepare" tier on Pull-Ups, Push-Ups, and Dips offers an easier variation (negatives, incline, assisted) with a mid-program checkpoint test — a gentler on-ramp for beginners where the Level 1 entry point is too demanding.
 
 ---
 

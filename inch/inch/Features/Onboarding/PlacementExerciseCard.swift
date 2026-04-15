@@ -55,7 +55,7 @@ struct PlacementExerciseCard: View {
                     .font(.headline)
                     .foregroundStyle(.primary)
                 Spacer()
-                Text(chosenLevel == 0 ? "Foundation" : "Level \(chosenLevel)")
+                Text(chosenLevel == 0 ? "Prepare" : "Level \(chosenLevel)")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
@@ -94,7 +94,7 @@ struct PlacementExerciseCard: View {
                     .foregroundStyle(isChosen ? accentColor : .secondary)
                     .font(.title3)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(levelDef.level == 0 ? "Foundation" : "Level \(levelDef.level)")
+                    Text(levelDef.level == 0 ? "Prepare" : "Level \(levelDef.level)")
                         .font(.subheadline)
                         .fontWeight(.medium)
                         .foregroundStyle(.primary)
@@ -156,12 +156,12 @@ struct PlacementExerciseCard: View {
             HStack {
                 Image(systemName: "checkmark.seal.fill")
                     .foregroundStyle(.green)
-                Text("We recommend \(recommended == 0 ? "Foundation" : "Level \(recommended)")")
+                Text("We recommend \(recommended == 0 ? "Prepare" : "Level \(recommended)")")
                     .font(.subheadline)
                     .fontWeight(.medium)
             }
             if !isApplied {
-                Button("Start at \(recommended == 0 ? "Foundation" : "Level \(recommended)")") {
+                Button("Start at \(recommended == 0 ? "Prepare" : "Level \(recommended)")") {
                     viewModel.levelChoices[definition.exerciseId] = recommended
                 }
                 .buttonStyle(.borderedProminent)
