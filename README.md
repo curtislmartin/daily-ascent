@@ -1,6 +1,9 @@
 # Daily Ascent — Bodyweight Training App
 
 [![Download on the App Store](https://img.shields.io/badge/App%20Store-Download-blue?logo=apple&logoColor=white)](https://apps.apple.com/us/app/daily-ascent/id6760611343)
+[![Tests](https://github.com/curtislmartin/daily-ascent/actions/workflows/tests.yml/badge.svg)](https://github.com/curtislmartin/daily-ascent/actions/workflows/tests.yml)
+[![SwiftLint](https://github.com/curtislmartin/daily-ascent/actions/workflows/swiftlint.yml/badge.svg)](https://github.com/curtislmartin/daily-ascent/actions/workflows/swiftlint.yml)
+[![Secret Scan](https://github.com/curtislmartin/daily-ascent/actions/workflows/secrets-scan.yml/badge.svg)](https://github.com/curtislmartin/daily-ascent/actions/workflows/secrets-scan.yml)
 
 iOS + watchOS app that guides users through structured bodyweight training programs. Nine exercises, three progressive levels each, with an optional "Prepare" beginner tier on the harder upper-body exercises. Users enrol in exercises, follow a prescribed set/rep scheme per day, and advance through levels by passing a max-rep test.
 
@@ -201,4 +204,4 @@ Without this file the app builds and runs normally — sensor upload is simply s
 
 ---
 
-Previously developed under the name *Inch*.
+The project directory, Xcode targets, and `InchShared` package are named after the app's original working title, *Inch*. It was renamed to *Daily Ascent* before shipping to the App Store; the internal identifiers were left in place to avoid churn across the watchOS target, entitlements, and build configuration.
