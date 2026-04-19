@@ -18,7 +18,7 @@
       --gold-mid: #D4A03C;
       --gold-dark: #B07D32;
       --gold-glow: rgba(247, 201, 72, 0.08);
-      --gold-glow-strong: rgba(247, 201, 72, 0.15);
+      --gold-glow-strong: rgba(247, 201, 72, 0.25);
       --text-primary: #f0f0f0;
       --text-secondary: #aaaaaa;
       --text-tertiary: #666666;
@@ -40,52 +40,59 @@
     }
 
     /* ---- REVEAL ANIMATIONS ---- */
+    .reveal,
+    .reveal-left,
+    .reveal-right,
+    .reveal-scale {
+      will-change: opacity, transform;
+    }
+
     .reveal {
       opacity: 0;
-      transform: translateY(32px);
-      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-                  transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: translateY(24px) translateZ(0);
+      transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
     .reveal.revealed {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateY(0) translateZ(0);
     }
 
     .reveal-left {
       opacity: 0;
-      transform: translateX(-32px);
-      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-                  transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: translateX(-24px) translateZ(0);
+      transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
     .reveal-left.revealed {
       opacity: 1;
-      transform: translateX(0);
+      transform: translateX(0) translateZ(0);
     }
 
     .reveal-right {
       opacity: 0;
-      transform: translateX(32px);
-      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-                  transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: translateX(24px) translateZ(0);
+      transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
     .reveal-right.revealed {
       opacity: 1;
-      transform: translateX(0);
+      transform: translateX(0) translateZ(0);
     }
 
     .reveal-scale {
       opacity: 0;
-      transform: scale(0.92);
-      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-                  transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: scale(0.94) translateZ(0);
+      transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
     .reveal-scale.revealed {
       opacity: 1;
-      transform: scale(1);
+      transform: scale(1) translateZ(0);
     }
 
     /* ---- HERO ---- */
@@ -120,6 +127,15 @@
     @keyframes icon-float {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-6px); }
+    }
+
+    .hero-app-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--gold-mid);
+      margin-bottom: 0.75rem;
     }
 
     .hero h1 {
@@ -531,7 +547,7 @@
       text-align: center;
       padding: 5rem 1.5rem;
       background:
-        radial-gradient(ellipse 50% 60% at 50% 50%, var(--gold-glow-strong) 0%, transparent 100%),
+        radial-gradient(ellipse 70% 70% at 50% 50%, var(--gold-glow-strong) 0%, transparent 100%),
         var(--bg-deep);
       position: relative;
     }
@@ -586,6 +602,7 @@
     /* ---- RESPONSIVE ---- */
     @media (max-width: 480px) {
       .hero { padding: 4rem 1rem 3.5rem; }
+      .hero-app-name { font-size: 0.8rem; }
       .hero h1 { font-size: 2.2rem; }
       .hero-sub { font-size: 1.05rem; }
       .section { padding: 3.5rem 1rem; }
@@ -604,6 +621,7 @@
   <!-- ======== HERO ======== -->
   <header class="hero">
     <img src="app-icon.png" alt="Daily Ascent" class="hero-icon" />
+    <p class="hero-app-name">Daily Ascent</p>
     <h1>Nine exercises. Three levels.<br>One clear path.</h1>
     <p class="hero-sub">
       A structured bodyweight programme that adapts to when you actually train. No guesswork, no account, no tracking.
@@ -624,13 +642,13 @@
   <section class="screenshots">
     <div class="screenshots-scroll">
       <div class="phone-frame reveal-left" style="transition-delay: 0s;">
-        <img src="../screenshots/today.PNG" alt="Today view showing your daily exercises" />
+        <img src="screenshots/today.PNG" alt="Today view showing your daily exercises" />
       </div>
       <div class="phone-frame reveal-scale" style="transition-delay: 0.15s;">
-        <img src="../screenshots/workout.PNG" alt="Workout tracking with rep counter" />
+        <img src="screenshots/workout.PNG" alt="Workout tracking with rep counter" />
       </div>
       <div class="phone-frame reveal-right" style="transition-delay: 0.3s;">
-        <img src="../screenshots/exercise.PNG" alt="Exercise detail with level progression and history" />
+        <img src="screenshots/exercise.PNG" alt="Exercise detail with level progression and history" />
       </div>
     </div>
   </section>
