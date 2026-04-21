@@ -222,8 +222,8 @@ struct WorkoutSessionView: View {
                         if sensorConsented {
                             let id = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
                             repCounter?.reset()
-                            motionRecording.onSample = { [repCounter] ax, ay, az in
-                                repCounter?.processSample(ax: ax, ay: ay, az: az)
+                            motionRecording.onSample = { [repCounter] ax, ay, az, gx, gy, gz in
+                                repCounter?.processSample(ax: ax, ay: ay, az: az, gx: gx, gy: gy, gz: gz)
                             }
                             motionRecording.startRecording(
                                 exerciseId: id,
@@ -295,8 +295,8 @@ struct WorkoutSessionView: View {
             }
             if sensorConsented, !motionRecording.isRecording {
                 repCounter?.reset()
-                motionRecording.onSample = { [repCounter] ax, ay, az in
-                    repCounter?.processSample(ax: ax, ay: ay, az: az)
+                motionRecording.onSample = { [repCounter] ax, ay, az, gx, gy, gz in
+                    repCounter?.processSample(ax: ax, ay: ay, az: az, gx: gx, gy: gy, gz: gz)
                 }
                 motionRecording.startRecording(
                     exerciseId: id,
@@ -313,8 +313,8 @@ struct WorkoutSessionView: View {
                 if sensorConsented, !motionRecording.isRecording {
                     let exerciseId = viewModel.enrolment?.exerciseDefinition?.exerciseId ?? ""
                     repCounter?.reset()
-                    motionRecording.onSample = { [repCounter] ax, ay, az in
-                        repCounter?.processSample(ax: ax, ay: ay, az: az)
+                    motionRecording.onSample = { [repCounter] ax, ay, az, gx, gy, gz in
+                        repCounter?.processSample(ax: ax, ay: ay, az: az, gx: gx, gy: gy, gz: gz)
                     }
                     motionRecording.startRecording(
                         exerciseId: exerciseId,

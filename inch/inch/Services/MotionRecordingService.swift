@@ -17,7 +17,7 @@ final class MotionRecordingService {
     // Assign before startRecording; stopRecording clears it automatically.
     // nonisolated(unsafe) — only ever set on @MainActor (between sets) and read
     // on the serial sensor OperationQueue (during recording). Same pattern as flushAndClose.
-    nonisolated(unsafe) var onSample: ((Double, Double, Double) -> Void)?
+    nonisolated(unsafe) var onSample: ((Double, Double, Double, Double, Double, Double) -> Void)?
     private var sensorQueue: OperationQueue?
     private(set) var currentRecordingURL: URL?
     private(set) var currentSessionId: String = ""
@@ -110,7 +110,10 @@ final class MotionRecordingService {
             let az = Float32(data.userAcceleration.z)
             self.onSample?(Double(data.userAcceleration.x),
                            Double(data.userAcceleration.y),
-                           Double(data.userAcceleration.z))
+                           Double(data.userAcceleration.z),
+                           data.gravity.x,
+                           data.gravity.y,
+                           data.gravity.z)
             let gx = Float32(data.rotationRate.x)
             let gy = Float32(data.rotationRate.y)
             let gz = Float32(data.rotationRate.z)

@@ -165,8 +165,8 @@ struct WatchWorkoutView: View {
                 )
                 if session.countingMode == "real_time" {
                     repCounter?.reset()
-                    motionRecording.onSample = { [repCounter] ax, ay, az in
-                        repCounter?.processSample(ax: ax, ay: ay, az: az)
+                    motionRecording.onSample = { [repCounter] ax, ay, az, gx, gy, gz in
+                        repCounter?.processSample(ax: ax, ay: ay, az: az, gx: gx, gy: gy, gz: gz)
                     }
                 }
             case .confirming:

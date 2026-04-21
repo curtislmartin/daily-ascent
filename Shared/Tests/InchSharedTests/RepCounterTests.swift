@@ -107,4 +107,66 @@ struct RepCounterTests {
         await Task.yield()
         #expect(counter.count == 1)
     }
+
+    // MARK: - Vertical projection
+
+    @Test func verticalProjectionCountsUpwardAcceleration() async {
+        // gravity pointing down along -y (phone upright in pocket)
+        let config = RepCountingConfig(threshold: 0.3, minIntervalSeconds: 0.0, smoothingAlpha: 1.0, verticalProjection: true)
+        let counter = RepCounter(config: config)
+
+        // Upward acceleration: userAcceleration.y is positive (opposing gravity.y = -1)
+        // signal = -(0.5 * -1.0) / 1.0 = +0.5 → above threshold → counts
+        counter.processSample(ax: 0, ay: 0.5, az: 0, gx: 0, gy: -1.0, gz: 0)
+        counter.processSample(ax: 0, ay: 0, az: 0, gx: 0, gy: -1.0, gz: 0) // valley
+
+        await Task.yield()
+        #expect(counter.count == 1)
+    }
+
+    @Test func verticalProjectionIgnoresDownwardAcceleration() async {
+        // gravity pointing down along -y
+        let config = RepCountingConfig(threshold: 0.3, minIntervalSeconds: 0.0, smoothingAlpha: 1.0, verticalProjection: true)
+        let counter = RepCounter(config: config)
+
+        // Downward acceleration: userAcceleration.y is negative (same direction as gravity.y = -1)
+        // signal = -(-0.5 * -1.0) / 1.0 = -0.5 → negative → stays below threshold
+        counter.processSample(ax: 0, ay: -0.5, az: 0, gx: 0, gy: -1.0, gz: 0)
+        counter.processSample(ax: 0, ay: 0, az: 0, gx: 0, gy: -1.0, gz: 0)
+
+        await Task.yield()
+        #expect(counter.count == 0)
+    }
+
+    @Test func verticalProjectionRejectsSquatDoubleCounting() async {
+        // Simulates a squat: descent acceleration (downward) then ascent acceleration (upward).
+        // Only the upward (concentric) phase should count.
+        let config = RepCountingConfig(threshold: 0.3, minIntervalSeconds: 0.0, smoothingAlpha: 1.0, verticalProjection: true)
+        let counter = RepCounter(config: config)
+        let g = (x: 0.0, y: -1.0, z: 0.0) // gravity pointing down
+
+        // Descent: userAccel.y = -0.5 (downward) → signal = -0.5 → no count
+        counter.processSample(ax: 0, ay: -0.5, az: 0, gx: g.x, gy: g.y, gz: g.z)
+        counter.processSample(ax: 0, ay: 0, az: 0, gx: g.x, gy: g.y, gz: g.z) // pause at bottom
+
+        // Ascent: userAccel.y = +0.5 (upward) → signal = +0.5 → should count
+        counter.processSample(ax: 0, ay: 0.5, az: 0, gx: g.x, gy: g.y, gz: g.z)
+        counter.processSample(ax: 0, ay: 0, az: 0, gx: g.x, gy: g.y, gz: g.z) // standing
+
+        await Task.yield()
+        #expect(counter.count == 1)
+    }
+
+    @Test func squatConfigUsesVerticalProjection() {
+        let config = RepCountingConfig.config(for: "squats")
+        #expect(config != nil)
+        #expect(config?.verticalProjection == true)
+    }
+
+    @Test func nonSquatConfigsDoNotUseVerticalProjection() {
+        for id in ["push_ups", "pull_ups", "hip_hinge"] {
+            let config = RepCountingConfig.config(for: id)
+            #expect(config?.verticalProjection == false, "\(id) should not use vertical projection")
+        }
+    }
 }
