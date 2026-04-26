@@ -101,10 +101,10 @@ struct InchApp: App {
     private func registerBGTasks() {
         BGTaskScheduler.shared.register(
             forTaskWithIdentifier: DataUploadService.taskIdentifier,
-            using: nil
+            using: .main
         ) { [self] task in
             guard let processingTask = task as? BGProcessingTask else { return }
-            Task { @MainActor in
+            Task {
                 let context = ModelContext(container)
                 await dataUpload.handleBGUpload(task: processingTask, context: context)
                 if let plistURL = Bundle.main.url(forResource: "Secrets", withExtension: "plist"),
@@ -114,7 +114,6 @@ struct InchApp: App {
                    let anonKey = dict["SupabaseAnonKey"] as? String {
                     await analytics.flush(supabaseURL: url, anonKey: anonKey)
                 }
-                processingTask.setTaskCompleted(success: true)
             }
         }
     }
