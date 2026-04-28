@@ -11,10 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping Supabase
+        env:
+          ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
           STATUS=$(curl -s -o /dev/null -w '%{http_code}' \
-            'https://xwvlewuuavpgurmtenwk.supabase.co/rest/v1/' \
-            -H 'apikey: ${{ secrets.SUPABASE_ANON_KEY }}')
+            'https://xwvlewuuavpgurmtenwk.supabase.co/rest/v1/sensor_recordings?select=id&limit=1' \
+            -H "apikey: $ANON_KEY" \
+            -H "Authorization: Bearer $ANON_KEY")
           echo "Response: $STATUS"
           if [ "$STATUS" != "200" ]; then
             echo "Unexpected status $STATUS"
